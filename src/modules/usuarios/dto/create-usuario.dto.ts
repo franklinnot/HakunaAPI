@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsEmail,
-  MinLength,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { IsString, MinLength, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsString()
@@ -13,15 +7,16 @@ export class CreateUsuarioDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(3)
-  username: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  @MinLength(2)
+  nombre: string;
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  @MinLength(2)
+  username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
   password: string;
 }

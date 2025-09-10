@@ -13,10 +13,18 @@ export class UsuarioRepository extends BaseRepository<Usuario> {
   }
 
   async findByUsername(username: string): Promise<Usuario | null> {
-    return this.usuarioModel.findOne({ username }).exec();
+    return await this.findOne({ username });
   }
 
-  async findByEmail(email: string): Promise<Usuario | null> {
-    return this.usuarioModel.findOne({ email }).exec();
+  async existsByUsername(username: string): Promise<boolean> {
+    const result = await this.exists({ username });
+    return !!result;
+  }
+
+  async findByUsernamePass(username: string): Promise<Usuario | null> {
+    return await this.getModel()
+      .findOne({ username })
+      .select('+password')
+      .exec();
   }
 }

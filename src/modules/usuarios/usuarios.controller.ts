@@ -1,18 +1,15 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
   Delete,
   Query,
-  BadRequestException,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import type { FilterQuery } from 'mongoose';
 import { Usuario } from './schemas/usuario.schema';
@@ -21,75 +18,40 @@ import { Usuario } from './schemas/usuario.schema';
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  /**
-   * Crear un nuevo usuario
-   */
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuariosService.createUser(createUsuarioDto);
-  }
-
-  /**
-   * Devuelve una lista de todos los usuarios.
-   */
+  // lista de usuarios: por username y nombre
   @Get()
-  findAll(@Query() filterQuery: FilterQuery<Usuario>) {
-    return this.usuariosService.findAllUsuarios(filterQuery);
+  async findAll(@Query() filterQuery: FilterQuery<Usuario>) {
+    const result = await this.usuariosService.findAll(filterQuery);
+    return { result };
   }
 
-  /**
-   * Verifica si un username o email ya existen.
-   * Uso: /usuarios/exists?username=<> O /usuarios/exists?email=<>
-   */
+  // verificar si el username ya existe /exists?username=<>
   @Get('exists')
-  async checkExists(
-    @Query('username') username?: string,
-    @Query('email') email?: string,
-  ) {
-    if (!username && !email) {
-      throw new BadRequestException(
-        'Debe proporcionar un "username" o un "email" como query parameter.',
-      );
-    }
-
-    const filter = username ? { username } : { email };
-    const exists = await this.usuariosService.existsUsuario(filter);
-
+  async checkExists(@Query('username') username: string) {
+    const exists = await this.usuariosService.existsByUsername(username);
     return { exists };
   }
 
-  /**
-   * Busca y devuelve un usuario por su ID.
-   */
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuariosService.findOneUsuarioById(id);
+  // devuelve un usuario por su username
+  @Get(':username')
+  async findOne(@Param('username') username: string) {
+    const user = await this.usuariosService.findByUsername(username);
+    return { user };
   }
 
-  /**
-   * Actualiza los datos de un usuario por su ID.
-   */
+  // actualizar usuario
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuariosService.update(id, updateUsuarioDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+  ) {
+    return await this.usuariosService.update(id, updateUsuarioDto);
   }
 
-  /**
-   * Deshabilita un usuario por su ID.
-   */
+  // deshabilitar usuario
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT) // Devuelve un código 204 No Content, estándar para deletes
-  disable(@Param('id') id: string) {
-    return this.usuariosService.disable(id);
-  }
-
-  /**
-   * Habilita un usuario por su ID.
-   */
-  @Patch(':id/enable')
-  @HttpCode(HttpStatus.OK)
-  enable(@Param('id') id: string) {
-    return this.usuariosService.enable(id);
+  @HttpCode(HttpStatus.NO_CONTENT) // codigo 204 No Content, estándar para deletes
+  async disable(@Param('id') id: string) {
+    return await this.usuariosService.disable(id);
   }
 }

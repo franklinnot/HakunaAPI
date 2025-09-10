@@ -11,92 +11,56 @@ import { UsuarioRepository } from './repositories/usuario.repository';
 // DTO'S
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { EstadoEnum } from 'src/common/enums/estado.enum';
 
 @Injectable()
 export class UsuariosService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
 
-  async existsUsuario(filterQuery: FilterQuery<Usuario>): Promise<boolean> {
-    return this.usuarioRepository.exists(filterQuery);
+  //#region Genericos
+  async existsById(id: string): Promise<boolean> {
+    return this.usuarioRepository.existsById(id);
   }
 
-  async findAllUsuarios(filterQuery: FilterQuery<Usuario>): Promise<Usuario[]> {
-    return this.usuarioRepository.findAll(filterQuery);
-  }
-
-  async findOneUsuarioById(id: string): Promise<Usuario> {
+  async findById(id: string): Promise<Usuario> {
     const usuario = await this.usuarioRepository.findById(id);
     if (!usuario) {
-      throw new NotFoundException(`Usuario con ID "${id}" no encontrado.`);
+      throw new NotFoundException(`Usuario no encontrado.`);
     }
     return usuario;
   }
 
-  async update(id: string, dto: UpdateUsuarioDto): Promise<Usuario> {
-    await this.findOneUsuarioById(id);
-
-    // si se incluye username o email se verifica que sean unicos
-    if (dto.username) {
-      const existing = await this.usuarioRepository.findOne({
-        username: dto.username,
-      });
-      if (existing && existing.id !== id) {
-        throw new ConflictException('El username ya pertenece a otro usuario.');
-      }
-    }
-    if (dto.email) {
-      const existing = await this.usuarioRepository.findOne({
-        email: dto.email,
-      });
-      if (existing && existing.id !== id) {
-        throw new ConflictException('El email ya pertenece a otro usuario.');
-      }
-    }
-
-    const usuarioActualizado = await this.usuarioRepository.update(id, dto);
-    if (!usuarioActualizado) {
-      throw new NotFoundException(
-        `Usuario con ID "${id}" no encontrado al intentar actualizar.`,
-      );
-    }
-
-    return usuarioActualizado;
+  async findAll(filterQuery: FilterQuery<Usuario>) {
+    filterQuery = { ...filterQuery, estado: EstadoEnum.HABILITADO };
+    return this.usuarioRepository.findAll(filterQuery);
   }
 
   async disable(id: string): Promise<Usuario> {
-    const usuarioDeshabilitado = await this.usuarioRepository.disable(id);
+    const usuario = await this.usuarioRepository.disable(id);
 
-    if (!usuarioDeshabilitado) {
-      throw new NotFoundException(`Usuario con ID "${id}" no encontrado.`);
+    if (!usuario) {
+      throw new NotFoundException(`Usuario no encontrado.`);
     }
 
-    return usuarioDeshabilitado;
+    return usuario;
+  }
+  //#endregion
+
+  async existsByUsername(username: string): Promise<boolean> {
+    return await this.usuarioRepository.existsByUsername(username);
   }
 
-  async enable(id: string): Promise<Usuario> {
-    const usuarioHabilitado = await this.usuarioRepository.enable(id);
-
-    if (!usuarioHabilitado) {
-      throw new NotFoundException(`Usuario con ID "${id}" no encontrado.`);
+  async findByUsername(username: string): Promise<Usuario> {
+    const usuario = await this.usuarioRepository.findByUsername(username);
+    if (!usuario) {
+      throw new NotFoundException(`Usuario no encontrado.`);
     }
-
-    return usuarioHabilitado;
+    return usuario;
   }
 
-  async createUser(dto: CreateUsuarioDto): Promise<Partial<Usuario>> {
-    let existe = await this.usuarioRepository.exists({
-      username: dto.username,
-    });
-    if (existe) {
-      throw new ConflictException('El username ya existe');
-    }
-
-    existe = await this.usuarioRepository.exists({
-      email: dto.email,
-    });
-    if (existe) {
-      throw new ConflictException('El correo ya existe');
-    }
+  async create(dto: CreateUsuarioDto): Promise<Partial<Usuario>> {
+    const existe = await this.existsByUsername(dto.username);
+    if (existe) throw new ConflictException('El username ya existe');
 
     const newUser = await this.usuarioRepository.create(dto);
     const userObject: Partial<Usuario> = newUser.toObject<Usuario>();
@@ -104,5 +68,33 @@ export class UsuariosService {
     if (userObject.password) delete userObject.password;
 
     return userObject;
+  }
+
+  async update(id: string, dto: UpdateUsuarioDto): Promise<Usuario> {
+    const existe = await this.existsById(id);
+    if (!existe) {
+      throw new NotFoundException(`Usuario no encontrado.`);
+    }
+
+    // si se incluye username
+    if (dto.username) {
+      const user = await this.findByUsername(dto.username);
+      if (user && user.id !== id) {
+        throw new ConflictException('El username ya existe.');
+      }
+    }
+
+    const user_actualizado = await this.usuarioRepository.update(id, dto);
+    if (!user_actualizado) {
+      throw new NotFoundException(
+        `Usuario no encontrado al intentar actualizar.`,
+      );
+    }
+
+    return user_actualizado;
+  }
+
+  async findByUsernamePass(username: string): Promise<Usuario | null> {
+    return this.usuarioRepository.findByUsernamePass(username);
   }
 }
