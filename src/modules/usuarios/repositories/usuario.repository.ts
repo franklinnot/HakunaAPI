@@ -21,7 +21,7 @@ export class UsuarioRepository extends BaseRepository<Usuario> {
     return !!result;
   }
 
-  async findByUsernamePass(username: string): Promise<Usuario | null> {
+  async getUserWithPassByUsername(username: string): Promise<Usuario | null> {
     return await this.getModel()
       .findOne({ username })
       .select('+password')

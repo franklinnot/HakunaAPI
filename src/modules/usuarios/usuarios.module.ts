@@ -1,5 +1,3 @@
-// src/modules/usuarios/usuarios.module.ts
-
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsuariosService } from './usuarios.service';
@@ -13,6 +11,6 @@ import { UsuarioRepository } from './repositories/usuario.repository';
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService, UsuarioRepository],
-  exports: [UsuariosService], // Exportamos para que otros módulos (como Auth) puedan usarlo
+  exports: [UsuariosService], // exportar para que otros modulos puedan usar el servicio
 })
 export class UsuariosModule {}

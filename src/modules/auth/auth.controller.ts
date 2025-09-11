@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Body,
-  HttpCode,
-  HttpStatus,
-  Get,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUsuarioDto } from '../usuarios/dto/create-usuario.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
@@ -22,29 +12,24 @@ export class AuthController {
     private readonly usuariosService: UsuariosService,
   ) {}
 
-  // registro de usuarios
-  @Public() // ruta publica
+  @Public() // ruta publica, sin validacion
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   register(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuariosService.create(createUsuarioDto);
+    return this.authService.regitrar_usuario(createUsuarioDto);
   }
 
-  // login
   @Public() // ruta publica, sin validacion
-  @UseGuards(AuthGuard('local')) // activar LocalStrategy
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() loginDto: LoginDto, @Request() req) {
-    // req.user es el objeto que devuelve el método validate() de LocalStrategy
-    return this.authService.generarJWT(req.user);
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
   }
 
-  // generar un nuevo token para el usuario ya autenticado.
-  @Get('renew')
-  @HttpCode(HttpStatus.OK)
-  renewToken(@Request() req) {
-    // req.user es el objeto que devuelve el método validate() de JwtStrategy
-    return this.authService.generarJWT(req.user);
-  }
+  // @Get('refresh-token')
+  // @HttpCode(HttpStatus.OK)
+  // renewToken(@Request() req) {
+  //   // req.user es el objeto que devuelve el método validate() de JwtStrategy
+  //   return this.authService.generarJWT(req.user);
+  // }
 }

@@ -94,7 +94,7 @@ export class UsuariosService {
     return user_actualizado;
   }
 
-  async findByUsernamePass(username: string): Promise<Usuario | null> {
-    return this.usuarioRepository.findByUsernamePass(username);
+  async getUserWithPassByUsername(username: string): Promise<Usuario | null> {
+    return this.usuarioRepository.getUserWithPassByUsername(username);
   }
 }
