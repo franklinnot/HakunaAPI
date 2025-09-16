@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUsuarioDto } from '../usuarios/dto/create-usuario.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
@@ -14,22 +14,21 @@ export class AuthController {
 
   @Public() // ruta publica, sin validacion
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
   register(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.authService.regitrar_usuario(createUsuarioDto);
+    return this.authService.create(createUsuarioDto);
   }
 
   @Public() // ruta publica, sin validacion
   @Post('login')
-  @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
-  // @Get('refresh-token')
-  // @HttpCode(HttpStatus.OK)
-  // renewToken(@Request() req) {
-  //   // req.user es el objeto que devuelve el método validate() de JwtStrategy
-  //   return this.authService.generarJWT(req.user);
-  // }
+  // devuelve un usuario usando su jwt
+  @Get('by_jwt')
+  by_jwt(@Request() req) {
+    // req.user es el objeto que devuelve el método validate() de JwtStrategy
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+    return req.user;
+  }
 }

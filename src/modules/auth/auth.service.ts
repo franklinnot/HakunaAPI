@@ -20,9 +20,7 @@ export class AuthService {
     };
   }
 
-  async verifyLoginCredentials(
-    dto: LoginDto,
-  ): Promise<Partial<Usuario> | null> {
+  async login(dto: LoginDto) {
     const user = await this.usuariosService.getUserWithPassByUsername(
       dto.username,
     );
@@ -30,13 +28,8 @@ export class AuthService {
     if (user && (await bcrypt.compare(dto.password, user.password))) {
       const userObject: Partial<Usuario> = user.toObject<Usuario>();
       if (userObject.password) delete userObject.password;
-      return userObject;
     }
-    return null;
-  }
 
-  async login(dto: LoginDto) {
-    const user = await this.verifyLoginCredentials(dto);
     if (!user) {
       throw new UnauthorizedException('Credenciales incorrectas.');
     }
@@ -47,7 +40,7 @@ export class AuthService {
     };
   }
 
-  async regitrar_usuario(dto: CreateUsuarioDto) {
+  async create(dto: CreateUsuarioDto) {
     const user = await this.usuariosService.create(dto);
     const token = this.generarJWT(user);
     return {

@@ -4,10 +4,8 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Query,
-  HttpCode,
-  HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -18,39 +16,36 @@ import { Usuario } from './schemas/usuario.schema';
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  // lista de usuarios: por username y nombre
-  @Get()
-  async findAll(@Query() filterQuery: FilterQuery<Usuario>) {
-    const result = await this.usuariosService.findAll(filterQuery);
-    return { result };
-  }
-
-  // verificar si el username ya existe /exists?username=<>
-  @Get('exists')
-  async checkExists(@Query('username') username: string) {
-    const exists = await this.usuariosService.existsByUsername(username);
-    return { exists };
+  // lista de usuarios
+  @Get('all')
+  async all(@Query() filterQuery: FilterQuery<Usuario>) {
+    return await this.usuariosService.findAll(filterQuery);
   }
 
   // devuelve un usuario por su username
-  @Get(':username')
-  async findOne(@Param('username') username: string) {
-    const user = await this.usuariosService.findByUsername(username);
-    return { user };
+  @Get('by_username/:username')
+  async by_username(@Param('username') username: string) {
+    return await this.usuariosService.findByUsername(username);
+  }
+
+  // verificar si el username ya existe
+  @Get('exists/:username')
+  async exists(@Param('username') username: string) {
+    return await this.usuariosService.existsByUsername(username);
   }
 
   // actualizar usuario
-  @Patch(':id')
+  @Put('update/:id')
   async update(
     @Param('id') id: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
-    return await this.usuariosService.update(id, updateUsuarioDto);
+    const result = await this.usuariosService.update(id, updateUsuarioDto);
+    return { result };
   }
 
   // deshabilitar usuario
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT) // codigo 204 No Content, estándar para deletes
+  @Patch('disable/:id')
   async disable(@Param('id') id: string) {
     return await this.usuariosService.disable(id);
   }

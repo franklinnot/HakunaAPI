@@ -23,7 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true; // acceso sin token
     }
 
-    // vvalidacin del token
+    // activar jwtStrategy para validacin del token
     return super.canActivate(context);
   }
 }
