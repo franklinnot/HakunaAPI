@@ -1,4 +1,4 @@
-export enum TipoArchivoEnum {
+export enum TipoArchivo {
   DOCUMENTO = 'Documento',
   AUDIO = 'Audio',
   IMAGEN = 'Imagen',

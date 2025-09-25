@@ -1,19 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { BaseDocument } from 'src/common/bases/base.schema';
+import { BaseDocument } from 'src/shared/domain/persistence/base.document';
 
 @Schema({ collection: 'usuario', timestamps: true })
 export class Usuario extends BaseDocument {
   @Prop({ type: String, ref: 'Archivo', required: false, default: null })
   id_fotoPerfil: string;
 
-  @Prop({ required: true, unique: true, trim: true })
+  @Prop({ required: true })
+  nombre: string;
+
+  @Prop({ required: true, unique: true })
   username: string;
 
-  @Prop({ required: true, unique: true, trim: true })
-  email: string;
-
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 }
 
@@ -21,9 +21,8 @@ export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
 
 // HOOKS
 
-// Hashear la contraseña antes de guardar
+// hashear la contraseña si ha sido modificada o es nueva
 UsuarioSchema.pre<Usuario>('save', async function (next) {
-  // Solo hashea la contraseña si ha sido modificada o es nueva)
   if (!this.isModified('password')) {
     return next();
   }
