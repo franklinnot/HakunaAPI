@@ -3,12 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Estado } from 'src/shared/domain/enums/estado.enum';
-import { JWTPayload } from '../interfaces/jwt-payload.interface';
+import { JWTPayload } from '../types/jwt-payload.interface';
 import { UsuariosService } from 'src/modules/usuarios/application/usuarios.service';
 import {
   Respuesta,
   crearRespuesta,
-} from 'src/shared/infraestructure/interfaces/respuesta.interface';
+} from 'src/shared/application/types/respuesta.interface';
 import { Usuario } from 'src/modules/usuarios/domain/schemas/usuario.schema';
 
 @Injectable()

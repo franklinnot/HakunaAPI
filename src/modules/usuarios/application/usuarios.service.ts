@@ -8,7 +8,7 @@ import { Estado } from 'src/shared/domain/enums/estado.enum';
 import {
   Respuesta,
   crearRespuesta,
-} from 'src/shared/infraestructure/interfaces/respuesta.interface';
+} from 'src/shared/application/types/respuesta.interface';
 
 @Injectable()
 export class UsuariosService {

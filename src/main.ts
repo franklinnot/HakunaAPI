@@ -4,7 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { JwtAuthGuard } from './modules/auth/application/jwt/jwt.guard';
-import { FiltroExcepcion } from './shared/infraestructure/filters/exception.filter';
+import { FiltroExcepcion } from './shared/application/filters/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

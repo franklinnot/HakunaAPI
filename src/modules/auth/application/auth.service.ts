@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {
   Respuesta,
   crearRespuesta,
-} from 'src/shared/infraestructure/interfaces/respuesta.interface';
-import { AuthResponse } from './interfaces/auth-response.interface';
+} from 'src/shared/application/types/respuesta.interface';
+import { AuthResponse } from './types/auth-response.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UsuariosService } from 'src/modules/usuarios/application/usuarios.service';
 import { Usuario } from 'src/modules/usuarios/domain/schemas/usuario.schema';
