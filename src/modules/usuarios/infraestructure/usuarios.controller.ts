@@ -48,4 +48,17 @@ export class UsuariosController {
   async disable(@Param('id') id: string) {
     return await this.usuariosService.disable(id);
   }
+
+  // Buscar usuarios por nombre o username
+  @Get('search')
+  async search(@Query('q') query: string) {
+    if (!query || query.trim() === '') return [];
+
+    const regex = new RegExp(query, 'i');
+    const filterQuery: FilterQuery<Usuario> = {
+      $or: [{ nombre: regex }, { username: regex }],
+    };
+
+    return await this.usuariosService.findAll(filterQuery);
+  }
 }
