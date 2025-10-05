@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsuariosModule } from './modules/usuarios/infraestructure/usuarios.module';
 import { AuthModule } from './modules/auth/infraestructure/auth.module';
-
+import {MensajeModule} from './modules/message/infraestructure/message.module';
 @Module({
   imports: [
     // Cargar variables de entorno
@@ -24,6 +24,7 @@ import { AuthModule } from './modules/auth/infraestructure/auth.module';
     // Modulos
     UsuariosModule,
     AuthModule,
+    MensajeModule,
   ],
 })
 export class AppModule {}
