@@ -2,19 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { Usuario } from '../domain/schemas/usuario.schema';
 import { UsuarioRepository } from '../domain/repositories/usuario.repository';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { Estado } from 'src/shared/domain/enums/estado.enum';
-import {
-  Respuesta,
-  crearRespuesta,
-} from 'src/shared/application/types/respuesta.interface';
+import { CreateUsuarioDto, UpdateUsuarioDto } from './usuarios.dtos';
+import { Estado } from 'src/shared/domain/enums';
+import { Respuesta, crearRespuesta } from 'src/shared/application/types';
 
 @Injectable()
 export class UsuariosService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
 
-  //#region Genericos
   async existsById(id: string): Promise<Respuesta<boolean>> {
     const existe = await this.usuarioRepository.existsById(id);
     if (!existe) {
@@ -76,7 +71,6 @@ export class UsuariosService {
       data: usuario,
     });
   }
-  //#endregion
 
   async existsByUsername(username: string): Promise<Respuesta<boolean>> {
     const existe = await this.usuarioRepository.existsByUsername(username);
@@ -175,5 +169,21 @@ export class UsuariosService {
       success: true,
       data: user,
     });
+  }
+
+  async findAllByNombreOUsername(query: string): Promise<Respuesta<Usuario[]>> {
+    if (!query || query.trim() == '') {
+      return crearRespuesta({
+        success: false,
+        error: 'No se encontraron usuarios.',
+      });
+    }
+
+    const regex = new RegExp(query, 'i');
+    const filterQuery: FilterQuery<Usuario> = {
+      $or: [{ nombre: regex }, { username: regex }],
+    };
+
+    return await this.findAll(filterQuery);
   }
 }

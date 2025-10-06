@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { JwtAuthGuard } from './modules/auth/application/jwt/jwt.guard';
-import { FiltroExcepcion } from './shared/application/filters/exception.filter';
+import { JwtAuthGuard } from './modules/auth/infraestructure/jwt/jwt.guard';
+import { FiltroExcepcion } from './shared/infraestructure/filters/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

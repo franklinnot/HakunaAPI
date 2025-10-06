@@ -1,6 +1,6 @@
 import { Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Estado } from 'src/shared/domain/enums/estado.enum';
+import { Estado } from '../enums';
 
 export abstract class BaseDocument extends Document {
   @Prop({

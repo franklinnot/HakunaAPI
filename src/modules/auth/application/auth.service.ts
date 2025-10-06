@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Respuesta,
-  crearRespuesta,
-} from 'src/shared/application/types/respuesta.interface';
-import { AuthResponse } from './types/auth-response.interface';
+import { Respuesta, crearRespuesta } from 'src/shared/application/types';
+import { AuthResponse } from './auth.types';
 import { JwtService } from '@nestjs/jwt';
 import { UsuariosService } from 'src/modules/usuarios/application/usuarios.service';
 import { Usuario } from 'src/modules/usuarios/domain/schemas/usuario.schema';
 import * as bcrypt from 'bcrypt';
-import { CreateUsuarioDto } from 'src/modules/usuarios/application/dto/create-usuario.dto';
-import { LoginDto } from './dto/login.dto';
+import { CreateUsuarioDto } from 'src/modules/usuarios/application/usuarios.dtos';
+import { LoginDto } from './auth.dtos';
 
 @Injectable()
 export class AuthService {

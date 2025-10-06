@@ -2,13 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Estado } from 'src/shared/domain/enums/estado.enum';
-import { JWTPayload } from '../types/jwt-payload.interface';
+import { Estado } from 'src/shared/domain/enums';
+import { JWTPayload } from '../../application/auth.types';
 import { UsuariosService } from 'src/modules/usuarios/application/usuarios.service';
-import {
-  Respuesta,
-  crearRespuesta,
-} from 'src/shared/application/types/respuesta.interface';
+import { Respuesta, crearRespuesta } from 'src/shared/application/types';
 import { Usuario } from 'src/modules/usuarios/domain/schemas/usuario.schema';
 
 @Injectable()

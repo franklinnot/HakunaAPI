@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { UsuariosService } from '../application/usuarios.service';
-import { UpdateUsuarioDto } from '../application/dto/update-usuario.dto';
+import { UpdateUsuarioDto } from '../application/usuarios.dtos';
 import type { FilterQuery } from 'mongoose';
 import { Usuario } from '../domain/schemas/usuario.schema';
 
@@ -52,13 +52,6 @@ export class UsuariosController {
   // Buscar usuarios por nombre o username
   @Get('search')
   async search(@Query('q') query: string) {
-    if (!query || query.trim() === '') return [];
-
-    const regex = new RegExp(query, 'i');
-    const filterQuery: FilterQuery<Usuario> = {
-      $or: [{ nombre: regex }, { username: regex }],
-    };
-
-    return await this.usuariosService.findAll(filterQuery);
+    return await this.usuariosService.findAllByNombreOUsername(query);
   }
 }

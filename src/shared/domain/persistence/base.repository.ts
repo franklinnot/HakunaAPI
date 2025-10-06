@@ -1,6 +1,6 @@
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { BaseDocument } from './base.document';
-import { Estado } from 'src/shared/domain/enums/estado.enum';
+import { Estado } from '../enums';
 
 export abstract class BaseRepository<T extends BaseDocument> {
   protected constructor(private readonly model: Model<T>) {

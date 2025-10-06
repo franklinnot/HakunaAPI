@@ -1,4 +1,4 @@
-import { IsString, MinLength, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateMensajeDto {
   @IsString()
@@ -11,5 +11,4 @@ export class CreateMensajeDto {
 
   @IsNotEmpty()
   has_files: boolean;
-
 }

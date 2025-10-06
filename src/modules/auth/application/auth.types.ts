@@ -4,3 +4,8 @@ export interface AuthResponse {
   usuario: Usuario;
   token: string;
 }
+
+export interface JWTPayload {
+  id: string;
+  username: string;
+}
