@@ -1,0 +1,38 @@
+import { IArchivo } from 'src/modules/archivos/domain/archivos.entities';
+import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
+import { IMensaje } from 'src/modules/mensajes/domain/mensajes.entities';
+import { Estado } from 'src/shared/domain/enums';
+import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
+
+export type IIntegrantePrivadoResponse = {
+  id_integrante: string;
+} & IUsuarioResponse;
+
+export interface IChatPrivadoResponse {
+  id_chat: string;
+  historial_mensajes: IMensajeResponse[] | null;
+  createdAt: Date;
+  id_integranteA: string;
+  integranteB: IIntegrantePrivadoResponse;
+}
+
+//
+
+export type IIntegranteGrupalResponse = {
+  id_integrante: string;
+  is_admin: boolean;
+  fecha_union: Date;
+  estado: Estado;
+} & IUsuarioResponse;
+
+export interface IChatGrupalResponse {
+  id_chat: string;
+  historial_mensajes: IMensajeResponse[] | null;
+  createdAt: Date;
+  foto: string | null;
+  nombre: string;
+  descripcion: string;
+  integrantes: IIntegranteGrupalResponse[];
+  cantidad_integrantes: number;
+  mensajes?: { mensaje: IMensaje; detalle: IArchivo[] }[];
+}

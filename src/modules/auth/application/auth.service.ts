@@ -1,92 +1,38 @@
+import { IRespuesta } from 'src/shared/application/response';
+import { IAuthResponse } from './auth.responses';
+import { IAuthService } from './auth.service.interface';
+import { IniciarSesion } from './use-cases/iniciar-sesion';
+import { RegistrarUsuario } from './use-cases/registrar-usuario';
 import { Injectable } from '@nestjs/common';
-import { Respuesta, crearRespuesta } from 'src/shared/application/types';
-import { AuthResponse } from './auth.types';
-import { JwtService } from '@nestjs/jwt';
-import { UsuariosService } from 'src/modules/usuarios/application/usuarios.service';
-import { Usuario } from 'src/modules/usuarios/domain/schemas/usuario.schema';
-import * as bcrypt from 'bcrypt';
-import { CreateUsuarioDto } from 'src/modules/usuarios/application/usuarios.dtos';
-import { LoginDto } from './auth.dtos';
+import { BuscarUsuarioPorJWT } from './use-cases/get-usuario-por-jwt';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
-    private readonly usuariosService: UsuariosService,
-    private readonly jwtService: JwtService,
+    private readonly iniciarSesion: IniciarSesion,
+    private readonly registrarUsuario: RegistrarUsuario,
+    private readonly buscarUsuarioPorJWT: BuscarUsuarioPorJWT,
   ) {}
-
-  generarJWT(user: Usuario): string {
-    const payload = { username: user.username, id: user._id };
-    return this.jwtService.sign(payload);
+  async login(
+    username: string,
+    password: string,
+  ): Promise<IRespuesta<IAuthResponse>> {
+    return this.iniciarSesion.execute(username, password);
   }
 
-  async login(dto: LoginDto): Promise<Respuesta<AuthResponse>> {
-    const rpta = await this.usuariosService.getUserWithPassByUsername(
-      dto.username,
-    );
-    const user = rpta.data;
-    if (
-      !rpta.success ||
-      !user ||
-      !(await bcrypt.compare(dto.password, user.password))
-    ) {
-      return crearRespuesta<AuthResponse>({
-        success: false,
-        error: 'Credenciales incorrectas.',
-      });
-    }
-
-    const userObject: Partial<Usuario> = user.toObject<Usuario>();
-    if (userObject.password) delete userObject.password;
-    const token = this.generarJWT(userObject as Usuario);
-
-    return crearRespuesta<AuthResponse>({
-      success: true,
-      data: {
-        usuario: userObject as Usuario,
-        token: token,
-      },
-    });
+  async register(
+    foto: string,
+    nombre: string,
+    username: string,
+    password: string,
+  ): Promise<IRespuesta<IAuthResponse>> {
+    return this.registrarUsuario.execute(foto, nombre, username, password);
   }
 
-  async create(dto: CreateUsuarioDto): Promise<Respuesta<AuthResponse>> {
-    const rpta = await this.usuariosService.create(dto);
-    const user = rpta.data;
-
-    if (!rpta.success || !user) {
-      return crearRespuesta({
-        success: false,
-        error: rpta.error,
-      });
-    }
-
-    const token = this.generarJWT(user);
-
-    return crearRespuesta({
-      success: true,
-      data: {
-        usuario: user,
-        token: token,
-      },
-    });
-  }
-
-  byJWT(rpta: Respuesta<Usuario>): Respuesta<AuthResponse> {
-    const user = rpta.data;
-
-    if (!rpta.success || !user) {
-      return crearRespuesta({
-        success: false,
-        error: rpta.error,
-      });
-    }
-    const token = this.generarJWT(user);
-    return crearRespuesta({
-      success: true,
-      data: {
-        usuario: user,
-        token: token,
-      },
-    });
+  async byJWT(
+    id_usuario: string,
+    username: string,
+  ): Promise<IRespuesta<IAuthResponse>> {
+    return this.buscarUsuarioPorJWT.execute(id_usuario, username);
   }
 }

@@ -1,189 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { FilterQuery } from 'mongoose';
-import { Usuario } from '../domain/schemas/usuario.schema';
-import { UsuarioRepository } from '../domain/repositories/usuario.repository';
-import { CreateUsuarioDto, UpdateUsuarioDto } from './usuarios.dtos';
-import { Estado } from 'src/shared/domain/enums';
-import { Respuesta, crearRespuesta } from 'src/shared/application/types';
+import { IRespuesta } from 'src/shared/application/response';
+import { IUsuarioResponse } from './usuarios.responses';
+import { IUsuariosService } from './usuarios.service.interface';
+import { RegistrarUsuario } from './use-cases/registrar-usuario';
+import { BuscarUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-or-username';
+import { ExisteUsuarioPorUsername } from './use-cases/existe-usuario-por-username';
+import { DeshabilitarUsuario } from './use-cases/disable-usuario';
+import { ActualizarUsuario } from './use-cases/actualizar-usuario';
 
 @Injectable()
-export class UsuariosService {
-  constructor(private readonly usuarioRepository: UsuarioRepository) {}
+export class UsuariosService implements IUsuariosService {
+  constructor(
+    private readonly registrarUsuario: RegistrarUsuario,
+    private readonly buscarUsuarios: BuscarUsuariosPorNombreOUsername,
+    private readonly existeUsuario: ExisteUsuarioPorUsername,
+    private readonly deshabilitarUsuario: DeshabilitarUsuario,
+    private readonly actualizarUsuario: ActualizarUsuario,
+  ) {}
 
-  async existsById(id: string): Promise<Respuesta<boolean>> {
-    const existe = await this.usuarioRepository.existsById(id);
-    if (!existe) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-    return crearRespuesta({
-      success: true,
-      data: existe,
-    });
-  }
-
-  async findById(id: string): Promise<Respuesta<Usuario>> {
-    const usuario = await this.usuarioRepository.findById(id);
-    if (usuario == null) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-    return crearRespuesta({
-      success: true,
-      data: usuario,
-    });
-  }
-
-  async findAll(
-    filterQuery: FilterQuery<Usuario>,
-  ): Promise<Respuesta<Usuario[]>> {
-    filterQuery = { ...filterQuery, estado: Estado.HABILITADO };
-    const usuarios = await this.usuarioRepository.findAll(filterQuery);
-
-    if (!usuarios) {
-      return crearRespuesta({
-        success: false,
-        error: 'No se encontraron usuarios.',
-      });
-    }
-    return crearRespuesta({
-      success: true,
-      data: usuarios.length > 0 ? usuarios : [],
-    });
-  }
-
-  async disable(id: string): Promise<Respuesta<Usuario>> {
-    const usuario = await this.usuarioRepository.disable(id);
-
-    if (!usuario) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-
-    return crearRespuesta({
-      success: true,
-      data: usuario,
-    });
-  }
-
-  async existsByUsername(username: string): Promise<Respuesta<boolean>> {
-    const existe = await this.usuarioRepository.existsByUsername(username);
-    if (!existe) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-    return crearRespuesta({
-      success: true,
-      data: existe,
-    });
-  }
-
-  async findByUsername(username: string): Promise<Respuesta<Usuario>> {
-    const usuario = await this.usuarioRepository.findByUsername(username);
-    if (!usuario) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-    return crearRespuesta({
-      success: true,
-      data: usuario,
-    });
-  }
-
-  async create(dto: CreateUsuarioDto): Promise<Respuesta<Usuario>> {
-    const existe = await this.existsByUsername(dto.username);
-    if (existe.data) {
-      return crearRespuesta({
-        success: false,
-        error: 'El username ya existe.',
-      });
-    }
-
-    const newUser = await this.usuarioRepository.create(dto);
-    const userObject: Partial<Usuario> = newUser.toObject<Usuario>();
-
-    if (userObject.password) delete userObject.password;
-
-    return crearRespuesta({
-      success: true,
-      data: userObject as Usuario,
-    });
-  }
-
-  async update(id: string, dto: UpdateUsuarioDto): Promise<Respuesta<Usuario>> {
-    const rpta = await this.existsById(id);
-    if (!rpta.success) {
-      return crearRespuesta({
-        success: false,
-        error: rpta.error,
-      });
-    }
-
-    // si se incluye username
-    if (dto.username) {
-      const user = (await this.findByUsername(dto.username)).data;
-      if (user && user.id !== id) {
-        return crearRespuesta({
-          success: false,
-          error: 'El username ya existe.',
-        });
-      }
-    }
-
-    const user_actualizado = await this.usuarioRepository.update(id, dto);
-    if (!user_actualizado) {
-      return crearRespuesta({
-        success: false,
-        error: 'El username ya existe.',
-      });
-    }
-
-    return crearRespuesta({
-      success: true,
-      data: user_actualizado,
-    });
-  }
-
-  async getUserWithPassByUsername(
+  async createUsuario(
+    foto: string,
+    nombre: string,
     username: string,
-  ): Promise<Respuesta<Usuario>> {
-    const user =
-      await this.usuarioRepository.getUserWithPassByUsername(username);
-    if (!user) {
-      return crearRespuesta<Usuario>({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-    return crearRespuesta<Usuario>({
-      success: true,
-      data: user,
-    });
+    password: string,
+  ): Promise<IRespuesta<IUsuarioResponse>> {
+    return await this.registrarUsuario.execute(
+      foto,
+      nombre,
+      username,
+      password,
+    );
   }
 
-  async findAllByNombreOUsername(query: string): Promise<Respuesta<Usuario[]>> {
-    if (!query || query.trim() == '') {
-      return crearRespuesta({
-        success: false,
-        error: 'No se encontraron usuarios.',
-      });
-    }
+  async findAllByNombreOUsername(
+    content: string,
+  ): Promise<IRespuesta<IUsuarioResponse[]>> {
+    return await this.buscarUsuarios.execute(content);
+  }
 
-    const regex = new RegExp(query, 'i');
-    const filterQuery: FilterQuery<Usuario> = {
-      $or: [{ nombre: regex }, { username: regex }],
-    };
+  async existsUsuarioByUsername(
+    username: string,
+  ): Promise<IRespuesta<boolean>> {
+    return await this.existeUsuario.execute(username);
+  }
 
-    return await this.findAll(filterQuery);
+  async disableUsuario(id: string): Promise<IRespuesta<IUsuarioResponse>> {
+    return this.deshabilitarUsuario.execute(id);
+  }
+
+  async updateUsuario(
+    id: string,
+    foto: string,
+    nombre: string,
+    username: string,
+    password: string,
+  ): Promise<IRespuesta<IUsuarioResponse>> {
+    return this.actualizarUsuario.execute(id, foto, nombre, username, password);
   }
 }

@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { UsuariosModule } from './modules/usuarios/infraestructure/usuarios.module';
-import { AuthModule } from './modules/auth/infraestructure/auth.module';
-import { MensajeModule } from './modules/mensajes/infraestructure/mensajes.module';
+import { ConfigModule } from '@nestjs/config';
+import { DbConfigModule } from './dbconfig.module';
+import { ArchivosModule } from './modules/archivos/presentation/module';
+import { UsuariosModule } from './modules/usuarios/presentation/usuarios.module';
+import { AuthModule } from './modules/auth/presentation/auth.module';
+import { ChatsModule } from './modules/chats/presentation/chats.module';
+import { MensajesModule } from './modules/mensajes/presentation/mensajes.module';
 @Module({
   imports: [
     // Cargar variables de entorno
@@ -11,20 +13,13 @@ import { MensajeModule } from './modules/mensajes/infraestructure/mensajes.modul
       isGlobal: true,
     }),
 
-    // Conexión a la bd
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('DB_URI'),
-        dbName: configService.get<string>('DB_NAME'),
-      }),
-    }),
-
     // Modulos
+    DbConfigModule,
+    ArchivosModule,
     UsuariosModule,
     AuthModule,
-    MensajeModule,
+    ChatsModule,
+    MensajesModule,
   ],
 })
 export class AppModule {}
