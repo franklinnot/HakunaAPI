@@ -29,6 +29,7 @@ export class MensajesUtils {
         tipo_archivo: archivo.tipo_archivo,
         estado: archivo.estado,
         extension: archivo.extension,
+        size: archivo.size,
       };
       archivos.push(archivoResponse);
     }

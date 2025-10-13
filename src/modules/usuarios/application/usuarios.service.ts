@@ -19,7 +19,7 @@ export class UsuariosService implements IUsuariosService {
   ) {}
 
   async createUsuario(
-    foto: string,
+    foto: string | null,
     nombre: string,
     username: string,
     password: string,

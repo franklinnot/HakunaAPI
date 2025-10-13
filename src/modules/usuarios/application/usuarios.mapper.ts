@@ -2,10 +2,13 @@ import { IUsuario } from '../domain/usuarios.entities';
 import { IUsuarioResponse } from './usuarios.responses';
 
 export class UsuariosMapper {
-  static toUsuarioResponse(usuario: IUsuario): IUsuarioResponse {
+  static toUsuarioResponse(
+    usuario: IUsuario,
+    link_foto: string | null = null,
+  ): IUsuarioResponse {
     return {
       id_usuario: usuario._id,
-      foto: null,
+      link_foto: link_foto,
       nombre: usuario.nombre,
       username: usuario.username,
       createdAt: usuario.createdAt,

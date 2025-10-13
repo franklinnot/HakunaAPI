@@ -53,36 +53,41 @@ export class ChatRepository
     id_usuarioA: string,
     id_usuarioB: string,
   ): Promise<IChat | null> {
-    const chat = await this.chatModel
-      .findOne({
-        is_group: false,
-        estado: Estado.HABILITADO,
-      })
-      .populate({
-        path: 'integrantes',
-        match: {
-          id_usuario: { $in: [id_usuarioA, id_usuarioB] },
-          estado: Estado.HABILITADO,
+    const chats = await this.chatModel
+      .aggregate([
+        {
+          $match: {
+            is_group: false,
+            estado: Estado.HABILITADO,
+          },
         },
-        select: 'id_usuario', // solo traemos lo necesario
-      })
-      .lean()
+        {
+          $lookup: {
+            from: 'integrante',
+            localField: '_id',
+            foreignField: 'id_chat',
+            as: 'integrantes',
+          },
+        },
+        {
+          $match: {
+            'integrantes.estado': Estado.HABILITADO,
+            'integrantes.id_usuario': { $all: [id_usuarioA, id_usuarioB] },
+            'integrantes.2': { $exists: false }, // asegura que solo hay 2 integrantes
+          },
+        },
+        {
+          $limit: 1,
+        },
+      ])
       .exec();
 
-    // Validar que el chat tiene exactamente 2 integrantes (los dos usuarios buscados)
-    if (
-      !chat ||
-      !(chat as any).integrantes ||
-      (chat as any).integrantes.length != 2 ||
-      !(chat as any).integrantes.some(
-        (i: any) => i.id_usuario == id_usuarioA,
-      ) ||
-      !(chat as any).integrantes.some((i: any) => i.id_usuario == id_usuarioB)
-    ) {
+    if (!chats || chats.length === 0) {
       return null;
     }
 
-    return this.toDomain(chat);
+    const chatDoc = chats[0];
+    return this.toDomain(chatDoc as unknown as Chat);
   }
 
   // buscar chats privados de un usuario

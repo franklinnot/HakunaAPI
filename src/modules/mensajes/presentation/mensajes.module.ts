@@ -18,7 +18,7 @@ import { DetalleMensajeRepository } from 'src/modules/mensajes/infraestructure/r
 import { MensajesService } from 'src/modules/mensajes/application/mensajes.service';
 import { MensajesController } from './mensajes.controller';
 import { ChatsModule } from 'src/modules/chats/presentation/chats.module';
-import { ArchivosModule } from 'src/modules/archivos/presentation/module';
+import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { MensajesUtils } from '../application/mensajes.utils';
 
 @Module({

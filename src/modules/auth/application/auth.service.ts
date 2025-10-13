@@ -21,7 +21,7 @@ export class AuthService implements IAuthService {
   }
 
   async register(
-    foto: string,
+    foto: string | null,
     nombre: string,
     username: string,
     password: string,

@@ -9,7 +9,7 @@ import { ChatRepository } from 'src/modules/chats/infraestructure/repositories/c
 import { IntegranteRepository } from 'src/modules/chats/infraestructure/repositories/integrante.repository';
 import { ChatsService } from '../application/chats.service';
 import { ChatsController } from './chats.controller';
-import { ArchivosModule } from 'src/modules/archivos/presentation/module';
+import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { UsuariosModule } from 'src/modules/usuarios/presentation/usuarios.module';
 import { MensajesModule } from 'src/modules/mensajes/presentation/mensajes.module';
 import { CrearChatPrivado } from '../application/use-cases/crear-chat-privado';

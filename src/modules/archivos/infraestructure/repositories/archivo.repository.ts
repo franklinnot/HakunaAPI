@@ -5,8 +5,8 @@ import { Archivo } from '../schemas/archivo.schema';
 import { BaseRepository } from 'src/shared/infraestructure/repository/base.repository';
 import type { Persistence } from 'src/shared/infraestructure/infraestructure.types';
 import { IArchivo } from '../../domain/archivos.entities';
-import { Estado } from 'src/shared/domain/enums';
 import { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
+import { Estado, TipoArchivo } from 'src/shared/domain/enums';
 
 @Injectable()
 export class ArchivoRepository
@@ -22,14 +22,17 @@ export class ArchivoRepository
 
   protected toDomain(doc: Archivo): IArchivo {
     return {
-      _id: doc._id.toString(),
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
+      _id: doc._id ?? '',
+      createdAt: doc.createdAt ?? new Date(),
+      updatedAt: doc.updatedAt ?? new Date(),
+      //
       estado: doc.estado ?? Estado.HABILITADO,
-      nombre: doc.nombre,
-      link: doc.link,
-      tipo_archivo: doc.tipo_archivo,
-      extension: doc.extension,
+      nombre: doc.nombre ?? '',
+      link: doc.link ?? '',
+      tipo_archivo: doc.tipo_archivo ?? TipoArchivo.DOCUMENTO,
+      extension: doc.extension ?? '',
+      size: doc.size ?? '',
+      filekey: doc.filekey ?? '',
     };
   }
 
@@ -39,6 +42,9 @@ export class ArchivoRepository
       nombre: entity.nombre,
       link: entity.link,
       tipo_archivo: entity.tipo_archivo,
+      extension: entity.extension,
+      size: entity.size,
+      filekey: entity.filekey,
     } as Persistence<IArchivo>;
   }
 

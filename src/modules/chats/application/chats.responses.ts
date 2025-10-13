@@ -29,7 +29,7 @@ export interface IChatGrupalResponse {
   id_chat: string;
   historial_mensajes: IMensajeResponse[] | null;
   createdAt: Date;
-  foto: string | null;
+  link_foto: string | null;
   nombre: string;
   descripcion: string;
   integrantes: IIntegranteGrupalResponse[];
