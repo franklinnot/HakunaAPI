@@ -5,9 +5,16 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { JwtAuthGuard } from './modules/auth/presentation/jwt/jwt.guard';
 import { FiltroExcepcion } from './exception.filter';
+import { json } from 'body-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // Disable default bodyParser
+  });
+
+  // Enable body-parser with a larger limit for JSON payloads
+  app.use(json({ limit: '50mb' }));
+
   const logger = new Logger(); // logger para el proceso de arranque
 
   // acceder a las variables de entorno
