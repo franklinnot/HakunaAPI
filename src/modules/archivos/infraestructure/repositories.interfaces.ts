@@ -2,5 +2,5 @@ import { IBaseRepository } from 'src/shared/infraestructure/repository/base.repo
 import { IArchivo } from '../domain/archivos.entities';
 
 export interface IArchivoRepository extends IBaseRepository<IArchivo> {
-  findByLink(link: string): Promise<IArchivo | null>;
+  findLinkById(id_archivo: string): Promise<string | null>;
 }

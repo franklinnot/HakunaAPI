@@ -48,7 +48,8 @@ export class ArchivoRepository
     } as Persistence<IArchivo>;
   }
 
-  findByLink(link: string): Promise<IArchivo | null> {
-    return this.findOne({ link });
+  async findLinkById(id_archivo: string): Promise<string | null> {
+    const archivo = await this.findOne({ _id: id_archivo });
+    return archivo?.link ?? null;
   }
 }

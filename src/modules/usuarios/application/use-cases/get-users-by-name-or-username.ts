@@ -4,18 +4,21 @@ import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IUsuarioResponse } from '../usuarios.responses';
 import { Estado } from 'src/shared/domain/enums';
 import { UsuariosMapper } from '../usuarios.mapper';
+import type { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
 
 @Injectable()
 export class BuscarUsuariosPorNombreOUsername {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
+    @Inject('IArchivoRepository')
+    private readonly archivoRepository: IArchivoRepository,
   ) {}
 
   async execute(content: string): Promise<IRespuesta<IUsuarioResponse[]>> {
     const palabra = content.trim();
 
-    if (!palabra || palabra.length <= 2) {
+    if (!palabra || palabra.length < 2) {
       return crearRespuesta({
         success: false,
         error: 'Solicitud inválida.',
@@ -39,9 +42,15 @@ export class BuscarUsuariosPorNombreOUsername {
       return nombre.includes(palabra) || username.includes(palabra);
     });
 
-    const result = usuariosFiltrados.map((usuario) =>
-      UsuariosMapper.toUsuarioResponse(usuario),
-    );
+    const result: IUsuarioResponse[] = [];
+
+    for (const usuario of usuariosFiltrados) {
+      let link_foto: string | null = null;
+      if (usuario.id_foto) {
+        link_foto = await this.archivoRepository.findLinkById(usuario.id_foto);
+      }
+      result.push(UsuariosMapper.toUsuarioResponse(usuario, link_foto));
+    }
 
     return crearRespuesta({
       success: true,
