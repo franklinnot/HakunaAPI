@@ -8,7 +8,7 @@ import { ArchivoRepository } from '../infraestructure/repositories/archivo.repos
 import { ArchivosService } from 'src/modules/archivos/application/archivos.service';
 import { ArchivosUtils } from '../application/archivos.utils';
 import { GuardarImagen } from '../application/use-cases/guardar-imagen';
-import { CloudflareService } from '../application/storage.service';
+import { StorageService } from '../application/storage.service';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { CloudflareService } from '../application/storage.service';
       useClass: ArchivoRepository,
     },
     // servicios
-    CloudflareService,
+    StorageService,
     ArchivosUtils,
     GuardarImagen,
     {

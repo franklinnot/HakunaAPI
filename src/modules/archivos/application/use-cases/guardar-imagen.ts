@@ -4,8 +4,9 @@ import { IArchivoResponse } from '../archivos.responses';
 import type { IArchivoRepository } from '../../infraestructure/repositories.interfaces';
 import { StorageService } from '../storage.service';
 import { ArchivosUtils } from '../archivos.utils';
-import { Estado, TipoArchivo } from 'src/shared/domain/enums';
+import { TipoArchivo } from 'src/shared/domain/enums';
 import { randomUUID } from 'crypto';
+import { ArchivosMapper } from '../archivos.mapper';
 
 @Injectable()
 export class GuardarImagen {
@@ -66,15 +67,7 @@ export class GuardarImagen {
     // retornar respuesta
     return crearRespuesta({
       success: true,
-      data: {
-        id_archivo: archivo._id,
-        nombre: nombre,
-        link: link,
-        tipo_archivo: TipoArchivo.IMAGEN,
-        extension: extension,
-        size: `${sizeMB}MB`,
-        estado: Estado.HABILITADO,
-      },
+      data: ArchivosMapper.toArchivoResponse(archivo),
     });
   }
 
