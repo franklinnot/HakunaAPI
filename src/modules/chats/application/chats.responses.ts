@@ -1,6 +1,4 @@
-import { IArchivo } from 'src/modules/archivos/domain/archivos.entities';
 import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
-import { IMensaje } from 'src/modules/mensajes/domain/mensajes.entities';
 import { Estado } from 'src/shared/domain/enums';
 import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
 
@@ -34,5 +32,4 @@ export interface IChatGrupalResponse {
   descripcion: string;
   integrantes: IIntegranteGrupalResponse[];
   cantidad_integrantes: number;
-  mensajes?: { mensaje: IMensaje; detalle: IArchivo[] }[];
 }

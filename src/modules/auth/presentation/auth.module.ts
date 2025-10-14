@@ -10,9 +10,11 @@ import { AuthUtils } from '../application/auth.utils';
 import { BuscarUsuarioPorJWT } from '../application/use-cases/get-usuario-por-jwt';
 import { IniciarSesion } from '../application/use-cases/iniciar-sesion';
 import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
+import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 
 @Module({
   imports: [
+    ArchivosModule,
     UsuariosModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
