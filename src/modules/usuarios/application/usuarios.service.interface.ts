@@ -15,10 +15,8 @@ export interface IUsuariosService {
   disableUsuario(id: string): Promise<IRespuesta<IUsuarioResponse>>;
   updateUsuario(
     id: string,
-    foto: string | undefined,
-    nombre: string | undefined,
-    username: string | undefined,
-    password: string | undefined,
+    foto: string | null | undefined,
+    nombre: string | null | undefined,
+    username: string | null | undefined,
   ): Promise<IRespuesta<IUsuarioResponse>>;
-  eliminarFotoPerfil(id: string): Promise<IRespuesta<IUsuarioResponse>>;
 }

@@ -1,4 +1,17 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { RegisterUsuarioDto } from 'src/modules/auth/presentation/auth.dtos';
+import { IsString, MinLength, IsBase64, IsOptional } from 'class-validator';
 
-export class UpdateUsuarioDto extends PartialType(RegisterUsuarioDto) {}
+export class UpdateUsuarioDto {
+  @IsBase64()
+  @IsOptional()
+  foto?: string | null;
+
+  @IsString()
+  @IsOptional()
+  @MinLength(2)
+  nombre?: string | null;
+
+  @IsString()
+  @IsOptional()
+  @MinLength(2)
+  username?: string | null;
+}

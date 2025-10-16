@@ -7,7 +7,7 @@ import { BuscarUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-
 import { ExisteUsuarioPorUsername } from './use-cases/existe-usuario-por-username';
 import { DeshabilitarUsuario } from './use-cases/disable-usuario';
 import { ActualizarUsuario } from './use-cases/actualizar-usuario';
-import { EliminarFotoPerfil } from './use-cases/eliminar-foto-perfil';
+import { ActualizarFotoPerfil } from './use-cases/actualizar-foto-perfil';
 
 @Injectable()
 export class UsuariosService implements IUsuariosService {
@@ -17,7 +17,7 @@ export class UsuariosService implements IUsuariosService {
     private readonly existeUsuario: ExisteUsuarioPorUsername,
     private readonly deshabilitarUsuario: DeshabilitarUsuario,
     private readonly actualizarUsuario: ActualizarUsuario,
-    private readonly eliminarFotoPerfilService: EliminarFotoPerfil,
+    private readonly actualizarFotoPerfilService: ActualizarFotoPerfil,
   ) {}
 
   async createUsuario(
@@ -52,15 +52,10 @@ export class UsuariosService implements IUsuariosService {
 
   async updateUsuario(
     id: string,
-    foto: string,
-    nombre: string,
-    username: string,
-    password: string,
+    foto: string | null | undefined,
+    nombre: string | null | undefined,
+    username: string | null | undefined,
   ): Promise<IRespuesta<IUsuarioResponse>> {
-    return this.actualizarUsuario.execute(id, foto, nombre, username, password);
-  }
-
-  async eliminarFotoPerfil(id: string): Promise<IRespuesta<IUsuarioResponse>> {
-    return this.eliminarFotoPerfilService.execute(id);
+    return this.actualizarUsuario.execute(id, foto, nombre, username);
   }
 }

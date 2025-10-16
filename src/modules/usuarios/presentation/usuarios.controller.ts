@@ -37,7 +37,6 @@ export class UsuariosController {
       dto.foto,
       dto.nombre,
       dto.username,
-      dto.password,
     );
   }
 
@@ -52,12 +51,5 @@ export class UsuariosController {
   @Get('search/:q')
   async findAllByNombreOUsername(@Param('q') q: string) {
     return await this.usuariosService.findAllByNombreOUsername(q);
-  }
-
-  // eliminar foto de perfil
-  @Get('remove-foto')
-  async eliminarFotoPerfil(@Request() req: IRequestWithUser) {
-    const usuario = req.user.data;
-    return await this.usuariosService.eliminarFotoPerfil(usuario!.id_usuario);
   }
 }

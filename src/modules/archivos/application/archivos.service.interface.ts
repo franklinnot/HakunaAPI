@@ -12,7 +12,7 @@ export interface IArchivosService {
     base64: string,
     nombre: string | null,
   ): Promise<IRespuesta<IArchivoResponse>>;
-  eliminarImagen(id_archivo: string): Promise<IRespuesta<IArchivoResponse>>;
+  eliminarArchivo(id_archivo: string): Promise<IRespuesta<IArchivoResponse>>;
   // siempre mp4
   guardarVideo(
     base64: string,

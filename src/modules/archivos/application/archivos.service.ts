@@ -4,7 +4,7 @@ import { IRespuesta } from 'src/shared/application/response';
 import { IArchivoResponse } from './archivos.responses';
 import { GuardarImagen } from './use-cases/guardar-imagen';
 import { ActualizarImagen } from './use-cases/actualizar-imagen';
-import { EliminarImagen } from './use-cases/eliminar-imagen';
+import { EliminarArchivo } from './use-cases/eliminar-archivo';
 
 // hakuna-api-files
 
@@ -13,7 +13,7 @@ export class ArchivosService implements IArchivosService {
   constructor(
     private readonly guardarImagenService: GuardarImagen,
     private readonly actualizarImagenService: ActualizarImagen,
-    private readonly eliminarImagenService: EliminarImagen,
+    private readonly eliminarArchivoService: EliminarArchivo,
   ) {}
 
   async guardarImagen(
@@ -35,10 +35,10 @@ export class ArchivosService implements IArchivosService {
     );
   }
 
-  async eliminarImagen(
+  async eliminarArchivo(
     id_archivo: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
-    return await this.eliminarImagenService.execute(id_archivo);
+    return await this.eliminarArchivoService.execute(id_archivo);
   }
 
   guardarVideo(

@@ -3,24 +3,24 @@ import type { IUsuarioRepository } from '../../infraestructure/usuarios.reposito
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IUsuarioResponse } from '../usuarios.responses';
 import { UsuariosMapper } from '../usuarios.mapper';
-import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
-import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
+import { ActualizarFotoPerfil } from './actualizar-foto-perfil';
+import type { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
 
 @Injectable()
 export class ActualizarUsuario {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
-    @Inject('IArchivosService')
-    private readonly archivosService: IArchivosService,
+    private readonly actualizarFotoPerfilService: ActualizarFotoPerfil,
+    @Inject('IArchivoRepository')
+    private readonly archivoRepository: IArchivoRepository,
   ) {}
 
   async execute(
     id: string,
-    foto: string,
-    nombre: string,
-    username: string,
-    password: string,
+    foto: string | null | undefined,
+    nombre: string | null | undefined,
+    username: string | null | undefined,
   ): Promise<IRespuesta<IUsuarioResponse>> {
     const usuario = await this.usuarioRepository.findById(id);
 
@@ -31,8 +31,21 @@ export class ActualizarUsuario {
       });
     }
 
+    if (nombre && nombre.length < 2) {
+      return crearRespuesta({
+        success: false,
+        error: 'El nombre no es válido.',
+      });
+    }
+
     // si se incluye username
     if (username) {
+      if (username.length < 2) {
+        return crearRespuesta({
+          success: false,
+          error: 'El username no es válido.',
+        });
+      }
       const user = await this.usuarioRepository.findOne({
         username: username,
       });
@@ -44,39 +57,27 @@ export class ActualizarUsuario {
       }
     }
 
-    // si se incluye la foto
-    let archivoResponse: IRespuesta<IArchivoResponse> | null = null;
-    // si el usuario no tiene foto
-    if (foto && !usuario.id_foto) {
-      archivoResponse = await this.archivosService.guardarImagen(foto, null);
-      // si el usuario ya tiene una foto
-    } else if (foto && usuario.id_foto) {
-      archivoResponse = await this.archivosService.actualizarImagen(
-        usuario.id_foto,
-        foto,
-        null,
+    let new_link: string | null = null;
+    // si se pide cambio
+    if (typeof foto !== 'undefined') {
+      new_link = await this.actualizarFotoPerfilService.execute(usuario, foto);
+    } else {
+      // no se pidió cambio: obtener link actual
+      new_link = await this.archivoRepository.findLinkById(
+        usuario.id_foto || '',
       );
     }
 
     const user_actualizado = await this.usuarioRepository.update(id, {
-      id_foto: foto ? archivoResponse?.data?.id_archivo : null,
-      nombre,
-      username,
-      password,
+      nombre: nombre || usuario.nombre,
+      username: username || usuario.username,
     });
-
-    if (!user_actualizado) {
-      return crearRespuesta({
-        success: false,
-        error: 'No se pudo actualizar el usuario.',
-      });
-    }
 
     return crearRespuesta({
       success: true,
       data: UsuariosMapper.toUsuarioResponse(
-        user_actualizado,
-        archivoResponse?.data?.link,
+        user_actualizado!,
+        new_link ?? null,
       ),
     });
   }

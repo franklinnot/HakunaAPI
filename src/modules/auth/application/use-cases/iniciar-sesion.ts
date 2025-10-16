@@ -41,10 +41,9 @@ export class IniciarSesion {
       });
     }
 
-    let link_foto: string | null = null;
-    if (user.id_foto) {
-      link_foto = await this.archivoRepository.findLinkById(user.id_foto);
-    }
+    const link_foto = await this.archivoRepository.findLinkById(
+      user.id_foto || '',
+    );
 
     const token = this.authUtils.generarJWT(user._id, user.username);
 

@@ -5,7 +5,6 @@ import { IUsuarioResponse } from '../usuarios.responses';
 import { Estado } from 'src/shared/domain/enums';
 import { UsuariosMapper } from '../usuarios.mapper';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
-import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 
 @Injectable()
 export class RegistrarUsuario {
@@ -34,13 +33,20 @@ export class RegistrarUsuario {
       });
     }
 
-    let archivoResponse: IRespuesta<IArchivoResponse> | null = null;
+    let link_foto: string | null = null;
+    let id_foto: string | null = null;
+
     if (foto) {
-      archivoResponse = await this.archivosService.guardarImagen(foto, null);
+      const archivoResponse = await this.archivosService.guardarImagen(
+        foto,
+        null,
+      );
+      link_foto = archivoResponse.data?.link || null;
+      id_foto = archivoResponse.data?.id_archivo || null;
     }
 
     const newUser = await this.usuarioRepository.create({
-      id_foto: foto ? archivoResponse?.data?.id_archivo : null,
+      id_foto: id_foto,
       nombre: nombre,
       username: username.toLowerCase(),
       password: password,
@@ -55,10 +61,7 @@ export class RegistrarUsuario {
 
     return crearRespuesta({
       success: true,
-      data: UsuariosMapper.toUsuarioResponse(
-        newUser,
-        archivoResponse?.data?.link,
-      ),
+      data: UsuariosMapper.toUsuarioResponse(newUser, link_foto),
     });
   }
 }

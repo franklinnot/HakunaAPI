@@ -6,7 +6,7 @@ import { StorageService } from '../storage.service';
 import { ArchivosMapper } from '../archivos.mapper';
 
 @Injectable()
-export class EliminarImagen {
+export class EliminarArchivo {
   constructor(
     @Inject('IArchivoRepository')
     private readonly archivoRepository: IArchivoRepository,

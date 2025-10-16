@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IArchivoResponse } from '../archivos.responses';
 import type { IArchivoRepository } from '../../infraestructure/repositories.interfaces';
-import { EliminarImagen } from './eliminar-imagen';
+import { EliminarArchivo } from './eliminar-archivo';
 import { GuardarImagen } from './guardar-imagen';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class ActualizarImagen {
     @Inject('IArchivoRepository')
     private readonly archivoRepository: IArchivoRepository,
     private readonly guardarImagen: GuardarImagen,
-    private readonly eliminarImagenService: EliminarImagen,
+    private readonly eliminarArchivoService: EliminarArchivo,
   ) {}
 
   async execute(
@@ -28,7 +28,7 @@ export class ActualizarImagen {
       });
     }
 
-    await this.eliminarImagenService.execute(id_archivo);
+    await this.eliminarArchivoService.execute(id_archivo);
     const archivoResponse = await this.guardarImagen.execute(base64, nombre);
 
     // retornar respuesta
