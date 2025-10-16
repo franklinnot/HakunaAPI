@@ -19,7 +19,7 @@ export class LoginDto {
 export class RegisterUsuarioDto {
   @IsBase64()
   @IsOptional()
-  foto: string; // b64
+  foto?: string | null;
 
   @IsString()
   @IsNotEmpty()

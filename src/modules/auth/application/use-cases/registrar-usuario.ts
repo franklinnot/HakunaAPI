@@ -13,7 +13,7 @@ export class RegistrarUsuario {
   ) {}
 
   async execute(
-    foto: string | null,
+    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,

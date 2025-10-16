@@ -3,7 +3,7 @@ import { IUsuarioResponse } from './usuarios.responses';
 
 export interface IUsuariosService {
   createUsuario(
-    foto: string | null,
+    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,
