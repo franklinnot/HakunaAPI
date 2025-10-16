@@ -9,6 +9,8 @@ import { ArchivosService } from 'src/modules/archivos/application/archivos.servi
 import { ArchivosUtils } from '../application/archivos.utils';
 import { GuardarImagen } from '../application/use-cases/guardar-imagen';
 import { StorageService } from '../application/storage.service';
+import { ActualizarImagen } from '../application/use-cases/actualizar-imagen';
+import { EliminarImagen } from '../application/use-cases/eliminar-imagen';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { StorageService } from '../application/storage.service';
     StorageService,
     ArchivosUtils,
     GuardarImagen,
+    ActualizarImagen,
+    EliminarImagen,
     {
       provide: 'IArchivosService',
       useClass: ArchivosService,

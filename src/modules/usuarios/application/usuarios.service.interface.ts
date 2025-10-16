@@ -20,4 +20,5 @@ export interface IUsuariosService {
     username: string | undefined,
     password: string | undefined,
   ): Promise<IRespuesta<IUsuarioResponse>>;
+  eliminarFotoPerfil(id: string): Promise<IRespuesta<IUsuarioResponse>>;
 }

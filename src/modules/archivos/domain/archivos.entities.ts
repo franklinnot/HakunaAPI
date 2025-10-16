@@ -6,6 +6,6 @@ export interface IArchivo extends IBaseEntity {
   link: string | null;
   tipo_archivo: TipoArchivo;
   extension: string;
-  filekey: string;
+  filekey: string | null;
   size: string;
 }

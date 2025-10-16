@@ -25,7 +25,7 @@ export class GuardarImagen {
     const extension = 'webp';
 
     // convertir a .webp
-    const webpBuffer = await this.getBuffer(base64);
+    const webpBuffer = await this.archivosUtils.getImageBuffer(base64);
 
     if (!webpBuffer) {
       return crearRespuesta({
@@ -69,29 +69,5 @@ export class GuardarImagen {
       success: true,
       data: ArchivosMapper.toArchivoResponse(archivo),
     });
-  }
-
-  async getBuffer(base64: string): Promise<Buffer | null> {
-    // obtener MIME y validar
-    const mimeType = await this.archivosUtils.getMimeType(base64);
-
-    if (!mimeType) {
-      return null;
-    }
-
-    const result = this.archivosUtils.validarImagen(mimeType);
-
-    if (!result) {
-      return null;
-    }
-
-    const buffer = this.archivosUtils.base64ToBuffer(base64);
-
-    if (!buffer) {
-      throw new Error('Formato de imagen no permitido.');
-      return null;
-    }
-
-    return await this.archivosUtils.convertirAWebp(buffer);
   }
 }

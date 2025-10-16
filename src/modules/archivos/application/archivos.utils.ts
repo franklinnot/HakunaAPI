@@ -50,4 +50,27 @@ export class ArchivosUtils {
       return null;
     }
   }
+
+  async getImageBuffer(base64: string): Promise<Buffer | null> {
+    // obtener MIME y validar
+    const mimeType = await this.getMimeType(base64);
+
+    if (!mimeType) {
+      return null;
+    }
+
+    const result = this.validarImagen(mimeType);
+
+    if (!result) {
+      return null;
+    }
+
+    const buffer = this.base64ToBuffer(base64);
+
+    if (!buffer) {
+      return null;
+    }
+
+    return await this.convertirAWebp(buffer);
+  }
 }

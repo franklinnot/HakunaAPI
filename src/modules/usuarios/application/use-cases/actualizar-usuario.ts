@@ -3,12 +3,16 @@ import type { IUsuarioRepository } from '../../infraestructure/usuarios.reposito
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IUsuarioResponse } from '../usuarios.responses';
 import { UsuariosMapper } from '../usuarios.mapper';
+import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
+import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 
 @Injectable()
 export class ActualizarUsuario {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
+    @Inject('IArchivosService')
+    private readonly archivosService: IArchivosService,
   ) {}
 
   async execute(
@@ -18,9 +22,9 @@ export class ActualizarUsuario {
     username: string,
     password: string,
   ): Promise<IRespuesta<IUsuarioResponse>> {
-    const existe = await this.usuarioRepository.existsById(id);
+    const usuario = await this.usuarioRepository.findById(id);
 
-    if (!existe) {
+    if (!usuario) {
       return crearRespuesta({
         success: false,
         error: 'El usuario no existe.',
@@ -40,8 +44,22 @@ export class ActualizarUsuario {
       }
     }
 
+    // si se incluye la foto
+    let archivoResponse: IRespuesta<IArchivoResponse> | null = null;
+    // si el usuario no tiene foto
+    if (foto && !usuario.id_foto) {
+      archivoResponse = await this.archivosService.guardarImagen(foto, null);
+      // si el usuario ya tiene una foto
+    } else if (foto && usuario.id_foto) {
+      archivoResponse = await this.archivosService.actualizarImagen(
+        usuario.id_foto,
+        foto,
+        null,
+      );
+    }
+
     const user_actualizado = await this.usuarioRepository.update(id, {
-      id_foto: foto,
+      id_foto: foto ? archivoResponse?.data?.id_archivo : null,
       nombre,
       username,
       password,
@@ -56,7 +74,10 @@ export class ActualizarUsuario {
 
     return crearRespuesta({
       success: true,
-      data: UsuariosMapper.toUsuarioResponse(user_actualizado),
+      data: UsuariosMapper.toUsuarioResponse(
+        user_actualizado,
+        archivoResponse?.data?.link,
+      ),
     });
   }
 }

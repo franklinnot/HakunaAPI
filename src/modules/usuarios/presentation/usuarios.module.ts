@@ -13,6 +13,7 @@ import { DeshabilitarUsuario } from '../application/use-cases/disable-usuario';
 import { ExisteUsuarioPorUsername } from '../application/use-cases/existe-usuario-por-username';
 import { BuscarUsuariosPorNombreOUsername } from '../application/use-cases/get-users-by-name-or-username';
 import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
+import { EliminarFotoPerfil } from '../application/use-cases/eliminar-foto-perfil';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
     ExisteUsuarioPorUsername,
     BuscarUsuariosPorNombreOUsername,
     RegistrarUsuario,
+    EliminarFotoPerfil,
     {
       provide: 'IUsuariosService',
       useClass: UsuariosService,
