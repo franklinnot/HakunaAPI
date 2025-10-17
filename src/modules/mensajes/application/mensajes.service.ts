@@ -1,21 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common';
-import type { IMensajeRepository } from '../infraestructure/mensajes.repositories.interfaces';
-import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
+import { Injectable } from '@nestjs/common';
+import { IRespuesta } from 'src/shared/application/response';
 import { IMensajesService } from './mensajes.service.interface';
 import { IMensajeResponse } from './mensajes.responses';
+import { CrearMensaje, ICrearArchivo } from './crear-mesaje';
 
 @Injectable()
 export class MensajesService implements IMensajesService {
-  constructor(
-    @Inject('IMensajeRepository')
-    private readonly mensajeRepository: IMensajeRepository,
-  ) {}
-  createMensaje(
+  constructor(private readonly crearMensajeService: CrearMensaje) {}
+  crearMensaje(
     id_integrante: string,
-    descripcion: string,
-    has_files: boolean,
-    archivos: string[],
+    descripcion?: string,
+    archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>> {
-    throw new Error('Method not implemented.');
+    return this.crearMensajeService.execute(
+      id_integrante,
+      descripcion,
+      archivos,
+    );
   }
 }

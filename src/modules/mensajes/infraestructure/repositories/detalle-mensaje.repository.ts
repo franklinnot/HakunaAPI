@@ -43,6 +43,23 @@ export class DetalleMensajeRepository
   }
 
   findByMensaje(id_mensaje: string): Promise<IDetalleMensaje[]> {
-    throw new Error('Method not implemented.');
+    return this.findAll({
+      id_mensaje: id_mensaje,
+    });
+  }
+
+  registrarDetalles(
+    detalles: {
+      id_mensaje: string;
+      id_integrante: string;
+    }[],
+  ): Promise<IDetalleMensaje[]> {
+    const createdDetalles = detalles.map((detalle) => {
+      return this.create({
+        id_mensaje: detalle.id_mensaje,
+        id_archivo: detalle.id_integrante,
+      });
+    });
+    return Promise.all(createdDetalles);
   }
 }

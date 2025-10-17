@@ -1,10 +1,19 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsBoolean,
-  IsOptional,
-  IsBase64,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBase64 } from 'class-validator';
+import { TipoArchivo } from 'src/shared/domain/enums';
+
+export class ArchivoDto {
+  @IsString()
+  @IsOptional()
+  nombre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  tipoArchivo: TipoArchivo;
+
+  @IsBase64()
+  @IsNotEmpty()
+  b64: string;
+}
 
 export class CreateMensajeDto {
   @IsString()
@@ -12,14 +21,9 @@ export class CreateMensajeDto {
   id_integrante: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   descripcion: string;
 
-  @IsBoolean()
-  @IsNotEmpty()
-  has_files: boolean;
-
-  @IsBase64()
   @IsOptional()
-  archivos: string[];
+  archivos: ArchivoDto[];
 }

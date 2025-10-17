@@ -1,11 +1,11 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajeResponse } from './mensajes.responses';
+import { ICrearArchivo } from './crear-mesaje';
 
 export interface IMensajesService {
-  createMensaje(
+  crearMensaje(
     id_integrante: string,
-    descripcion: string,
-    has_files: boolean,
-    archivos: string[],
+    descripcion?: string,
+    archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>>;
 }

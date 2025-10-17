@@ -4,7 +4,7 @@ import { IAuthResponse } from './auth.responses';
 export interface IAuthService {
   login(username: string, password: string): Promise<IRespuesta<IAuthResponse>>;
   register(
-    foto: string | null,
+    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,

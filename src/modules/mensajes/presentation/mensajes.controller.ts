@@ -1,20 +1,19 @@
 import { Controller, Post, Body, Inject } from '@nestjs/common';
-import { MensajesService } from 'src/modules/mensajes/application/mensajes.service';
 import { CreateMensajeDto } from './mensajes.dtos';
+import type { IMensajesService } from '../application/mensajes.service.interface';
 
 @Controller('mensajes')
 export class MensajesController {
   constructor(
     @Inject('IMensajesService')
-    private readonly mensajeService: MensajesService,
+    private readonly mensajeService: IMensajesService,
   ) {}
 
-  @Post('create')
-  register(@Body() dto: CreateMensajeDto) {
-    return this.mensajeService.createMensaje(
+  @Post()
+  crearMensaje(@Body() dto: CreateMensajeDto) {
+    return this.mensajeService.crearMensaje(
       dto.id_integrante,
       dto.descripcion,
-      dto.has_files,
       dto.archivos,
     );
   }

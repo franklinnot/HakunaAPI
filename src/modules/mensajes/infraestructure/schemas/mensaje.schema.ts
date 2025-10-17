@@ -7,7 +7,7 @@ export class Mensaje extends BaseSchema implements IMensaje {
   @Prop({ type: String, ref: 'Integrante', required: true })
   id_integrante: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: null })
   descripcion: string;
 
   @Prop({ required: true, default: false })

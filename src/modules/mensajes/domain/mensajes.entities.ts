@@ -2,7 +2,7 @@ import { IBaseEntity } from 'src/shared/domain/base.entity';
 
 export interface IMensaje extends IBaseEntity {
   id_integrante: string;
-  descripcion: string;
+  descripcion: string | null;
   has_files: boolean;
 }
 
