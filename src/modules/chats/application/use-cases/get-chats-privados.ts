@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
-import {
-  IChatPrivadoResponse,
-  IIntegrantePrivadoResponse,
-} from '../chats.responses';
+import { IChatPrivadoResponse } from '../chats.responses';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
 import type {
   IChatRepository,
@@ -17,6 +14,8 @@ import type { IMensajeRepository } from 'src/modules/mensajes/infraestructure/me
 import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
 import { MensajesUtils } from 'src/modules/mensajes/application/mensajes.utils';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
+import type { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
+import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 
 @Injectable()
 export class BuscarChatsPrivados {
@@ -29,6 +28,8 @@ export class BuscarChatsPrivados {
     private readonly integranteRepository: IIntegranteRepository,
     @Inject('IMensajeRepository')
     private readonly mensajeRepository: IMensajeRepository,
+    @Inject('IArchivoRepository')
+    private readonly archivoRepository: IArchivoRepository,
     private readonly mensajesUtils: MensajesUtils,
   ) {}
 
@@ -69,16 +70,13 @@ export class BuscarChatsPrivados {
     const chatsResponse: IChatPrivadoResponse[] = [];
 
     for (const chat of chats) {
-      const [id_integranteA, integranteB] = await this.returnIntegrantesByChat(
-        chat._id,
-        usuarioA,
-      );
+      const usuarioB = await this.getUsuarioB(chat._id, usuarioA._id);
       const ultimo_mensaje =
         await this.mensajeRepository.findUltimoMensajeByChatId(chat._id);
 
       const historial_mensajes: IMensajeResponse[] = [];
 
-      if (ultimo_mensaje != null) {
+      if (ultimo_mensaje) {
         const has_files = ultimo_mensaje.has_files;
         let archivos: IArchivoResponse[] | null = [];
         if (has_files) {
@@ -86,9 +84,14 @@ export class BuscarChatsPrivados {
             ultimo_mensaje._id,
           );
         }
+        const emisor = await this.integranteRepository.findById(
+          ultimo_mensaje.id_integrante,
+        );
         const mensajeResponse = {
           id_mensaje: ultimo_mensaje._id,
-          id_integrante: ultimo_mensaje.id_integrante,
+          id_usuario: emisor!.id_usuario,
+          id_chat: chat._id,
+          es_grupal: chat.is_group,
           descripcion: ultimo_mensaje.descripcion,
           has_files: ultimo_mensaje.has_files,
           createdAt: ultimo_mensaje.createdAt,
@@ -97,43 +100,36 @@ export class BuscarChatsPrivados {
         };
         historial_mensajes.push(mensajeResponse);
       }
+
+      if (historial_mensajes.length == 0) continue;
+
       chatsResponse.push({
         id_chat: chat._id,
         historial_mensajes: historial_mensajes,
         createdAt: chat.createdAt,
-        id_integranteA: id_integranteA,
-        integranteB: integranteB,
+        usuarioB: usuarioB,
       });
     }
     return chatsResponse;
   }
 
-  async returnIntegrantesByChat(
+  async getUsuarioB(
     id_chat: string,
-    usuarioA: IUsuario,
-  ): Promise<
-    [id_integranteA: string, integranteB: IIntegrantePrivadoResponse]
-  > {
+    id_usuarioA: string,
+  ): Promise<IUsuarioResponse> {
     const integrantes =
       await this.integranteRepository.findAllByIdChat(id_chat);
 
-    const id_integranteA = integrantes.find(
-      (i) => i.id_usuario == usuarioA._id,
-    )?._id;
-
-    const segundoIntegrante = integrantes.find(
-      (i) => i.id_usuario != usuarioA._id,
-    );
+    const integranteB = integrantes.find((i) => i.id_usuario != id_usuarioA);
 
     const usuarioB = await this.usuarioRepository.findById(
-      segundoIntegrante?.id_usuario ?? '',
+      integranteB!.id_usuario,
     );
 
-    const integranteB: IIntegrantePrivadoResponse = {
-      id_integrante: segundoIntegrante?._id ?? '',
-      ...UsuariosMapper.toUsuarioResponse(usuarioB!),
-    };
+    const link_foto = await this.archivoRepository.findLinkById(
+      usuarioB!.id_foto || '',
+    );
 
-    return [id_integranteA!, integranteB];
+    return UsuariosMapper.toUsuarioResponse(usuarioB!, link_foto);
   }
 }

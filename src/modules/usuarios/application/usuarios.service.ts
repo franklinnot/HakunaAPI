@@ -7,7 +7,6 @@ import { BuscarUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-
 import { ExisteUsuarioPorUsername } from './use-cases/existe-usuario-por-username';
 import { DeshabilitarUsuario } from './use-cases/disable-usuario';
 import { ActualizarUsuario } from './use-cases/actualizar-usuario';
-import { ActualizarFotoPerfil } from './use-cases/actualizar-foto-perfil';
 
 @Injectable()
 export class UsuariosService implements IUsuariosService {
@@ -17,7 +16,6 @@ export class UsuariosService implements IUsuariosService {
     private readonly existeUsuario: ExisteUsuarioPorUsername,
     private readonly deshabilitarUsuario: DeshabilitarUsuario,
     private readonly actualizarUsuario: ActualizarUsuario,
-    private readonly actualizarFotoPerfilService: ActualizarFotoPerfil,
   ) {}
 
   async createUsuario(
@@ -35,9 +33,10 @@ export class UsuariosService implements IUsuariosService {
   }
 
   async findAllByNombreOUsername(
+    id_usuario: string,
     content: string,
   ): Promise<IRespuesta<IUsuarioResponse[]>> {
-    return await this.buscarUsuarios.execute(content);
+    return await this.buscarUsuarios.execute(id_usuario, content);
   }
 
   async existsUsuarioByUsername(

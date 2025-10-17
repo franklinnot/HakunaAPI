@@ -1,10 +1,11 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajeResponse } from './mensajes.responses';
-import { ICrearArchivo } from './crear-mesaje';
+import { ICrearArchivo } from './enviar-mensaje-privado';
 
 export interface IMensajesService {
-  crearMensaje(
-    id_integrante: string,
+  enviarMensajePrivado(
+    id_usuarioA: string,
+    id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>>;

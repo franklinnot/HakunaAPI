@@ -14,6 +14,7 @@ import { UsuariosModule } from 'src/modules/usuarios/presentation/usuarios.modul
 import { MensajesModule } from 'src/modules/mensajes/presentation/mensajes.module';
 import { CrearChatPrivado } from '../application/use-cases/crear-chat-privado';
 import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados';
+import { ChatsUtils } from '../application/chats.utils';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados
       useClass: IntegranteRepository,
     },
     // servicios
+    ChatsUtils,
     CrearChatPrivado,
     BuscarChatsPrivados,
     {

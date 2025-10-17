@@ -15,7 +15,10 @@ export class BuscarUsuariosPorNombreOUsername {
     private readonly archivoRepository: IArchivoRepository,
   ) {}
 
-  async execute(content: string): Promise<IRespuesta<IUsuarioResponse[]>> {
+  async execute(
+    id_usuario: string,
+    content: string,
+  ): Promise<IRespuesta<IUsuarioResponse[]>> {
     const palabra = content.trim();
 
     if (!palabra || palabra.length < 2) {
@@ -39,7 +42,11 @@ export class BuscarUsuariosPorNombreOUsername {
     const usuariosFiltrados = usuarios.filter((usuario) => {
       const nombre = usuario.nombre.toLowerCase();
       const username = usuario.username.toLowerCase();
-      return nombre.includes(palabra) || username.includes(palabra);
+      const id = usuario._id;
+      return (
+        (nombre.includes(palabra) || username.includes(palabra)) &&
+        id_usuario != id
+      );
     });
 
     const result: IUsuarioResponse[] = [];

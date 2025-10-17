@@ -1,20 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
-import {
-  IChatPrivadoResponse,
-  IIntegrantePrivadoResponse,
-} from '../chats.responses';
+import { IChatPrivadoResponse } from '../chats.responses';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
-import type {
-  IChatRepository,
-  IIntegranteRepository,
-} from '../../infraestructure/chats.repositories.interfaces';
+import type { IChatRepository } from '../../infraestructure/chats.repositories.interfaces';
 import { Estado } from 'src/shared/domain/enums';
-import { UsuariosMapper } from 'src/modules/usuarios/application/usuarios.mapper';
-import { IChat } from '../../domain/chats.entities';
-import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
-import type { IMensajeRepository } from 'src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
-import { MensajesUtils } from 'src/modules/mensajes/application/mensajes.utils';
+import { ChatsUtils } from '../chats.utils';
 
 @Injectable()
 export class CrearChatPrivado {
@@ -23,11 +13,7 @@ export class CrearChatPrivado {
     private readonly usuarioRepository: IUsuarioRepository,
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
-    @Inject('IIntegranteRepository')
-    private readonly integranteRepository: IIntegranteRepository,
-    @Inject('IMensajeRepository')
-    private readonly mensajeRepository: IMensajeRepository,
-    private readonly mensajesUtils: MensajesUtils,
+    private readonly chatsUtils: ChatsUtils,
   ) {}
 
   async execute(
@@ -73,44 +59,6 @@ export class CrearChatPrivado {
       cantidad_integrantes: 2,
     });
 
-    return await this.returnChat(new_chat, usuarioA, usuarioB);
-  }
-
-  async returnChat(
-    chat: IChat,
-    usuarioA: IUsuario,
-    usuarioB: IUsuario,
-  ): Promise<IRespuesta<IChatPrivadoResponse>> {
-    const integrantes = await this.integranteRepository.registerIntegrantes(
-      chat._id,
-      [
-        { id_usuario: usuarioA._id, is_admin: false },
-        { id_usuario: usuarioB._id, is_admin: false },
-      ],
-    );
-
-    const id_integranteA = integrantes.find(
-      (i) => i.id_usuario == usuarioA._id,
-    )?._id;
-
-    const id_integranteB = integrantes.find(
-      (i) => i.id_usuario == usuarioB._id,
-    )?._id;
-
-    const integranteB: IIntegrantePrivadoResponse = {
-      id_integrante: id_integranteB!,
-      ...UsuariosMapper.toUsuarioResponse(usuarioB),
-    };
-
-    return crearRespuesta({
-      success: true,
-      data: {
-        id_chat: chat._id,
-        id_integranteA: id_integranteA!,
-        integranteB: integranteB,
-        historial_mensajes: null,
-        createdAt: chat.createdAt,
-      },
-    });
+    return await this.chatsUtils.returnChat(new_chat, usuarioA, usuarioB);
   }
 }

@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Inject } from '@nestjs/common';
-import { CreateMensajeDto } from './mensajes.dtos';
+import { Controller, Post, Body, Inject, Request } from '@nestjs/common';
+import { EnviarMensajePrivadoDto } from './mensajes.dtos';
 import type { IMensajesService } from '../application/mensajes.service.interface';
+import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
 
 @Controller('mensajes')
 export class MensajesController {
@@ -9,10 +10,15 @@ export class MensajesController {
     private readonly mensajeService: IMensajesService,
   ) {}
 
-  @Post()
-  crearMensaje(@Body() dto: CreateMensajeDto) {
-    return this.mensajeService.crearMensaje(
-      dto.id_integrante,
+  @Post('privado')
+  enviarMensajePrivado(
+    @Request() req: IRequestWithUser,
+    @Body() dto: EnviarMensajePrivadoDto,
+  ) {
+    const usuario = req.user.data;
+    return this.mensajeService.enviarMensajePrivado(
+      usuario!.id_usuario,
+      dto.id_usuarioB,
       dto.descripcion,
       dto.archivos,
     );

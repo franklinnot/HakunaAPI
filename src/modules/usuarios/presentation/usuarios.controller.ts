@@ -49,7 +49,14 @@ export class UsuariosController {
 
   // Buscar usuarios por nombre o username
   @Get('search/:q')
-  async findAllByNombreOUsername(@Param('q') q: string) {
-    return await this.usuariosService.findAllByNombreOUsername(q);
+  async findAllByNombreOUsername(
+    @Request() req: IRequestWithUser,
+    @Param('q') q: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.usuariosService.findAllByNombreOUsername(
+      usuario!.id_usuario,
+      q,
+    );
   }
 }

@@ -20,7 +20,7 @@ import { MensajesController } from './mensajes.controller';
 import { ChatsModule } from 'src/modules/chats/presentation/chats.module';
 import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { MensajesUtils } from '../application/mensajes.utils';
-import { CrearMensaje } from '../application/crear-mesaje';
+import { EnviarMensajePrivado } from '../application/enviar-mensaje-privado';
 
 @Module({
   imports: [
@@ -47,7 +47,7 @@ import { CrearMensaje } from '../application/crear-mesaje';
       provide: 'IDetalleMensajeRepository',
       useClass: DetalleMensajeRepository,
     },
-    CrearMensaje,
+    EnviarMensajePrivado,
     // servicios
     MensajesUtils,
     {

@@ -15,10 +15,10 @@ export class ArchivoDto {
   b64: string;
 }
 
-export class CreateMensajeDto {
+export class EnviarMensajePrivadoDto {
   @IsString()
   @IsNotEmpty()
-  id_integrante: string;
+  id_usuarioB: string;
 
   @IsString()
   @IsOptional()

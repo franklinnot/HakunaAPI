@@ -9,6 +9,7 @@ export interface IUsuariosService {
     password: string,
   ): Promise<IRespuesta<IUsuarioResponse>>;
   findAllByNombreOUsername(
+    id_usuario: string,
     termino_busqueda: string,
   ): Promise<IRespuesta<IUsuarioResponse[]>>;
   existsUsuarioByUsername(username: string): Promise<IRespuesta<boolean>>;

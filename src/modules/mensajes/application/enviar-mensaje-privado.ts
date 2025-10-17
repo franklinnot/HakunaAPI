@@ -11,6 +11,7 @@ import type {
 import { IMensajeResponse } from './mensajes.responses';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
+import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';
 
 export interface ICrearArchivo {
   nombre?: string;
@@ -19,7 +20,7 @@ export interface ICrearArchivo {
 }
 
 @Injectable()
-export class CrearMensaje {
+export class EnviarMensajePrivado {
   constructor(
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
@@ -33,37 +34,66 @@ export class CrearMensaje {
     private readonly detalleRepository: IDetalleMensajeRepository,
     @Inject('IArchivosService')
     private readonly archivosService: IArchivosService,
+    @Inject('IChatsService')
+    private readonly chatsService: IChatsService,
   ) {}
 
   async execute(
-    id_integrante: string,
+    id_usuarioA: string,
+    id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>> {
-    if (!descripcion && !archivos) {
+    if ((!descripcion && !archivos) || id_usuarioA == id_usuarioB) {
       return crearRespuesta({
         success: false,
         error: 'Solicitud inválida.',
       });
     }
 
-    const integrante = await this.integranteRepository.findById(id_integrante);
-    if (!integrante || integrante.estado == Estado.DESHABILITADO) {
+    const old_chat = await this.chatRepository.findChatPrivadoByIdUsuarios(
+      id_usuarioA,
+      id_usuarioB,
+    );
+
+    let id_chat: string = '';
+    if (!old_chat) {
+      const result = await this.chatsService.createChatPrivado(
+        id_usuarioA,
+        id_usuarioB,
+      );
+
+      if (!result.success || !result.data) {
+        return crearRespuesta({
+          success: false,
+          error: result.error,
+        });
+      }
+
+      id_chat = result.data.id_chat;
+    } else {
+      id_chat = old_chat._id;
+    }
+
+    const integranteA =
+      await this.integranteRepository.findOneByIdChatAndIdUsuario(
+        id_chat,
+        id_usuarioA,
+      );
+
+    if (!integranteA || integranteA.estado == Estado.DESHABILITADO) {
       return crearRespuesta({
         success: false,
         error: 'El integrante no puede enviar mensajes.',
       });
     }
 
-    const chat = await this.chatRepository.findById(integrante.id_chat);
-    let integrantes = await this.integranteRepository.findAllByIdChat(
-      chat!._id,
-    );
+    let integrantes = await this.integranteRepository.findAllByIdChat(id_chat);
     integrantes = integrantes.filter((i) => i.estado == Estado.HABILITADO);
 
     const has_files = archivos ? true : false;
     const nuevo_mensaje = await this.mensajeRepository.create({
-      id_integrante: id_integrante,
+      id_integrante: integranteA._id,
       descripcion: descripcion || null,
       has_files: has_files,
     });
@@ -72,7 +102,7 @@ export class CrearMensaje {
       await this.viewerRepository.create({
         id_integrante: integrante._id,
         id_mensaje: nuevo_mensaje._id,
-        visto: integrante._id == id_integrante ? true : false,
+        visto: integrante._id == integranteA._id ? true : false,
       });
     }
 
@@ -100,7 +130,9 @@ export class CrearMensaje {
       success: true,
       data: {
         id_mensaje: nuevo_mensaje._id,
-        id_integrante: integrante._id,
+        id_usuario: id_usuarioA,
+        id_chat: id_chat,
+        es_grupal: false,
         descripcion: descripcion || null,
         has_files: has_files,
         createdAt: nuevo_mensaje.createdAt,
