@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Inject, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Inject,
+  Request,
+  Get,
+  Param,
+} from '@nestjs/common';
 import { EnviarMensajePrivadoDto } from './mensajes.dtos';
 import type { IMensajesService } from '../application/mensajes.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
@@ -21,6 +29,18 @@ export class MensajesController {
       dto.id_usuarioB,
       dto.descripcion,
       dto.archivos,
+    );
+  }
+
+  @Get('privado/:id_chat')
+  getMensajesPrivados(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return this.mensajeService.getMensajesPrivados(
+      usuario!.id_usuario,
+      id_chat,
     );
   }
 }

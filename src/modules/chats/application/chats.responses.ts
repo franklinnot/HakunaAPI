@@ -7,6 +7,7 @@ export interface IChatPrivadoResponse {
   historial_mensajes: IMensajeResponse[] | null;
   createdAt: Date;
   usuarioB: IUsuarioResponse;
+  ultimo_mensaje?: IMensajeResponse;
 }
 
 //
@@ -20,6 +21,7 @@ export type IIntegranteGrupalResponse = {
 export interface IChatGrupalResponse {
   id_chat: string;
   historial_mensajes: IMensajeResponse[] | null;
+  ultimo_mensaje?: IMensajeResponse;
   createdAt: Date;
   link_foto: string | null;
   nombre: string;

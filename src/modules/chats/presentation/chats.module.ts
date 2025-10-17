@@ -15,6 +15,7 @@ import { MensajesModule } from 'src/modules/mensajes/presentation/mensajes.modul
 import { CrearChatPrivado } from '../application/use-cases/crear-chat-privado';
 import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados';
 import { ChatsUtils } from '../application/chats.utils';
+import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/get-mensajes-privados';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ChatsUtils } from '../application/chats.utils';
     ChatsUtils,
     CrearChatPrivado,
     BuscarChatsPrivados,
+    GetMensajesPrivados,
     {
       provide: 'IChatsService',
       useClass: ChatsService,

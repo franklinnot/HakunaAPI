@@ -8,7 +8,7 @@ import type {
   IMensajeRepository,
   IViewerRepository,
 } from 'src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
-import { IMensajeResponse } from './mensajes.responses';
+import { IMensajeResponse } from '../mensajes.responses';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';

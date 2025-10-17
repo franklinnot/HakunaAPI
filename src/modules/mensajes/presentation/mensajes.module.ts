@@ -20,7 +20,8 @@ import { MensajesController } from './mensajes.controller';
 import { ChatsModule } from 'src/modules/chats/presentation/chats.module';
 import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { MensajesUtils } from '../application/mensajes.utils';
-import { EnviarMensajePrivado } from '../application/enviar-mensaje-privado';
+import { EnviarMensajePrivado } from '../application/use-cases/enviar-mensaje-privado';
+import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-privados';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { EnviarMensajePrivado } from '../application/enviar-mensaje-privado';
     EnviarMensajePrivado,
     // servicios
     MensajesUtils,
+    GetMensajesPrivados,
     {
       provide: 'IMensajesService',
       useClass: MensajesService,

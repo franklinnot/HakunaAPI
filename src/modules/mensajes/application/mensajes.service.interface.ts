@@ -1,6 +1,6 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajeResponse } from './mensajes.responses';
-import { ICrearArchivo } from './enviar-mensaje-privado';
+import { ICrearArchivo } from './use-cases/enviar-mensaje-privado';
 
 export interface IMensajesService {
   enviarMensajePrivado(
@@ -9,4 +9,8 @@ export interface IMensajesService {
     descripcion?: string,
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>>;
+  getMensajesPrivados(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<IMensajeResponse[]>>;
 }

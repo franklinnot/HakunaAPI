@@ -2,11 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajesService } from './mensajes.service.interface';
 import { IMensajeResponse } from './mensajes.responses';
-import { EnviarMensajePrivado, ICrearArchivo } from './enviar-mensaje-privado';
+import {
+  EnviarMensajePrivado,
+  ICrearArchivo,
+} from './use-cases/enviar-mensaje-privado';
+import { GetMensajesPrivados } from './use-cases/get-mensajes-privados';
 
 @Injectable()
 export class MensajesService implements IMensajesService {
-  constructor(private readonly enviarMensajeService: EnviarMensajePrivado) {}
+  constructor(
+    private readonly enviarMensajeService: EnviarMensajePrivado,
+    private readonly getMensajesService: GetMensajesPrivados,
+  ) {}
+  getMensajesPrivados(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<IMensajeResponse[]>> {
+    return this.getMensajesService.execute(id_usuario, id_chat);
+  }
   enviarMensajePrivado(
     id_usuarioA: string,
     id_usuarioB: string,

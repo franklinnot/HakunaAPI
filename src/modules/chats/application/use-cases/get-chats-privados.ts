@@ -10,12 +10,9 @@ import { Estado } from 'src/shared/domain/enums';
 import { UsuariosMapper } from 'src/modules/usuarios/application/usuarios.mapper';
 import { IChat } from '../../domain/chats.entities';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
-import type { IMensajeRepository } from 'src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
-import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
-import { MensajesUtils } from 'src/modules/mensajes/application/mensajes.utils';
-import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 import type { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
 import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
+import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/get-mensajes-privados';
 
 @Injectable()
 export class BuscarChatsPrivados {
@@ -26,11 +23,9 @@ export class BuscarChatsPrivados {
     private readonly chatRepository: IChatRepository,
     @Inject('IIntegranteRepository')
     private readonly integranteRepository: IIntegranteRepository,
-    @Inject('IMensajeRepository')
-    private readonly mensajeRepository: IMensajeRepository,
     @Inject('IArchivoRepository')
     private readonly archivoRepository: IArchivoRepository,
-    private readonly mensajesUtils: MensajesUtils,
+    private readonly getMensajesPrivadosService: GetMensajesPrivados,
   ) {}
 
   async execute(
@@ -45,10 +40,10 @@ export class BuscarChatsPrivados {
 
     const usuario = await this.usuarioRepository.findById(id_usuario);
 
-    if (!usuario || usuario.estado == Estado.DESHABILITADO) {
+    if (!usuario || usuario.estado === Estado.DESHABILITADO) {
       return crearRespuesta({
         success: false,
-        error: 'El usuario no existe.',
+        error: 'El usuario no existe o está deshabilitado.',
       });
     }
 
@@ -71,45 +66,42 @@ export class BuscarChatsPrivados {
 
     for (const chat of chats) {
       const usuarioB = await this.getUsuarioB(chat._id, usuarioA._id);
-      const ultimo_mensaje =
-        await this.mensajeRepository.findUltimoMensajeByChatId(chat._id);
 
-      const historial_mensajes: IMensajeResponse[] = [];
+      // obtener historial completo
+      const mensajesResult = await this.getMensajesPrivadosService.execute(
+        usuarioA._id,
+        chat._id,
+      );
 
-      if (ultimo_mensaje) {
-        const has_files = ultimo_mensaje.has_files;
-        let archivos: IArchivoResponse[] | null = [];
-        if (has_files) {
-          archivos = await this.mensajesUtils.obtenerDetalles(
-            ultimo_mensaje._id,
-          );
-        }
-        const emisor = await this.integranteRepository.findById(
-          ultimo_mensaje.id_integrante,
-        );
-        const mensajeResponse = {
-          id_mensaje: ultimo_mensaje._id,
-          id_usuario: emisor!.id_usuario,
-          id_chat: chat._id,
-          es_grupal: chat.is_group,
-          descripcion: ultimo_mensaje.descripcion,
-          has_files: ultimo_mensaje.has_files,
-          createdAt: ultimo_mensaje.createdAt,
-          archivos: archivos,
-          estado: ultimo_mensaje.estado,
-        };
-        historial_mensajes.push(mensajeResponse);
-      }
+      const historial_mensajes = mensajesResult.success
+        ? mensajesResult.data!
+        : [];
 
-      if (historial_mensajes.length == 0) continue;
+      // ultimo mensaje si existe
+      const ultimo_mensaje = historial_mensajes.length
+        ? historial_mensajes[historial_mensajes.length - 1]
+        : undefined;
 
       chatsResponse.push({
         id_chat: chat._id,
-        historial_mensajes: historial_mensajes,
+        historial_mensajes,
         createdAt: chat.createdAt,
-        usuarioB: usuarioB,
+        usuarioB,
+        ultimo_mensaje,
       });
     }
+
+    // ordenar por fecha
+    chatsResponse.sort((a, b) => {
+      const fechaA = a.ultimo_mensaje
+        ? new Date(a.ultimo_mensaje.createdAt).getTime()
+        : 0;
+      const fechaB = b.ultimo_mensaje
+        ? new Date(b.ultimo_mensaje.createdAt).getTime()
+        : 0;
+      return fechaB - fechaA;
+    });
+
     return chatsResponse;
   }
 
@@ -120,7 +112,7 @@ export class BuscarChatsPrivados {
     const integrantes =
       await this.integranteRepository.findAllByIdChat(id_chat);
 
-    const integranteB = integrantes.find((i) => i.id_usuario != id_usuarioA);
+    const integranteB = integrantes.find((i) => i.id_usuario !== id_usuarioA);
 
     const usuarioB = await this.usuarioRepository.findById(
       integranteB!.id_usuario,
