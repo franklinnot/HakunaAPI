@@ -22,10 +22,20 @@ export class ChatsController {
     );
   }
 
-  // Crear chat privado
+  // obtener todos los chats privados
   @Get('get-privados')
   async getChatsPrivados(@Request() req: IRequestWithUser) {
     const usuario = req.user.data;
     return await this.chatsService.getChatsPrivados(usuario!.id_usuario);
+  }
+
+  // obtener un chat privado
+  @Get('get-privado/:id_chat')
+  async getChatPrivado(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.getChatPrivado(id_chat, usuario!.id_usuario);
   }
 }

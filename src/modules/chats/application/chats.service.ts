@@ -4,12 +4,14 @@ import { IChatGrupalResponse, IChatPrivadoResponse } from './chats.responses';
 import { CrearChatPrivado } from './use-cases/crear-chat-privado';
 import { IRespuesta } from 'src/shared/application/response';
 import { BuscarChatsPrivados } from './use-cases/get-chats-privados';
+import { BuscarChatPrivado } from './use-cases/get-chat-privado';
 
 @Injectable()
 export class ChatsService implements IChatsService {
   constructor(
     private readonly crearChatPrivado: CrearChatPrivado,
     private readonly buscarChatsPrivados: BuscarChatsPrivados,
+    private readonly buscarChatPrivado: BuscarChatPrivado,
   ) {}
 
   async createChatPrivado(
@@ -33,6 +35,13 @@ export class ChatsService implements IChatsService {
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse[]>> {
     return await this.buscarChatsPrivados.execute(id_usuario);
+  }
+
+  async getChatPrivado(
+    id_chat: string,
+    id_usuario: string,
+  ): Promise<IRespuesta<IChatPrivadoResponse>> {
+    return await this.buscarChatPrivado.execute(id_chat, id_usuario);
   }
 
   getChatsGrupales(): Promise<IRespuesta<IChatGrupalResponse[]>> {

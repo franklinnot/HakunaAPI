@@ -17,4 +17,8 @@ export interface IChatsService {
   getChatsPrivados(
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse[]>>;
+  getChatPrivado(
+    id_chat: string,
+    id_usuario: string,
+  ): Promise<IRespuesta<IChatPrivadoResponse>>;
 }
