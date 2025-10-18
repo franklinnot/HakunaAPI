@@ -16,6 +16,7 @@ import { CrearChatPrivado } from '../application/use-cases/crear-chat-privado';
 import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados';
 import { ChatsUtils } from '../application/chats.utils';
 import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/get-mensajes-privados';
+import { BuscarChatPrivado } from '../application/use-cases/get-chat-privado';
 
 @Module({
   imports: [
@@ -38,11 +39,13 @@ import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/
       provide: 'IIntegranteRepository',
       useClass: IntegranteRepository,
     },
-    // servicios
+    // casos de uso
     ChatsUtils,
     CrearChatPrivado,
+    GetMensajesPrivados, // aunque se importa el modulo de mensajes, le da amsieda
+    BuscarChatPrivado,
     BuscarChatsPrivados,
-    GetMensajesPrivados,
+    // servicios
     {
       provide: 'IChatsService',
       useClass: ChatsService,
