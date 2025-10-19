@@ -22,6 +22,7 @@ import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.modul
 import { MensajesUtils } from '../application/mensajes.utils';
 import { EnviarMensajePrivado } from '../application/use-cases/enviar-mensaje-privado';
 import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-privados';
+import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupales';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-priva
     // servicios
     MensajesUtils,
     GetMensajesPrivados,
+    GetMensajesGrupales,
     {
       provide: 'IMensajesService',
       useClass: MensajesService,

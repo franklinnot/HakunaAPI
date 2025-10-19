@@ -13,4 +13,8 @@ export interface IMensajesService {
     id_usuario: string,
     id_chat: string,
   ): Promise<IRespuesta<IMensajeResponse[]>>;
+  getMensajesGrupales(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<IMensajeResponse[]>>;
 }

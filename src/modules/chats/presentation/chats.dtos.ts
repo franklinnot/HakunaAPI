@@ -1,9 +1,16 @@
-import { IsBase64, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBase64, IsNotEmpty, IsOptional, IsString, ValidateIf, ValidateNested, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class IntegranteDto {
+  @IsString()
+  @IsNotEmpty()
+  id_usuario: string;
+}
 
 export class CreateChatGrupalDto {
-  @IsOptional()
+  @ValidateIf((o) => o.foto !== undefined && o.foto !== null)
   @IsBase64()
-  foto: string;
+  foto?: string | null;
 
   @IsString()
   @IsNotEmpty()
@@ -13,7 +20,23 @@ export class CreateChatGrupalDto {
   @IsOptional()
   descripcion: string;
 
-  @IsString({ each: true })
-  @IsNotEmpty()
-  integrantes: { id_usuario: string }[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => IntegranteDto)
+  integrantes: IntegranteDto[];
+}
+
+export class UpdateChatGrupalDto {
+  @ValidateIf((o) => o.foto !== undefined && o.foto !== null)
+  @IsBase64()
+  @IsOptional()
+  foto?: string | null;
+
+  @IsString()
+  @IsOptional()
+  nombre?: string;
+
+  @IsString()
+  @IsOptional()
+  descripcion?: string;
 }

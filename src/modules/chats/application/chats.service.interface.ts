@@ -7,13 +7,13 @@ export interface IChatsService {
     id_usuarioB: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>>;
   createChatGrupal(
-    foto: string,
+    foto: string | null,
     nombre: string,
     descripcion: string,
     id_usuarioAdmin: string,
     usarios: { id_usuario: string }[],
-  ): Promise<IRespuesta<IChatPrivadoResponse>>;
-  getChatsGrupales(): Promise<IRespuesta<IChatGrupalResponse[]>>;
+  ): Promise<IRespuesta<IChatGrupalResponse>>;
+  getChatsGrupales(id_usuario: string): Promise<IRespuesta<IChatGrupalResponse[]>>;
   getChatsPrivados(
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse[]>>;
@@ -21,4 +21,11 @@ export interface IChatsService {
     id_chat: string,
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>>;
+  updateChatGrupal(
+    id_chat: string,
+    id_usuario: string,
+    foto?: string | null,
+    nombre?: string,
+    descripcion?: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>>;
 }

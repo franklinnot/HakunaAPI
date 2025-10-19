@@ -5,6 +5,9 @@ import { CrearChatPrivado } from './use-cases/crear-chat-privado';
 import { IRespuesta } from 'src/shared/application/response';
 import { BuscarChatsPrivados } from './use-cases/get-chats-privados';
 import { BuscarChatPrivado } from './use-cases/get-chat-privado';
+import { CrearChatGrupalUseCase } from './use-cases/crear-chat-grupal';
+import { BuscarChatsGrupales } from './use-cases/get-chats-grupales';
+import { ActualizarChatGrupalUseCase } from './use-cases/actualizar-chat-grupal';
 
 @Injectable()
 export class ChatsService implements IChatsService {
@@ -12,6 +15,9 @@ export class ChatsService implements IChatsService {
     private readonly crearChatPrivado: CrearChatPrivado,
     private readonly buscarChatsPrivados: BuscarChatsPrivados,
     private readonly buscarChatPrivado: BuscarChatPrivado,
+    private readonly crearChatGrupal: CrearChatGrupalUseCase,
+    private readonly buscarChatsGrupales: BuscarChatsGrupales,
+    private readonly actualizarChatGrupal: ActualizarChatGrupalUseCase,
   ) {}
 
   async createChatPrivado(
@@ -21,14 +27,20 @@ export class ChatsService implements IChatsService {
     return await this.crearChatPrivado.execute(id_usuarioA, id_usuarioB);
   }
 
-  createChatGrupal(
-    foto: string,
+  async createChatGrupal(
+    foto: string | null,
     nombre: string,
     descripcion: string,
     id_usuarioAdmin: string,
     usarios: { id_usuario: string }[],
-  ): Promise<IRespuesta<IChatPrivadoResponse>> {
-    throw new Error('Method not implemented.');
+  ): Promise<IRespuesta<IChatGrupalResponse>> {
+    return await this.crearChatGrupal.execute(
+      foto,
+      nombre,
+      descripcion,
+      id_usuarioAdmin,
+      usarios,
+    );
   }
 
   async getChatsPrivados(
@@ -44,7 +56,23 @@ export class ChatsService implements IChatsService {
     return await this.buscarChatPrivado.execute(id_chat, id_usuario);
   }
 
-  getChatsGrupales(): Promise<IRespuesta<IChatGrupalResponse[]>> {
-    throw new Error('Method not implemented.');
+  async getChatsGrupales(id_usuario: string): Promise<IRespuesta<IChatGrupalResponse[]>> {
+    return await this.buscarChatsGrupales.execute(id_usuario);
+  }
+
+  async updateChatGrupal(
+    id_chat: string,
+    id_usuario: string,
+    foto?: string | null,
+    nombre?: string,
+    descripcion?: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>> {
+    return await this.actualizarChatGrupal.execute(
+      id_chat,
+      id_usuario,
+      foto,
+      nombre,
+      descripcion,
+    );
   }
 }

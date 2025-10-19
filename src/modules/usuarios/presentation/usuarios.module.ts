@@ -12,6 +12,7 @@ import { ActualizarUsuario } from '../application/use-cases/actualizar-usuario';
 import { DeshabilitarUsuario } from '../application/use-cases/disable-usuario';
 import { ExisteUsuarioPorUsername } from '../application/use-cases/existe-usuario-por-username';
 import { BuscarUsuariosPorNombreOUsername } from '../application/use-cases/get-users-by-name-or-username';
+import { GetUsuarioById } from '../application/use-cases/get-usuario-by-id';
 import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
 import { ActualizarFotoPerfil } from '../application/use-cases/actualizar-foto-perfil';
 
@@ -32,6 +33,7 @@ import { ActualizarFotoPerfil } from '../application/use-cases/actualizar-foto-p
     DeshabilitarUsuario,
     ExisteUsuarioPorUsername,
     BuscarUsuariosPorNombreOUsername,
+    GetUsuarioById,
     RegistrarUsuario,
     ActualizarFotoPerfil,
     {

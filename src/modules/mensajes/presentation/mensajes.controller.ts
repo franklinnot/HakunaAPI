@@ -43,4 +43,16 @@ export class MensajesController {
       id_chat,
     );
   }
+
+  @Get('grupal/:id_chat')
+  getMensajesGrupales(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return this.mensajeService.getMensajesGrupales(
+      usuario!.id_usuario,
+      id_chat,
+    );
+  }
 }

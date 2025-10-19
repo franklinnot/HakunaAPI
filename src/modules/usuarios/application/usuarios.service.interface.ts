@@ -12,6 +12,7 @@ export interface IUsuariosService {
     id_usuario: string,
     termino_busqueda: string,
   ): Promise<IRespuesta<IUsuarioResponse[]>>;
+  getUsuarioById(id: string): Promise<IRespuesta<IUsuarioResponse>>;
   existsUsuarioByUsername(username: string): Promise<IRespuesta<boolean>>;
   disableUsuario(id: string): Promise<IRespuesta<IUsuarioResponse>>;
   updateUsuario(

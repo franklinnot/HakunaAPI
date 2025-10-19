@@ -7,12 +7,14 @@ import {
   ICrearArchivo,
 } from './use-cases/enviar-mensaje-privado';
 import { GetMensajesPrivados } from './use-cases/get-mensajes-privados';
+import { GetMensajesGrupales } from './use-cases/get-mensajes-grupales';
 
 @Injectable()
 export class MensajesService implements IMensajesService {
   constructor(
     private readonly enviarMensajeService: EnviarMensajePrivado,
     private readonly getMensajesService: GetMensajesPrivados,
+    private readonly getMensajesGrupalesService: GetMensajesGrupales,
   ) {}
   getMensajesPrivados(
     id_usuario: string,
@@ -32,5 +34,11 @@ export class MensajesService implements IMensajesService {
       descripcion,
       archivos,
     );
+  }
+  getMensajesGrupales(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<IMensajeResponse[]>> {
+    return this.getMensajesGrupalesService.execute(id_usuario, id_chat);
   }
 }

@@ -4,6 +4,7 @@ import { IUsuarioResponse } from './usuarios.responses';
 import { IUsuariosService } from './usuarios.service.interface';
 import { RegistrarUsuario } from './use-cases/registrar-usuario';
 import { BuscarUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-or-username';
+import { GetUsuarioById } from './use-cases/get-usuario-by-id';
 import { ExisteUsuarioPorUsername } from './use-cases/existe-usuario-por-username';
 import { DeshabilitarUsuario } from './use-cases/disable-usuario';
 import { ActualizarUsuario } from './use-cases/actualizar-usuario';
@@ -13,6 +14,7 @@ export class UsuariosService implements IUsuariosService {
   constructor(
     private readonly registrarUsuario: RegistrarUsuario,
     private readonly buscarUsuarios: BuscarUsuariosPorNombreOUsername,
+    private readonly getUsuario: GetUsuarioById,
     private readonly existeUsuario: ExisteUsuarioPorUsername,
     private readonly deshabilitarUsuario: DeshabilitarUsuario,
     private readonly actualizarUsuario: ActualizarUsuario,
@@ -37,6 +39,10 @@ export class UsuariosService implements IUsuariosService {
     content: string,
   ): Promise<IRespuesta<IUsuarioResponse[]>> {
     return await this.buscarUsuarios.execute(id_usuario, content);
+  }
+
+  async getUsuarioById(id: string): Promise<IRespuesta<IUsuarioResponse>> {
+    return await this.getUsuario.execute(id);
   }
 
   async existsUsuarioByUsername(

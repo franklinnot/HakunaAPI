@@ -17,6 +17,10 @@ import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados
 import { ChatsUtils } from '../application/chats.utils';
 import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/get-mensajes-privados';
 import { BuscarChatPrivado } from '../application/use-cases/get-chat-privado';
+import { CrearChatGrupalUseCase } from '../application/use-cases/crear-chat-grupal';
+import { BuscarChatsGrupales } from '../application/use-cases/get-chats-grupales';
+import { ActualizarChatGrupalUseCase } from '../application/use-cases/actualizar-chat-grupal';
+import { ActualizarFotoGrupal } from '../application/use-cases/actualizar-foto-grupal';
 
 @Module({
   imports: [
@@ -42,9 +46,13 @@ import { BuscarChatPrivado } from '../application/use-cases/get-chat-privado';
     // casos de uso
     ChatsUtils,
     CrearChatPrivado,
+    CrearChatGrupalUseCase,
+    ActualizarChatGrupalUseCase,
+    ActualizarFotoGrupal,
     GetMensajesPrivados, // aunque se importa el modulo de mensajes, le da amsieda
     BuscarChatPrivado,
     BuscarChatsPrivados,
+    BuscarChatsGrupales,
     // servicios
     {
       provide: 'IChatsService',

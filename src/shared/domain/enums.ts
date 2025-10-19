@@ -14,3 +14,13 @@ export enum DocumentoExtension {
   PDF = 'pdf',
   DOCX = 'docx',
 }
+
+export enum TipoChat {
+  PRIVADO = 'Privado',
+  GRUPAL = 'Grupal',
+}
+
+export enum TipoIntegrante {
+  ADMIN = 'Admin',
+  MIEMBRO = 'Miembro',
+}

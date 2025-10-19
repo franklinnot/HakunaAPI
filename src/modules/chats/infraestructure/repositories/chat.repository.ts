@@ -118,6 +118,34 @@ export class ChatRepository
     return chatsDelUsuario.map((chat) => this.toDomain(chat));
   }
 
+  // buscar chats grupales de un usuario
+  async findChatsGrupalesByIdUsuario(id_usuario: string): Promise<IChat[]> {
+    const chats = await this.chatModel
+      .find({
+        is_group: true,
+        estado: Estado.HABILITADO,
+      })
+      .populate({
+        path: 'integrantes',
+        match: {
+          id_usuario: id_usuario,
+          estado: Estado.HABILITADO,
+        },
+        select: '_id',
+      })
+      .lean()
+      .exec();
+
+    // filtrar solo los chats que efectivamente tienen al usuario como integrante
+    const chatsDelUsuario = chats.filter(
+      (chat) =>
+        Array.isArray((chat as any).integrantes) &&
+        (chat as any).integrantes.length > 0,
+    );
+
+    return chatsDelUsuario.map((chat) => this.toDomain(chat));
+  }
+
   // buscar coincidencias
   // async searchChatsByName(searchTerm: string): Promise<Chat[]> {}
 }
