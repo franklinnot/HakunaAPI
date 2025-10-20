@@ -12,27 +12,27 @@ export class AuthController {
     private readonly authService: IAuthService,
   ) {}
 
-  @Public() // ruta publica, sin validacion
-  @Post('register')
-  register(@Body() dto: RegisterUsuarioDto) {
-    return this.authService.register(
-      dto.foto,
+  @Public()
+  @Post()
+  crearUsuario(@Body() dto: RegisterUsuarioDto) {
+    return this.authService.crearUsuario(
       dto.nombre,
       dto.username,
       dto.password,
+      dto.foto,
     );
   }
 
-  @Public() // ruta publica, sin validacion
+  @Public()
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.username, dto.password);
+  iniciarSesion(@Body() dto: LoginDto) {
+    return this.authService.iniciarSesion(dto.username, dto.password);
   }
 
   // devuelve un usuario usando su jwt)
   @Post('by-jwt')
-  async byJWT(@Request() req: IRequestWithUser) {
+  async getUsuarioByJWT(@Request() req: IRequestWithUser) {
     const usuario = req.user.data;
-    return await this.authService.byJWT(usuario!.id_usuario, usuario!.username);
+    return await this.authService.getUsuarioByJWT(usuario!);
   }
 }

@@ -5,13 +5,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Estado } from 'src/shared/domain/enums';
 import { JWTPayload } from '../auth.types';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
-import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
-import { UsuariosMapper } from 'src/modules/usuarios/application/usuarios.mapper';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
+    @Inject()
     private readonly configService: ConfigService,
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
@@ -19,12 +19,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
-      secretOrKey:
-        configService.get<string>('JWT_SECRET') || 'PerritoSalchicha',
+      secretOrKey: configService.get<string>('JWT_SECRET')!,
     });
   }
 
-  async validate(payload: JWTPayload): Promise<IRespuesta<IUsuarioResponse>> {
+  async validate(payload: JWTPayload): Promise<IRespuesta<IUsuario>> {
     const { id_usuario } = payload;
     const user = await this.usuarioRepository.findById(id_usuario);
 
@@ -32,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException(
         crearRespuesta({
           success: false,
-          error: 'Token no válido.',
+          error: 'Usuario no encontrado.',
         }).error,
       );
     } else if (user.estado == Estado.DESHABILITADO) {
@@ -46,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     return crearRespuesta({
       success: true,
-      data: UsuariosMapper.toUsuarioResponse(user),
+      data: user,
     });
   }
 }

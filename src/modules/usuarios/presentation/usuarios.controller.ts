@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Body,
-  Patch,
   Param,
   Put,
   Request,
@@ -20,9 +19,9 @@ export class UsuariosController {
   ) {}
 
   // verificar si el username ya existe
-  @Get('exists/:username')
-  async existsUsuarioByUsername(@Param('username') username: string) {
-    return await this.usuariosService.existsUsuarioByUsername(username);
+  @Get('existe-by-username/:username')
+  async existeUsuarioPorUsername(@Param('username') username: string) {
+    return await this.usuariosService.existeUsuarioPorUsername(username);
   }
 
   // actualizar usuario
@@ -33,29 +32,29 @@ export class UsuariosController {
   ) {
     const usuario = req.user.data;
     return await this.usuariosService.updateUsuario(
-      usuario!.id_usuario,
-      dto.foto,
+      usuario!,
       dto.nombre,
       dto.username,
+      dto.foto,
     );
   }
 
   // deshabilitar usuario
-  @Patch('disable')
+  @Put('disable')
   async disableUsuario(@Request() req: IRequestWithUser) {
     const usuario = req.user.data;
-    return await this.usuariosService.disableUsuario(usuario!.id_usuario);
+    return await this.usuariosService.disableUsuario(usuario!._id);
   }
 
   // Buscar usuarios por nombre o username
   @Get('search/:q')
-  async findAllByNombreOUsername(
+  async getUsuariosPorNombreOUsername(
     @Request() req: IRequestWithUser,
     @Param('q') q: string,
   ) {
     const usuario = req.user.data;
-    return await this.usuariosService.findAllByNombreOUsername(
-      usuario!.id_usuario,
+    return await this.usuariosService.getUsuariosPorNombreOUsername(
+      usuario!._id,
       q,
     );
   }

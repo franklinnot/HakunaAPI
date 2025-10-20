@@ -2,9 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IChatPrivadoResponse } from '../chats.responses';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
-import type { IChatRepository } from '../../infraestructure/chats.repositories.interfaces';
+import type {
+  IChatRepository,
+  IIntegranteRepository,
+} from '../../infraestructure/chats.repositories.interfaces';
 import { Estado } from 'src/shared/domain/enums';
-import { ChatsUtils } from '../chats.utils';
+import { IChat } from '../../domain/chats.entities';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
+import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 
 @Injectable()
 export class CrearChatPrivado {
@@ -13,32 +18,31 @@ export class CrearChatPrivado {
     private readonly usuarioRepository: IUsuarioRepository,
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
-    private readonly chatsUtils: ChatsUtils,
+    @Inject('IIntegranteRepository')
+    private readonly integranteRepository: IIntegranteRepository,
+    @Inject()
+    private readonly usuariosUtils: UsuariosUtils,
   ) {}
 
   async execute(
-    id_usuarioA: string,
+    usuarioA: IUsuario,
     id_usuarioB: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>> {
-    if (id_usuarioA == id_usuarioB || !id_usuarioA || !id_usuarioB) {
+    const id_usuarioA = usuarioA._id;
+
+    if (id_usuarioA == id_usuarioB) {
       return crearRespuesta({
         success: false,
-        error: 'Solicitud inválida.',
+        error: 'No se puede crear un chat privado con el mismo usuario.',
       });
     }
 
-    const usuarioA = await this.usuarioRepository.findById(id_usuarioA);
     const usuarioB = await this.usuarioRepository.findById(id_usuarioB);
 
-    if (
-      !usuarioA ||
-      !usuarioB ||
-      usuarioA.estado == Estado.DESHABILITADO ||
-      usuarioB.estado == Estado.DESHABILITADO
-    ) {
+    if (!usuarioB || usuarioB.estado == Estado.DESHABILITADO) {
       return crearRespuesta({
         success: false,
-        error: 'Solicitud inválida.',
+        error: 'El usuario no existe.',
       });
     }
 
@@ -50,7 +54,7 @@ export class CrearChatPrivado {
     if (old_chat) {
       return crearRespuesta({
         success: false,
-        error: 'El chat ya existe.',
+        error: 'Ya existe un chat privado con este usuario.',
       });
     }
 
@@ -59,6 +63,31 @@ export class CrearChatPrivado {
       cantidad_integrantes: 2,
     });
 
-    return await this.chatsUtils.returnChat(new_chat, usuarioA, usuarioB);
+    return await this.returnChat(new_chat, usuarioA, usuarioB);
+  }
+
+  async returnChat(
+    chat: IChat,
+    usuarioA: IUsuario,
+    usuarioB: IUsuario,
+  ): Promise<IRespuesta<IChatPrivadoResponse>> {
+    await this.integranteRepository.registerIntegrantes(chat._id, [
+      { id_usuario: usuarioA._id, is_admin: false },
+      { id_usuario: usuarioB._id, is_admin: false },
+    ]);
+
+    const usuarioBResponse =
+      await this.usuariosUtils.getUsuarioResponse(usuarioB);
+
+    return crearRespuesta({
+      success: true,
+      data: {
+        id_chat: chat._id,
+        historial_mensajes: [],
+        createdAt: chat.createdAt,
+        usuarioB: usuarioBResponse,
+        ultimo_mensaje: null,
+      },
+    });
   }
 }

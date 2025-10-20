@@ -7,7 +7,6 @@ import { BaseRepository } from 'src/shared/infraestructure/repository/base.repos
 import { Estado } from 'src/shared/domain/enums';
 import { IMensajeRepository } from '../mensajes.repositories.interfaces';
 import type { IIntegranteRepository } from 'src/modules/chats/infraestructure/chats.repositories.interfaces';
-import { Persistence } from '../../../../shared/infraestructure/infraestructure.types';
 
 @Injectable()
 export class MensajeRepository
@@ -25,36 +24,26 @@ export class MensajeRepository
 
   protected toDomain(doc: Mensaje): IMensaje {
     return {
-      _id: doc._id ?? '',
-      createdAt: doc.createdAt ?? new Date(),
-      updatedAt: doc.updatedAt ?? new Date(),
-      estado: doc.estado ?? Estado.HABILITADO,
+      _id: doc._id || '',
+      createdAt: doc.createdAt || new Date(),
+      updatedAt: doc.updatedAt || new Date(),
+      estado: doc.estado || Estado.HABILITADO,
       //
-      id_integrante: doc.id_integrante ?? null,
-      descripcion: doc.descripcion ?? '',
-      has_files: doc.has_files ?? false,
+      id_integrante: doc.id_integrante || '',
+      descripcion: doc.descripcion || null,
+      has_files: doc.has_files || false,
     };
   }
 
-  protected toPersistence(entity: Partial<IMensaje>): Persistence<IMensaje> {
-    return {
-      estado: entity.estado,
-      id_integrante: entity.id_integrante,
-      descripcion: entity.descripcion,
-      has_files: entity.has_files,
-    } as Persistence<IMensaje>;
-  }
-
   async findAllByChatId(id_chat: string): Promise<IMensaje[]> {
-    const integrantes = await this.integranteRepository
-      .getModel()
-      .find({ id_chat, estado: Estado.HABILITADO })
-      .select('_id')
-      .exec();
+    const integrantes = await this.integranteRepository.findAll({
+      id_chat,
+      estado: Estado.HABILITADO,
+    });
 
     const integranteIds = integrantes.map((i) => i._id);
 
-    // Luego, obtén todos los mensajes de esos integrantes
+    // todos los mensajes de los integrantes
     const mensajes = await this.mensajeModel
       .find({
         id_integrante: { $in: integranteIds },
@@ -68,15 +57,10 @@ export class MensajeRepository
 
   async findUltimoMensajeByChatId(id_chat: string): Promise<IMensaje | null> {
     // obtener los IDs de los integrantes del chat
-    const integrantes = await this.integranteRepository
-      .getModel()
-      .find({ id_chat })
-      .select('_id')
-      .exec();
-
-    if (integrantes.length == 0) {
-      return null;
-    }
+    const integrantes = await this.integranteRepository.findAll({
+      id_chat,
+      estado: Estado.HABILITADO,
+    });
 
     const integranteIds = integrantes.map((i) => i._id);
 

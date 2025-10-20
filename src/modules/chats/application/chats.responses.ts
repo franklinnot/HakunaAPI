@@ -4,10 +4,10 @@ import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.resp
 
 export interface IChatPrivadoResponse {
   id_chat: string;
-  historial_mensajes: IMensajeResponse[] | null;
+  historial_mensajes: IMensajeResponse[];
   createdAt: Date;
   usuarioB: IUsuarioResponse;
-  ultimo_mensaje?: IMensajeResponse;
+  ultimo_mensaje: IMensajeResponse | null;
 }
 
 //
@@ -20,12 +20,12 @@ export type IIntegranteGrupalResponse = {
 
 export interface IChatGrupalResponse {
   id_chat: string;
-  historial_mensajes: IMensajeResponse[] | null;
-  ultimo_mensaje?: IMensajeResponse;
+  historial_mensajes: IMensajeResponse[];
+  ultimo_mensaje: IMensajeResponse | null;
   createdAt: Date;
   link_foto: string | null;
   nombre: string;
-  descripcion: string;
+  descripcion: string | null;
   integrantes: IIntegranteGrupalResponse[];
   cantidad_integrantes: number;
 }

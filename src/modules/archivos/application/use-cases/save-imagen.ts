@@ -9,17 +9,19 @@ import { randomUUID } from 'crypto';
 import { ArchivosMapper } from '../archivos.mapper';
 
 @Injectable()
-export class GuardarImagen {
+export class SaveImagen {
   constructor(
     @Inject('IArchivoRepository')
     private readonly archivoRepository: IArchivoRepository,
+    @Inject()
     private readonly storageService: StorageService,
+    @Inject()
     private readonly archivosUtils: ArchivosUtils,
   ) {}
 
   async execute(
     base64: string,
-    nombre: string | null,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
     const maxSize = 4;
     const extension = 'webp';

@@ -8,10 +8,10 @@ export class UpdateUsuarioDto {
   @IsString()
   @IsOptional()
   @MinLength(2)
-  nombre?: string | null;
+  nombre?: string;
 
   @IsString()
   @IsOptional()
   @MinLength(2)
-  username?: string | null;
+  username?: string;
 }

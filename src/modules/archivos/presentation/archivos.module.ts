@@ -7,10 +7,10 @@ import {
 import { ArchivoRepository } from '../infraestructure/repositories/archivo.repository';
 import { ArchivosService } from 'src/modules/archivos/application/archivos.service';
 import { ArchivosUtils } from '../application/archivos.utils';
-import { GuardarImagen } from '../application/use-cases/guardar-imagen';
+import { SaveImagen } from '../application/use-cases/save-imagen';
 import { StorageService } from '../application/storage.service';
-import { ActualizarImagen } from '../application/use-cases/actualizar-imagen';
-import { EliminarArchivo } from '../application/use-cases/eliminar-archivo';
+import { UpdateImagen } from '../application/use-cases/update-imagen';
+import { DeleteArchivo } from '../application/use-cases/delete-archivo';
 
 @Module({
   imports: [
@@ -22,12 +22,13 @@ import { EliminarArchivo } from '../application/use-cases/eliminar-archivo';
       provide: 'IArchivoRepository',
       useClass: ArchivoRepository,
     },
-    // servicios
+    // casos de uso
     StorageService,
     ArchivosUtils,
-    GuardarImagen,
-    ActualizarImagen,
-    EliminarArchivo,
+    DeleteArchivo,
+    SaveImagen,
+    UpdateImagen,
+    // servicio
     {
       provide: 'IArchivosService',
       useClass: ArchivosService,

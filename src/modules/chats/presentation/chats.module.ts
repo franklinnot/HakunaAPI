@@ -13,14 +13,14 @@ import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.modul
 import { UsuariosModule } from 'src/modules/usuarios/presentation/usuarios.module';
 import { MensajesModule } from 'src/modules/mensajes/presentation/mensajes.module';
 import { CrearChatPrivado } from '../application/use-cases/crear-chat-privado';
-import { BuscarChatsPrivados } from '../application/use-cases/get-chats-privados';
+import { GetChatsPrivados } from '../application/use-cases/get-chats-privados';
 import { ChatsUtils } from '../application/chats.utils';
-import { GetMensajesPrivados } from 'src/modules/mensajes/application/use-cases/get-mensajes-privados';
-import { BuscarChatPrivado } from '../application/use-cases/get-chat-privado';
-import { CrearChatGrupalUseCase } from '../application/use-cases/crear-chat-grupal';
-import { BuscarChatsGrupales } from '../application/use-cases/get-chats-grupales';
-import { ActualizarChatGrupalUseCase } from '../application/use-cases/actualizar-chat-grupal';
-import { ActualizarFotoGrupal } from '../application/use-cases/actualizar-foto-grupal';
+import { GetChatPrivado } from '../application/use-cases/get-chat-privado';
+import { CrearChatGrupal } from '../application/use-cases/crear-chat-grupal';
+import { GetChatsGrupales } from '../application/use-cases/get-chats-grupales';
+import { UpdateChatGrupal } from '../application/use-cases/update-chat-grupal/update-chat-grupal';
+import { UpdateFotoGrupal } from '../application/use-cases/update-chat-grupal/update-foto-grupal';
+import { GetChatGrupal } from '../application/use-cases/get-chat-grupal';
 
 @Module({
   imports: [
@@ -43,23 +43,29 @@ import { ActualizarFotoGrupal } from '../application/use-cases/actualizar-foto-g
       provide: 'IIntegranteRepository',
       useClass: IntegranteRepository,
     },
-    // casos de uso
+    // de utilidad
     ChatsUtils,
+    // casos de uso
     CrearChatPrivado,
-    CrearChatGrupalUseCase,
-    ActualizarChatGrupalUseCase,
-    ActualizarFotoGrupal,
-    GetMensajesPrivados, // aunque se importa el modulo de mensajes, le da amsieda
-    BuscarChatPrivado,
-    BuscarChatsPrivados,
-    BuscarChatsGrupales,
+    GetChatsPrivados,
+    GetChatPrivado,
+    CrearChatGrupal,
+    GetChatsGrupales,
+    GetChatGrupal,
+    UpdateChatGrupal,
+    UpdateFotoGrupal,
     // servicios
     {
       provide: 'IChatsService',
       useClass: ChatsService,
     },
   ],
-  exports: ['IChatRepository', 'IIntegranteRepository', 'IChatsService'],
+  exports: [
+    'IChatRepository',
+    'IIntegranteRepository',
+    'IChatsService',
+    ChatsUtils,
+  ],
   controllers: [ChatsController],
 })
 export class ChatsModule {}

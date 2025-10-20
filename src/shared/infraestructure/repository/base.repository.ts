@@ -1,9 +1,8 @@
-import { Model, Document } from 'mongoose';
+import { Model, Document, UpdateQuery } from 'mongoose';
 import { IBaseEntity } from '../../domain/base.entity';
 import { Estado } from 'src/shared/domain/enums';
 import { QueryFilter } from 'src/shared/infraestructure/infraestructure.types';
 import { IBaseRepository } from './base.repository.interface';
-import type { Persistence } from 'src/shared/infraestructure/infraestructure.types';
 
 export abstract class BaseRepository<
   TEntity extends IBaseEntity,
@@ -13,10 +12,6 @@ export abstract class BaseRepository<
   protected constructor(protected readonly model: Model<TDocument>) {}
 
   protected abstract toDomain(doc: TDocument): TEntity;
-
-  protected abstract toPersistence(
-    entity: Partial<TEntity>,
-  ): Persistence<TEntity>;
 
   getModel(): Model<TDocument> {
     return this.model;
@@ -44,17 +39,18 @@ export abstract class BaseRepository<
     const docs = await this.model.find(filter).exec();
     return docs.map((doc) => this.toDomain(doc));
   }
+
   async create(data: Partial<TEntity>): Promise<TEntity> {
-    const persistence = this.toPersistence(data);
-    const created = new this.model(persistence);
+    const created = new this.model(data);
     const saved = await created.save();
     return this.toDomain(saved);
   }
 
   async update(id: string, update: Partial<TEntity>): Promise<TEntity | null> {
-    const persistence = this.toPersistence(update);
     const updated = await this.model
-      .findByIdAndUpdate(id, persistence, { new: true })
+      .findByIdAndUpdate(id, update as UpdateQuery<TDocument>, {
+        new: true,
+      })
       .exec();
     return updated ? this.toDomain(updated) : null;
   }

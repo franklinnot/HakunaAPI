@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat } from '../schemas/chat.schema';
@@ -8,7 +6,6 @@ import { Model } from 'mongoose';
 import { IChat } from '../../domain/chats.entities';
 import { Estado } from 'src/shared/domain/enums';
 import { IChatRepository } from '../chats.repositories.interfaces';
-import { Persistence } from '../../../../shared/infraestructure/infraestructure.types';
 
 @Injectable()
 export class ChatRepository
@@ -24,28 +21,17 @@ export class ChatRepository
 
   protected toDomain(doc: Chat): IChat {
     return {
-      _id: doc._id ?? '',
-      createdAt: doc.createdAt ?? new Date(),
-      updatedAt: doc.updatedAt ?? new Date(),
-      estado: doc.estado ?? Estado.HABILITADO,
+      _id: doc._id || '',
+      createdAt: doc.createdAt || new Date(),
+      updatedAt: doc.updatedAt || new Date(),
+      estado: doc.estado || Estado.HABILITADO,
       //
-      id_foto: doc.id_foto ?? null,
-      nombre: doc.nombre ?? '',
-      descripcion: doc.descripcion ?? '',
-      is_group: doc.is_group ?? false,
-      cantidad_integrantes: doc.cantidad_integrantes ?? 0,
+      id_foto: doc.id_foto || null,
+      nombre: doc.nombre || '',
+      descripcion: doc.descripcion || '',
+      is_group: doc.is_group || false,
+      cantidad_integrantes: doc.cantidad_integrantes || 0,
     };
-  }
-
-  protected toPersistence(entity: Partial<IChat>): Persistence<IChat> {
-    return {
-      estado: entity.estado,
-      id_foto: entity.id_foto,
-      nombre: entity.nombre,
-      descripcion: entity.descripcion,
-      is_group: entity.is_group,
-      cantidad_integrantes: entity.cantidad_integrantes,
-    } as Persistence<IChat>;
   }
 
   // buscar chat privado entre ambos usuarios
@@ -59,6 +45,7 @@ export class ChatRepository
           $match: {
             is_group: false,
             estado: Estado.HABILITADO,
+            cantidad_integrantes: 2,
           },
         },
         {
@@ -86,8 +73,7 @@ export class ChatRepository
       return null;
     }
 
-    const chatDoc = chats[0];
-    return this.toDomain(chatDoc as unknown as Chat);
+    return this.toDomain(chats[0] as Chat);
   }
 
   // buscar chats privados de un usuario
@@ -96,6 +82,7 @@ export class ChatRepository
       .find({
         is_group: false,
         estado: Estado.HABILITADO,
+        cantidad_integrantes: 2,
       })
       .populate({
         path: 'integrantes',
@@ -108,14 +95,7 @@ export class ChatRepository
       .lean()
       .exec();
 
-    // filtrar solo los chats que efectivamente tienen al usuario como integrante
-    const chatsDelUsuario = chats.filter(
-      (chat) =>
-        Array.isArray((chat as any).integrantes) &&
-        (chat as any).integrantes.length > 0,
-    );
-
-    return chatsDelUsuario.map((chat) => this.toDomain(chat));
+    return chats.map((chat) => this.toDomain(chat));
   }
 
   // buscar chats grupales de un usuario
@@ -136,14 +116,7 @@ export class ChatRepository
       .lean()
       .exec();
 
-    // filtrar solo los chats que efectivamente tienen al usuario como integrante
-    const chatsDelUsuario = chats.filter(
-      (chat) =>
-        Array.isArray((chat as any).integrantes) &&
-        (chat as any).integrantes.length > 0,
-    );
-
-    return chatsDelUsuario.map((chat) => this.toDomain(chat));
+    return chats.map((chat) => this.toDomain(chat));
   }
 
   // buscar coincidencias

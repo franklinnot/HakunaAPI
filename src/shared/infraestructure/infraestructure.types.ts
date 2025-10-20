@@ -14,7 +14,3 @@ export type QueryFilter<T extends IBaseEntity> = Partial<{
   $or?: QueryFilter<T>[];
   $and?: QueryFilter<T>[];
 };
-
-export type Persistence<T> = Omit<T, '_id' | 'createdAt' | 'updatedAt'> & {
-  _id?: string;
-};

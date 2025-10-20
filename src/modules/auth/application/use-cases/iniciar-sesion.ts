@@ -3,17 +3,17 @@ import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IAuthResponse } from '../auth.responses';
 import * as bcrypt from 'bcrypt';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
-import { UsuariosMapper } from 'src/modules/usuarios/application/usuarios.mapper';
 import { AuthUtils } from '../auth.utils';
-import type { IArchivoRepository } from 'src/modules/archivos/infraestructure/repositories.interfaces';
+import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 
 @Injectable()
 export class IniciarSesion {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
-    @Inject('IArchivoRepository')
-    private readonly archivoRepository: IArchivoRepository,
+    @Inject()
+    private readonly usuariosUtils: UsuariosUtils,
+    @Inject()
     private readonly authUtils: AuthUtils,
   ) {}
 
@@ -21,16 +21,6 @@ export class IniciarSesion {
     username: string,
     password: string,
   ): Promise<IRespuesta<IAuthResponse>> {
-    if (
-      username.trim().toLowerCase().length < 2 ||
-      password.trim().length < 6
-    ) {
-      return crearRespuesta<IAuthResponse>({
-        success: false,
-        error: 'Credenciales incorrectas.',
-      });
-    }
-
     const user =
       await this.usuarioRepository.findOneByUsernameWithPass(username);
 
@@ -41,16 +31,13 @@ export class IniciarSesion {
       });
     }
 
-    const link_foto = await this.archivoRepository.findLinkById(
-      user.id_foto || '',
-    );
-
+    const usuarioResponse = await this.usuariosUtils.getUsuarioResponse(user);
     const token = this.authUtils.generarJWT(user._id, user.username);
 
     return crearRespuesta<IAuthResponse>({
       success: true,
       data: {
-        usuario: UsuariosMapper.toUsuarioResponse(user, link_foto),
+        usuario: usuarioResponse,
         token: token,
       },
     });

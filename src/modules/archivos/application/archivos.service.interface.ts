@@ -3,30 +3,29 @@ import { IArchivoResponse } from './archivos.responses';
 
 export interface IArchivosService {
   // jpg siempre
-  guardarImagen(
+  saveImagen(
     base64: string,
-    nombre: string | null,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
-  actualizarImagen(
+  updateImagen(
     id_archivo: string,
     base64: string,
-    nombre: string | null,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
-  eliminarArchivo(id_archivo: string): Promise<IRespuesta<IArchivoResponse>>;
+  deleteArchivo(id_archivo: string): Promise<IRespuesta<IArchivoResponse>>;
   // siempre mp4
-  guardarVideo(
+  saveVideo(
     base64: string,
-    nombre: string | null,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
   // excel, word, powerpoint, zip, pdf, zip, etc
-  guardarDocumento(
-    nombre: string | null,
+  saveDocumento(
     extension: string,
-    size: string,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
   // siempre mp3
-  guardarAudio(
+  saveAudio(
     base64: string,
-    nombre: string | null,
+    nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
 }

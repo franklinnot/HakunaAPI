@@ -15,9 +15,4 @@ export interface IIntegranteRepository extends IBaseRepository<IIntegrante> {
     id_chat: string,
     integrantes: { id_usuario: string; is_admin: boolean }[],
   ): Promise<IIntegrante[]>;
-  findAllByIdChat(id_chat: string): Promise<IIntegrante[]>;
-  findOneByIdChatAndIdUsuario(
-    id_chat: string,
-    id_usuario: string,
-  ): Promise<IIntegrante | null>;
 }

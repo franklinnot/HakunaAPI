@@ -1,66 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta } from 'src/shared/application/response';
 import { IUsuarioResponse } from './usuarios.responses';
 import { IUsuariosService } from './usuarios.service.interface';
-import { RegistrarUsuario } from './use-cases/registrar-usuario';
-import { BuscarUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-or-username';
-import { GetUsuarioById } from './use-cases/get-usuario-by-id';
+import { CrearUsuario } from './use-cases/crear-usuario';
+import { GetUsuariosPorNombreOUsername } from './use-cases/get-users-by-name-or-username';
 import { ExisteUsuarioPorUsername } from './use-cases/existe-usuario-por-username';
-import { DeshabilitarUsuario } from './use-cases/disable-usuario';
-import { ActualizarUsuario } from './use-cases/actualizar-usuario';
+import { DisableUsuario } from './use-cases/disable-usuario';
+import { UpdateUsuario } from './use-cases/update-usuario/update-usuario';
+import { IUsuario } from '../domain/usuarios.entities';
 
 @Injectable()
 export class UsuariosService implements IUsuariosService {
   constructor(
-    private readonly registrarUsuario: RegistrarUsuario,
-    private readonly buscarUsuarios: BuscarUsuariosPorNombreOUsername,
-    private readonly getUsuario: GetUsuarioById,
-    private readonly existeUsuario: ExisteUsuarioPorUsername,
-    private readonly deshabilitarUsuario: DeshabilitarUsuario,
-    private readonly actualizarUsuario: ActualizarUsuario,
+    @Inject()
+    private readonly crearUsuarioCU: CrearUsuario,
+    @Inject()
+    private readonly getUsuariosPorNombreOUsernameCU: GetUsuariosPorNombreOUsername,
+    @Inject()
+    private readonly existeUsuarioPorUsernameCU: ExisteUsuarioPorUsername,
+    @Inject()
+    private readonly disableUsuarioCU: DisableUsuario,
+    @Inject()
+    private readonly updateUsuarioCU: UpdateUsuario,
   ) {}
 
   async createUsuario(
-    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,
+    foto?: string,
   ): Promise<IRespuesta<IUsuarioResponse>> {
-    return await this.registrarUsuario.execute(
-      foto,
-      nombre,
-      username,
-      password,
+    return await this.crearUsuarioCU.execute(nombre, username, password, foto);
+  }
+
+  async getUsuariosPorNombreOUsername(
+    id_usuario: string,
+    palabra: string,
+  ): Promise<IRespuesta<IUsuarioResponse[]>> {
+    return await this.getUsuariosPorNombreOUsernameCU.execute(
+      id_usuario,
+      palabra,
     );
   }
 
-  async findAllByNombreOUsername(
-    id_usuario: string,
-    content: string,
-  ): Promise<IRespuesta<IUsuarioResponse[]>> {
-    return await this.buscarUsuarios.execute(id_usuario, content);
-  }
-
-  async getUsuarioById(id: string): Promise<IRespuesta<IUsuarioResponse>> {
-    return await this.getUsuario.execute(id);
-  }
-
-  async existsUsuarioByUsername(
+  async existeUsuarioPorUsername(
     username: string,
   ): Promise<IRespuesta<boolean>> {
-    return await this.existeUsuario.execute(username);
+    return await this.existeUsuarioPorUsernameCU.execute(username);
   }
 
-  async disableUsuario(id: string): Promise<IRespuesta<IUsuarioResponse>> {
-    return this.deshabilitarUsuario.execute(id);
+  async disableUsuario(id_usuario: string): Promise<IRespuesta<boolean>> {
+    return this.disableUsuarioCU.execute(id_usuario);
   }
 
   async updateUsuario(
-    id: string,
-    foto: string | null | undefined,
-    nombre: string | null | undefined,
-    username: string | null | undefined,
+    usuario: IUsuario,
+    nombre?: string,
+    username?: string,
+    foto?: string | null,
   ): Promise<IRespuesta<IUsuarioResponse>> {
-    return this.actualizarUsuario.execute(id, foto, nombre, username);
+    return this.updateUsuarioCU.execute(usuario, nombre, username, foto);
   }
 }

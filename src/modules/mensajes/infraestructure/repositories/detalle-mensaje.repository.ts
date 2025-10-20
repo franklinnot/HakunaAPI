@@ -6,7 +6,6 @@ import { BaseRepository } from 'src/shared/infraestructure/repository/base.repos
 import { IDetalleMensajeRepository } from '../mensajes.repositories.interfaces';
 import { IDetalleMensaje } from '../../domain/mensajes.entities';
 import { Estado } from 'src/shared/domain/enums';
-import { Persistence } from '../../../../shared/infraestructure/infraestructure.types';
 
 @Injectable()
 export class DetalleMensajeRepository
@@ -22,24 +21,14 @@ export class DetalleMensajeRepository
 
   protected toDomain(doc: DetalleMensaje): IDetalleMensaje {
     return {
-      _id: doc._id ?? '',
-      createdAt: doc.createdAt ?? new Date(),
-      updatedAt: doc.updatedAt ?? new Date(),
-      estado: doc.estado ?? Estado.HABILITADO,
+      _id: doc._id || '',
+      createdAt: doc.createdAt || new Date(),
+      updatedAt: doc.updatedAt || new Date(),
+      estado: doc.estado || Estado.HABILITADO,
       //
-      id_archivo: doc.id_archivo ?? null,
-      id_mensaje: doc.id_mensaje ?? null,
+      id_archivo: doc.id_archivo || '',
+      id_mensaje: doc.id_mensaje || '',
     };
-  }
-
-  protected toPersistence(
-    entity: Partial<IDetalleMensaje>,
-  ): Persistence<IDetalleMensaje> {
-    return {
-      estado: entity.estado,
-      id_archivo: entity.id_archivo,
-      id_mensaje: entity.id_mensaje,
-    } as Persistence<IDetalleMensaje>;
   }
 
   findByMensaje(id_mensaje: string): Promise<IDetalleMensaje[]> {

@@ -1,42 +1,31 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IChatPrivadoResponse } from '../chats.responses';
-import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
 import type { IChatRepository } from '../../infraestructure/chats.repositories.interfaces';
-import { Estado } from 'src/shared/domain/enums';
-import { BuscarChatPrivado } from './get-chat-privado';
+import { GetChatPrivado } from './get-chat-privado';
 
 @Injectable()
-export class BuscarChatsPrivados {
+export class GetChatsPrivados {
   constructor(
-    @Inject('IUsuarioRepository')
-    private readonly usuarioRepository: IUsuarioRepository,
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
-    private readonly buscarChatPrivadoService: BuscarChatPrivado,
+    @Inject()
+    private readonly getChatPrivadoCU: GetChatPrivado,
   ) {}
 
   async execute(
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse[]>> {
-    const usuario = await this.usuarioRepository.findById(id_usuario);
-
-    if (!usuario || usuario.estado == Estado.DESHABILITADO) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe o está deshabilitado.',
-      });
-    }
-
     const chats =
       await this.chatRepository.findChatsPrivadosByIdUsuario(id_usuario);
 
     const chatsResponse: IChatPrivadoResponse[] = [];
 
     for (const chat of chats) {
-      const chatResult = await this.buscarChatPrivadoService.execute(
+      const chatResult = await this.getChatPrivadoCU.execute(
         chat._id,
         id_usuario,
+        chat,
       );
 
       if (chatResult.success && chatResult.data) {
@@ -46,12 +35,8 @@ export class BuscarChatsPrivados {
 
     // por fecha del ultimo mensaje
     chatsResponse.sort((a, b) => {
-      const fechaA = a.ultimo_mensaje
-        ? new Date(a.ultimo_mensaje.createdAt).getTime()
-        : 0;
-      const fechaB = b.ultimo_mensaje
-        ? new Date(b.ultimo_mensaje.createdAt).getTime()
-        : 0;
+      const fechaA = a.ultimo_mensaje?.createdAt.getTime() || 0;
+      const fechaB = b.ultimo_mensaje?.createdAt.getTime() || 0;
       return fechaB - fechaA;
     });
 

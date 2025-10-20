@@ -2,8 +2,8 @@ import { IBaseEntity } from 'src/shared/domain/base.entity';
 
 export interface IChat extends IBaseEntity {
   id_foto: string | null;
-  nombre: string | null;
-  descripcion: string;
+  nombre: string;
+  descripcion: string | null;
   is_group: boolean;
   cantidad_integrantes: number;
 }

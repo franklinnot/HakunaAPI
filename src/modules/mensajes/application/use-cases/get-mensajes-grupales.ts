@@ -15,6 +15,7 @@ export class GetMensajesGrupales {
     @Inject('IMensajeRepository')
     private readonly mensajeRepository: IMensajeRepository,
 
+    @Inject()
     private readonly mensajesUtils: MensajesUtils,
   ) {}
 
@@ -22,20 +23,13 @@ export class GetMensajesGrupales {
     id_usuario: string,
     id_chat: string,
   ): Promise<IRespuesta<IMensajeResponse[]>> {
-    if (!id_chat || !id_usuario) {
-      return crearRespuesta({
-        success: false,
-        error: 'Solicitud inválida.',
-      });
-    }
+    const integrante = await this.integranteRepository.findOne({
+      id_chat: id_chat,
+      id_usuario: id_usuario,
+      estado: Estado.HABILITADO,
+    });
 
-    const integrante =
-      await this.integranteRepository.findOneByIdChatAndIdUsuario(
-        id_chat,
-        id_usuario,
-      );
-
-    if (!integrante || integrante.estado === Estado.DESHABILITADO) {
+    if (!integrante) {
       return crearRespuesta({
         success: false,
         error: 'El usuario no pertenece a este chat grupal.',
@@ -45,7 +39,7 @@ export class GetMensajesGrupales {
     // Obtener todos los mensajes del chat grupal
     const mensajes = await this.mensajeRepository.findAllByChatId(id_chat);
 
-    if (!mensajes.length) {
+    if (mensajes.length == 0) {
       return crearRespuesta({
         success: true,
         data: [],
@@ -55,11 +49,9 @@ export class GetMensajesGrupales {
     const mensajesResponse: IMensajeResponse[] = [];
 
     for (const mensaje of mensajes) {
-      const integranteEmisor = await this.integranteRepository.findById(
-        mensaje.id_integrante,
-      );
-
-      if (!integranteEmisor) continue;
+      const integranteEmisor = await this.integranteRepository.findOne({
+        _id: mensaje.id_integrante,
+      });
 
       // Obtener archivos asociados (si existen)
       const archivos = mensaje.has_files
@@ -68,13 +60,13 @@ export class GetMensajesGrupales {
 
       mensajesResponse.push({
         id_mensaje: mensaje._id,
-        id_usuario: integranteEmisor.id_usuario,
+        id_usuario: integranteEmisor!.id_usuario,
         id_chat: id_chat,
-        es_grupal: true, // Esta es la diferencia principal con mensajes privados
+        es_grupal: true,
         descripcion: mensaje.descripcion,
         has_files: mensaje.has_files,
         createdAt: mensaje.createdAt,
-        archivos,
+        archivos: archivos,
         estado: mensaje.estado,
       });
     }

@@ -1,5 +1,5 @@
 import { IRespuesta } from 'src/shared/application/response';
-import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 export interface JWTPayload {
   id_usuario: string;
@@ -7,5 +7,5 @@ export interface JWTPayload {
 }
 
 export interface IRequestWithUser extends Request {
-  user: IRespuesta<IUsuarioResponse>;
+  user: IRespuesta<IUsuario>;
 }

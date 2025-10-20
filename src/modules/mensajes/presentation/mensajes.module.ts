@@ -20,7 +20,7 @@ import { MensajesController } from './mensajes.controller';
 import { ChatsModule } from 'src/modules/chats/presentation/chats.module';
 import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { MensajesUtils } from '../application/mensajes.utils';
-import { EnviarMensajePrivado } from '../application/use-cases/enviar-mensaje-privado';
+import { SendMensajePrivado } from '../application/use-cases/send-mensaje-privado';
 import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-privados';
 import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupales';
 
@@ -49,11 +49,13 @@ import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupa
       provide: 'IDetalleMensajeRepository',
       useClass: DetalleMensajeRepository,
     },
-    EnviarMensajePrivado,
-    // servicios
+    // de utilidad
     MensajesUtils,
+    // casos de uso
+    SendMensajePrivado,
     GetMensajesPrivados,
     GetMensajesGrupales,
+    // servicio
     {
       provide: 'IMensajesService',
       useClass: MensajesService,

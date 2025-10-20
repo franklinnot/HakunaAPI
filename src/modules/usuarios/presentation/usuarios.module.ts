@@ -8,13 +8,13 @@ import { UsuarioRepository } from '../infraestructure/repositories/usuario.repos
 import { UsuariosService } from '../application/usuarios.service';
 import { UsuariosController } from './usuarios.controller';
 import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
-import { ActualizarUsuario } from '../application/use-cases/actualizar-usuario';
-import { DeshabilitarUsuario } from '../application/use-cases/disable-usuario';
+import { UpdateUsuario } from '../application/use-cases/update-usuario/update-usuario';
+import { DisableUsuario } from '../application/use-cases/disable-usuario';
 import { ExisteUsuarioPorUsername } from '../application/use-cases/existe-usuario-por-username';
-import { BuscarUsuariosPorNombreOUsername } from '../application/use-cases/get-users-by-name-or-username';
-import { GetUsuarioById } from '../application/use-cases/get-usuario-by-id';
-import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
-import { ActualizarFotoPerfil } from '../application/use-cases/actualizar-foto-perfil';
+import { GetUsuariosPorNombreOUsername } from '../application/use-cases/get-users-by-name-or-username';
+import { UsuariosUtils } from '../application/usuarios.utils';
+import { CrearUsuario } from '../application/use-cases/crear-usuario';
+import { UpdateFotoPerfil } from '../application/use-cases/update-usuario/update-foto-perfil';
 
 @Module({
   imports: [
@@ -28,20 +28,22 @@ import { ActualizarFotoPerfil } from '../application/use-cases/actualizar-foto-p
       provide: 'IUsuarioRepository',
       useClass: UsuarioRepository,
     },
-    // servicios
-    ActualizarUsuario,
-    DeshabilitarUsuario,
+    // de utilidad
+    UsuariosUtils,
+    // casos de uso
+    CrearUsuario,
     ExisteUsuarioPorUsername,
-    BuscarUsuariosPorNombreOUsername,
-    GetUsuarioById,
-    RegistrarUsuario,
-    ActualizarFotoPerfil,
+    UpdateFotoPerfil,
+    UpdateUsuario,
+    DisableUsuario,
+    GetUsuariosPorNombreOUsername,
+    // servicio
     {
       provide: 'IUsuariosService',
       useClass: UsuariosService,
     },
   ],
-  exports: ['IUsuarioRepository', 'IUsuariosService'],
+  exports: ['IUsuarioRepository', 'IUsuariosService', UsuariosUtils],
   controllers: [UsuariosController],
 })
 export class UsuariosModule {}

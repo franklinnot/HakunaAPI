@@ -19,13 +19,13 @@ export class MensajesController {
   ) {}
 
   @Post('privado')
-  enviarMensajePrivado(
+  sendMensajePrivado(
     @Request() req: IRequestWithUser,
     @Body() dto: EnviarMensajePrivadoDto,
   ) {
     const usuario = req.user.data;
-    return this.mensajeService.enviarMensajePrivado(
-      usuario!.id_usuario,
+    return this.mensajeService.sendMensajePrivado(
+      usuario!,
       dto.id_usuarioB,
       dto.descripcion,
       dto.archivos,
@@ -38,10 +38,7 @@ export class MensajesController {
     @Param('id_chat') id_chat: string,
   ) {
     const usuario = req.user.data;
-    return this.mensajeService.getMensajesPrivados(
-      usuario!.id_usuario,
-      id_chat,
-    );
+    return this.mensajeService.getMensajesPrivados(usuario!._id, id_chat);
   }
 
   @Get('grupal/:id_chat')
@@ -50,9 +47,6 @@ export class MensajesController {
     @Param('id_chat') id_chat: string,
   ) {
     const usuario = req.user.data;
-    return this.mensajeService.getMensajesGrupales(
-      usuario!.id_usuario,
-      id_chat,
-    );
+    return this.mensajeService.getMensajesGrupales(usuario!._id, id_chat);
   }
 }

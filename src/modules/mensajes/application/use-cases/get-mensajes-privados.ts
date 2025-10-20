@@ -11,10 +11,9 @@ export class GetMensajesPrivados {
   constructor(
     @Inject('IIntegranteRepository')
     private readonly integranteRepository: IIntegranteRepository,
-
     @Inject('IMensajeRepository')
     private readonly mensajeRepository: IMensajeRepository,
-
+    @Inject()
     private readonly mensajesUtils: MensajesUtils,
   ) {}
 
@@ -22,20 +21,12 @@ export class GetMensajesPrivados {
     id_usuario: string,
     id_chat: string,
   ): Promise<IRespuesta<IMensajeResponse[]>> {
-    if (!id_chat || !id_usuario) {
-      return crearRespuesta({
-        success: false,
-        error: 'Solicitud inválida.',
-      });
-    }
+    const integrante = await this.integranteRepository.findOne({
+      id_chat: id_chat,
+      id_usuario: id_usuario,
+    });
 
-    const integrante =
-      await this.integranteRepository.findOneByIdChatAndIdUsuario(
-        id_chat,
-        id_usuario,
-      );
-
-    if (!integrante || integrante.estado === Estado.DESHABILITADO) {
+    if (!integrante || integrante.estado == Estado.DESHABILITADO) {
       return crearRespuesta({
         success: false,
         error: 'El usuario no pertenece a este chat.',
@@ -45,7 +36,7 @@ export class GetMensajesPrivados {
     // Obtener todos los mensajes del chat
     const mensajes = await this.mensajeRepository.findAllByChatId(id_chat);
 
-    if (!mensajes.length) {
+    if (mensajes.length == 0) {
       return crearRespuesta({
         success: true,
         data: [],
@@ -59,16 +50,14 @@ export class GetMensajesPrivados {
         mensaje.id_integrante,
       );
 
-      if (!integranteEmisor) continue;
-
-      // Obtener archivos asociados (si existen)
+      // obtener archivos asociados (si existen)
       const archivos = mensaje.has_files
         ? await this.mensajesUtils.obtenerDetalles(mensaje._id)
         : [];
 
       mensajesResponse.push({
         id_mensaje: mensaje._id,
-        id_usuario: integranteEmisor.id_usuario,
+        id_usuario: integranteEmisor!.id_usuario,
         id_chat: id_chat,
         es_grupal: false,
         descripcion: mensaje.descripcion,

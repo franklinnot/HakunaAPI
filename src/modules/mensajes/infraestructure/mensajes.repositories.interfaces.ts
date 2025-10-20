@@ -11,7 +11,10 @@ export interface IMensajeRepository extends IBaseRepository<IMensaje> {
 }
 
 export interface IViewerRepository extends IBaseRepository<IViewer> {
-  registerViewers(id_mensaje: string, ids_integrantes: string[]): Promise<void>;
+  registrarViewers(
+    id_mensaje: string,
+    integrantes: { id_integrante: string; visto: boolean }[],
+  ): Promise<IViewer[]>;
 }
 
 export interface IDetalleMensajeRepository

@@ -7,7 +7,7 @@ import { UsuariosMapper } from '../usuarios.mapper';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
 
 @Injectable()
-export class RegistrarUsuario {
+export class CrearUsuario {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
@@ -16,10 +16,10 @@ export class RegistrarUsuario {
   ) {}
 
   async execute(
-    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,
+    foto?: string,
   ): Promise<IRespuesta<IUsuarioResponse>> {
     const existe = await this.usuarioRepository.exists({
       username: username.toLowerCase(),
@@ -29,7 +29,7 @@ export class RegistrarUsuario {
     if (existe) {
       return crearRespuesta({
         success: false,
-        error: 'El username ya existe.',
+        error: 'El usuario ya existe.',
       });
     }
 
@@ -37,10 +37,7 @@ export class RegistrarUsuario {
     let id_foto: string | null = null;
 
     if (foto) {
-      const archivoResponse = await this.archivosService.guardarImagen(
-        foto,
-        null,
-      );
+      const archivoResponse = await this.archivosService.saveImagen(foto);
       link_foto = archivoResponse.data?.link || null;
       id_foto = archivoResponse.data?.id_archivo || null;
     }

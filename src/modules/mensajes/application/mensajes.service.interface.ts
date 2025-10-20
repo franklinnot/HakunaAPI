@@ -1,10 +1,11 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajeResponse } from './mensajes.responses';
-import { ICrearArchivo } from './use-cases/enviar-mensaje-privado';
+import { ICrearArchivo } from './use-cases/send-mensaje-privado';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 export interface IMensajesService {
-  enviarMensajePrivado(
-    id_usuarioA: string,
+  sendMensajePrivado(
+    usuario: IUsuario,
     id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],

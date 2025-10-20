@@ -7,14 +7,12 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../application/auth.service';
 import { AuthUtils } from '../application/auth.utils';
-import { BuscarUsuarioPorJWT } from '../application/use-cases/get-usuario-por-jwt';
+import { GetUsuarioByJWT } from '../application/use-cases/get-usuario-by-jwt';
 import { IniciarSesion } from '../application/use-cases/iniciar-sesion';
-import { RegistrarUsuario } from '../application/use-cases/registrar-usuario';
-import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
+import { CrearUsuario } from '../application/use-cases/crear-usuario';
 
 @Module({
   imports: [
-    ArchivosModule,
     UsuariosModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -26,11 +24,15 @@ import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.modul
     }),
   ],
   providers: [
+    // de utilidad
     AuthUtils,
-    BuscarUsuarioPorJWT,
+    // casos de uso
+    GetUsuarioByJWT,
     IniciarSesion,
-    RegistrarUsuario,
+    CrearUsuario,
+    // guard
     JwtStrategy,
+    // servicio
     {
       provide: 'IAuthService',
       useClass: AuthService,

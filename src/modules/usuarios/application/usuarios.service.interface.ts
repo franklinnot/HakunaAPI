@@ -1,24 +1,24 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IUsuarioResponse } from './usuarios.responses';
+import { IUsuario } from '../domain/usuarios.entities';
 
 export interface IUsuariosService {
   createUsuario(
-    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,
+    foto?: string,
   ): Promise<IRespuesta<IUsuarioResponse>>;
-  findAllByNombreOUsername(
+  getUsuariosPorNombreOUsername(
     id_usuario: string,
     termino_busqueda: string,
   ): Promise<IRespuesta<IUsuarioResponse[]>>;
-  getUsuarioById(id: string): Promise<IRespuesta<IUsuarioResponse>>;
-  existsUsuarioByUsername(username: string): Promise<IRespuesta<boolean>>;
-  disableUsuario(id: string): Promise<IRespuesta<IUsuarioResponse>>;
+  existeUsuarioPorUsername(username: string): Promise<IRespuesta<boolean>>;
+  disableUsuario(id_usuario: string): Promise<IRespuesta<boolean>>;
   updateUsuario(
-    id: string,
-    foto: string | null | undefined,
-    nombre: string | null | undefined,
-    username: string | null | undefined,
+    usuario: IUsuario,
+    nombre?: string,
+    username?: string,
+    foto?: string | null,
   ): Promise<IRespuesta<IUsuarioResponse>>;
 }

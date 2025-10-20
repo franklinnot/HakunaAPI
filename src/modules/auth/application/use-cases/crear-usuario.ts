@@ -5,28 +5,30 @@ import { AuthUtils } from '../auth.utils';
 import type { IUsuariosService } from 'src/modules/usuarios/application/usuarios.service.interface';
 
 @Injectable()
-export class RegistrarUsuario {
+export class CrearUsuario {
   constructor(
     @Inject('IUsuariosService')
     private readonly usuariosService: IUsuariosService,
+    @Inject()
     private readonly authUtils: AuthUtils,
   ) {}
 
   async execute(
-    foto: string | null | undefined,
     nombre: string,
     username: string,
     password: string,
+    foto?: string,
   ): Promise<IRespuesta<IAuthResponse>> {
     const rpta = await this.usuariosService.createUsuario(
-      foto,
       nombre,
       username,
       password,
+      foto,
     );
+
     const user = rpta.data;
 
-    if (!user) {
+    if (!user || !rpta.success) {
       return crearRespuesta({
         success: false,
         error: rpta.error,

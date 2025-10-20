@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Inject, Param, Post, Put, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Request,
+} from '@nestjs/common';
 import type { IChatsService } from '../application/chats.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
 import { CreateChatGrupalDto, UpdateChatGrupalDto } from './chats.dtos';
@@ -11,72 +20,69 @@ export class ChatsController {
   ) {}
 
   // Crear chat privado
-  @Post('create-privado/:id_usuarioB')
-  async createChatPrivado(
+  @Post('privado/:id_usuarioB')
+  async crearChatPrivado(
     @Request() req: IRequestWithUser,
     @Param('id_usuarioB') id_usuarioB: string,
   ) {
     const usuario = req.user.data;
-    return await this.chatsService.createChatPrivado(
-      usuario!.id_usuario,
-      id_usuarioB,
-    );
+    return await this.chatsService.crearChatPrivado(usuario!, id_usuarioB);
   }
 
   // Crear chat grupal
-  @Post('create-grupal')
-  async createChatGrupal(
+  @Post('grupal')
+  async crearChatGrupal(
     @Request() req: IRequestWithUser,
-    @Body() createChatGrupalDto: CreateChatGrupalDto,
+    @Body() dto: CreateChatGrupalDto,
   ) {
     const usuario = req.user.data;
-    return await this.chatsService.createChatGrupal(
-      createChatGrupalDto.foto || null,
-      createChatGrupalDto.nombre,
-      createChatGrupalDto.descripcion || '',
-      usuario!.id_usuario,
-      createChatGrupalDto.integrantes,
+    return await this.chatsService.crearChatGrupal(
+      usuario!,
+      dto.integrantes,
+      dto.nombre,
+      dto.descripcion,
+      dto.foto,
     );
   }
 
   // obtener todos los chats privados
-  @Get('get-privados')
+  @Get('privados')
   async getChatsPrivados(@Request() req: IRequestWithUser) {
     const usuario = req.user.data;
-    return await this.chatsService.getChatsPrivados(usuario!.id_usuario);
+    return await this.chatsService.getChatsPrivados(usuario!._id);
   }
 
   // obtener todos los chats grupales
-  @Get('get-grupales')
+  @Get('grupales')
   async getChatsGrupales(@Request() req: IRequestWithUser) {
     const usuario = req.user.data;
-    return await this.chatsService.getChatsGrupales(usuario!.id_usuario);
+    return await this.chatsService.getChatsGrupales(usuario!._id);
   }
 
   // obtener un chat privado
-  @Get('get-privado/:id_chat')
+  @Get('privado/:id_chat')
   async getChatPrivado(
     @Request() req: IRequestWithUser,
     @Param('id_chat') id_chat: string,
   ) {
     const usuario = req.user.data;
-    return await this.chatsService.getChatPrivado(id_chat, usuario!.id_usuario);
+    return await this.chatsService.getChatPrivado(usuario!._id, id_chat);
   }
 
   // actualizar chat grupal
-  @Put('update-grupal/:id_chat')
+  @Put('grupal/:id_chat')
   async updateChatGrupal(
     @Request() req: IRequestWithUser,
     @Param('id_chat') id_chat: string,
-    @Body() updateChatGrupalDto: UpdateChatGrupalDto,
+    @Body() dto: UpdateChatGrupalDto,
   ) {
     const usuario = req.user.data;
     return await this.chatsService.updateChatGrupal(
+      usuario!._id,
       id_chat,
-      usuario!.id_usuario,
-      updateChatGrupalDto.foto,
-      updateChatGrupalDto.nombre,
-      updateChatGrupalDto.descripcion,
+      dto.nombre,
+      dto.descripcion,
+      dto.foto,
     );
   }
 }

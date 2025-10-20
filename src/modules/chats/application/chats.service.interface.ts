@@ -1,31 +1,34 @@
 import { IRespuesta } from 'src/shared/application/response';
 import { IChatGrupalResponse, IChatPrivadoResponse } from './chats.responses';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 export interface IChatsService {
-  createChatPrivado(
-    id_usuarioA: string,
+  crearChatPrivado(
+    usuario: IUsuario,
     id_usuarioB: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>>;
-  createChatGrupal(
-    foto: string | null,
+  crearChatGrupal(
+    usuario: IUsuario,
+    usuarios: { id_usuario: string }[],
     nombre: string,
-    descripcion: string,
-    id_usuarioAdmin: string,
-    usarios: { id_usuario: string }[],
+    descripcion?: string,
+    foto?: string,
   ): Promise<IRespuesta<IChatGrupalResponse>>;
-  getChatsGrupales(id_usuario: string): Promise<IRespuesta<IChatGrupalResponse[]>>;
+  getChatsGrupales(
+    id_usuario: string,
+  ): Promise<IRespuesta<IChatGrupalResponse[]>>;
   getChatsPrivados(
     id_usuario: string,
   ): Promise<IRespuesta<IChatPrivadoResponse[]>>;
   getChatPrivado(
-    id_chat: string,
     id_usuario: string,
+    id_chat: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>>;
   updateChatGrupal(
-    id_chat: string,
     id_usuario: string,
-    foto?: string | null,
+    id_chat: string,
     nombre?: string,
     descripcion?: string,
+    foto?: string | null,
   ): Promise<IRespuesta<IChatGrupalResponse>>;
 }

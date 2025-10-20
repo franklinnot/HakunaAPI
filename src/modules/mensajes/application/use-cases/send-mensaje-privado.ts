@@ -12,6 +12,7 @@ import { IMensajeResponse } from '../mensajes.responses';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 export interface ICrearArchivo {
   nombre?: string;
@@ -20,7 +21,7 @@ export interface ICrearArchivo {
 }
 
 @Injectable()
-export class EnviarMensajePrivado {
+export class SendMensajePrivado {
   constructor(
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
@@ -39,15 +40,23 @@ export class EnviarMensajePrivado {
   ) {}
 
   async execute(
-    id_usuarioA: string,
+    usuario: IUsuario,
     id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeResponse>> {
-    if ((!descripcion && !archivos) || id_usuarioA == id_usuarioB) {
+    const id_usuarioA = usuario._id;
+    if (!descripcion && !archivos) {
       return crearRespuesta({
         success: false,
-        error: 'Solicitud inválida.',
+        error: 'No se puede enviar un mensaje vacío.',
+      });
+    }
+
+    if (id_usuarioA == id_usuarioB) {
+      return crearRespuesta({
+        success: false,
+        error: 'No se puede enviar un mensaje a sí mismo.',
       });
     }
 
@@ -58,8 +67,8 @@ export class EnviarMensajePrivado {
 
     let id_chat: string = '';
     if (!old_chat) {
-      const result = await this.chatsService.createChatPrivado(
-        id_usuarioA,
+      const result = await this.chatsService.crearChatPrivado(
+        usuario,
         id_usuarioB,
       );
 
@@ -75,44 +84,43 @@ export class EnviarMensajePrivado {
       id_chat = old_chat._id;
     }
 
-    const integranteA =
-      await this.integranteRepository.findOneByIdChatAndIdUsuario(
-        id_chat,
-        id_usuarioA,
-      );
+    const integranteA = await this.integranteRepository.findOne({
+      id_chat: id_chat,
+      id_usuario: id_usuarioA,
+      estado: Estado.HABILITADO,
+    });
 
-    if (!integranteA || integranteA.estado == Estado.DESHABILITADO) {
+    if (!integranteA) {
       return crearRespuesta({
         success: false,
         error: 'El integrante no puede enviar mensajes.',
       });
     }
 
-    let integrantes = await this.integranteRepository.findAllByIdChat(id_chat);
-    integrantes = integrantes.filter((i) => i.estado == Estado.HABILITADO);
-
     const has_files = archivos ? true : false;
     const nuevo_mensaje = await this.mensajeRepository.create({
       id_integrante: integranteA._id,
-      descripcion: descripcion || null,
+      descripcion: descripcion,
       has_files: has_files,
     });
 
-    for (const integrante of integrantes) {
-      await this.viewerRepository.create({
-        id_integrante: integrante._id,
-        id_mensaje: nuevo_mensaje._id,
-        visto: integrante._id == integranteA._id ? true : false,
-      });
-    }
+    const integrantes = await this.integranteRepository.findAll({
+      id_chat: id_chat,
+      estado: Estado.HABILITADO,
+    });
+    const integranteB = integrantes.find((i) => i.id_usuario != usuario._id);
+    await this.viewerRepository.registrarViewers(nuevo_mensaje._id, [
+      { id_integrante: integranteA._id, visto: true },
+      { id_integrante: integranteB!._id, visto: false },
+    ]);
 
     const detalles: IArchivoResponse[] = [];
     if (has_files) {
       for (const archivo of archivos!) {
         if (archivo.tipoArchivo == TipoArchivo.IMAGEN) {
-          const rpta = await this.archivosService.guardarImagen(
+          const rpta = await this.archivosService.saveImagen(
             archivo.b64,
-            archivo.nombre || null,
+            archivo.nombre,
           );
           if (rpta.data) {
             const archivo = rpta.data;

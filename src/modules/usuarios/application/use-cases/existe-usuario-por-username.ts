@@ -17,9 +17,8 @@ export class ExisteUsuarioPorUsername {
     });
 
     return crearRespuesta({
-      success: existe,
+      success: true,
       data: existe,
-      error: existe ? 'El usuario no existe.' : null,
     });
   }
 }

@@ -1,27 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUsuarioRepository } from '../../infraestructure/usuarios.repositories.interfaces';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
-import { IUsuarioResponse } from '../usuarios.responses';
-import { UsuariosMapper } from '../usuarios.mapper';
 
 @Injectable()
-export class DeshabilitarUsuario {
+export class DisableUsuario {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
   ) {}
 
-  async execute(id: string): Promise<IRespuesta<IUsuarioResponse>> {
-    const existe = await this.usuarioRepository.existsById(id);
-
-    if (!existe) {
-      return crearRespuesta({
-        success: false,
-        error: 'El usuario no existe.',
-      });
-    }
-
-    const usuario = await this.usuarioRepository.disable(id);
+  async execute(id_usuario: string): Promise<IRespuesta<boolean>> {
+    const usuario = await this.usuarioRepository.disable(id_usuario);
 
     if (!usuario) {
       return crearRespuesta({
@@ -32,7 +21,7 @@ export class DeshabilitarUsuario {
 
     return crearRespuesta({
       success: true,
-      data: UsuariosMapper.toUsuarioResponse(usuario),
+      data: true,
     });
   }
 }

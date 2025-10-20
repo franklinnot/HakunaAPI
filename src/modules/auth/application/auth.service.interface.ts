@@ -1,16 +1,17 @@
+import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 import { IRespuesta } from '../../../shared/application/response';
 import { IAuthResponse } from './auth.responses';
 
 export interface IAuthService {
-  login(username: string, password: string): Promise<IRespuesta<IAuthResponse>>;
-  register(
-    foto: string | null | undefined,
-    nombre: string,
+  iniciarSesion(
     username: string,
     password: string,
   ): Promise<IRespuesta<IAuthResponse>>;
-  byJWT(
-    id_usuario: string,
+  crearUsuario(
+    nombre: string,
     username: string,
+    password: string,
+    foto?: string,
   ): Promise<IRespuesta<IAuthResponse>>;
+  getUsuarioByJWT(usuario: IUsuario): Promise<IRespuesta<IAuthResponse>>;
 }
