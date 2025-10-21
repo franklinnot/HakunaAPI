@@ -95,7 +95,14 @@ export class ChatRepository
       .lean()
       .exec();
 
-    return chats.map((chat) => this.toDomain(chat));
+    // filtrar solo los chats validos
+    const chatsDelUsuario = chats.filter(
+      (chat) =>
+        Array.isArray((chat as any).integrantes) &&
+        (chat as any).integrantes.length > 0,
+    );
+
+    return chatsDelUsuario.map((chat) => this.toDomain(chat));
   }
 
   // buscar chats grupales de un usuario
@@ -116,7 +123,14 @@ export class ChatRepository
       .lean()
       .exec();
 
-    return chats.map((chat) => this.toDomain(chat));
+    // filtrar solo los chats validos
+    const chatsDelUsuario = chats.filter(
+      (chat) =>
+        Array.isArray((chat as any).integrantes) &&
+        (chat as any).integrantes.length > 0,
+    );
+
+    return chatsDelUsuario.map((chat) => this.toDomain(chat));
   }
 
   // buscar coincidencias

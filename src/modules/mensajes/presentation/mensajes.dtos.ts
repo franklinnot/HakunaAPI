@@ -17,13 +17,9 @@ export class ArchivoDto {
 
 export class EnviarMensajePrivadoDto {
   @IsString()
-  @IsNotEmpty()
-  id_usuarioB: string;
-
-  @IsString()
   @IsOptional()
   descripcion: string;
 
   @IsOptional()
-  archivos: ArchivoDto[];
+  archivos?: ArchivoDto[];
 }

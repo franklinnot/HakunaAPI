@@ -23,8 +23,8 @@ export class GetChatsPrivados {
 
     for (const chat of chats) {
       const chatResult = await this.getChatPrivadoCU.execute(
-        chat._id,
         id_usuario,
+        chat._id,
         chat,
       );
 

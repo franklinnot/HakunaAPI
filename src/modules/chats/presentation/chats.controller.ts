@@ -19,15 +19,15 @@ export class ChatsController {
     private readonly chatsService: IChatsService,
   ) {}
 
-  // Crear chat privado
-  @Post('privado/:id_usuarioB')
-  async crearChatPrivado(
-    @Request() req: IRequestWithUser,
-    @Param('id_usuarioB') id_usuarioB: string,
-  ) {
-    const usuario = req.user.data;
-    return await this.chatsService.crearChatPrivado(usuario!, id_usuarioB);
-  }
+  // // Crear chat privado
+  // @Post('privado/:id_usuarioB')
+  // async crearChatPrivado(
+  //   @Request() req: IRequestWithUser,
+  //   @Param('id_usuarioB') id_usuarioB: string,
+  // ) {
+  //   const usuario = req.user.data;
+  //   return await this.chatsService.crearChatPrivado(usuario!, id_usuarioB);
+  // }
 
   // Crear chat grupal
   @Post('grupal')

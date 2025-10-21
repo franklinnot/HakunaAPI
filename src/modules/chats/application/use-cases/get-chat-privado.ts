@@ -9,7 +9,6 @@ import type {
 import { Estado } from 'src/shared/domain/enums';
 import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
-import { MensajesUtils } from 'src/modules/mensajes/application/mensajes.utils';
 import { IChat } from '../../domain/chats.entities';
 
 @Injectable()
@@ -17,12 +16,10 @@ export class GetChatPrivado {
   constructor(
     @Inject('IUsuarioRepository')
     private readonly usuarioRepository: IUsuarioRepository,
-    @Inject('IUsuarioRepository')
+    @Inject('IIntegranteRepository')
     private readonly integranteRepository: IIntegranteRepository,
     @Inject()
     private readonly usuariosUtils: UsuariosUtils,
-    @Inject()
-    private readonly mensajesUtils: MensajesUtils,
     @Inject('IChatRepository')
     private readonly chatRepository: IChatRepository,
   ) {}
@@ -53,18 +50,15 @@ export class GetChatPrivado {
     // obtener el otro integrante
     const usuarioB = await this.getUsuarioB(id_usuario, chat._id);
 
-    // obtener ultimo mensaje
-    const ultimo_mensaje = await this.mensajesUtils.getUltimoMensaje(id_chat);
-
     // resultadop
     return crearRespuesta({
       success: true,
       data: {
         id_chat: chat._id,
-        historial_mensajes: ultimo_mensaje ? [ultimo_mensaje] : [],
+        historial_mensajes: [],
         createdAt: chat.createdAt,
         usuarioB: usuarioB,
-        ultimo_mensaje: ultimo_mensaje,
+        ultimo_mensaje: null,
       },
     });
   }
@@ -75,7 +69,7 @@ export class GetChatPrivado {
   ): Promise<IUsuarioResponse> {
     const integrantes = await this.integranteRepository.findAll({
       id_chat: id_chat,
-      estado: Estado.HABILITADO,
+      // estado: Estado.HABILITADO,
     });
 
     const integranteB = integrantes.find((i) => i.id_usuario != id_usuario);

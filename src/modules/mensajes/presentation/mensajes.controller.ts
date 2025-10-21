@@ -18,15 +18,16 @@ export class MensajesController {
     private readonly mensajeService: IMensajesService,
   ) {}
 
-  @Post('privado')
+  @Post('privado/:id_usuarioB')
   sendMensajePrivado(
     @Request() req: IRequestWithUser,
     @Body() dto: EnviarMensajePrivadoDto,
+    @Param('id_usuarioB') id_usuarioB: string,
   ) {
     const usuario = req.user.data;
     return this.mensajeService.sendMensajePrivado(
       usuario!,
-      dto.id_usuarioB,
+      id_usuarioB,
       dto.descripcion,
       dto.archivos,
     );
