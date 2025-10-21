@@ -30,28 +30,31 @@ export class UpdateFotoPerfil {
       id_foto || '',
     );
 
-    if (!id_foto) {
-      // no tiene foto y llega foto => guardar nueva fotop
-      if (!oldlink_foto && foto) {
+    // no tiene foto
+    if (!oldlink_foto) {
+      // y llega foto => guardar nueva fotop
+      if (foto) {
         archivoResponse = await this.archivosService.saveImagen(foto);
         new_link = archivoResponse.data?.link || null;
         await this.usuarioRepository.update(id_usuario, {
           id_foto: archivoResponse.data?.id_archivo || null,
         });
       }
-      // no tiene foto y no llega foto => nada xd
-    } else {
-      // tiene foto y no llega foto => eliminar fotop
-      if (oldlink_foto && !foto) {
-        await this.archivosService.deleteArchivo(id_foto);
+      //y no llega foto => nada xd
+    }
+    // tiene foto
+    else {
+      // y no llega foto => eliminar fotop
+      if (!foto) {
+        await this.archivosService.deleteArchivo(id_foto!);
         await this.usuarioRepository.update(id_usuario, {
           id_foto: null,
         });
       }
-      // tiene foto y llega foto => eliminar foto anterior y guardar la nuevap
-      else if (oldlink_foto && foto) {
+      // y llega foto => eliminar foto anterior y guardar la nuevap
+      else if (foto) {
         archivoResponse = await this.archivosService.updateImagen(
-          id_foto,
+          id_foto!,
           foto,
         );
         new_link = archivoResponse.data?.link || null;

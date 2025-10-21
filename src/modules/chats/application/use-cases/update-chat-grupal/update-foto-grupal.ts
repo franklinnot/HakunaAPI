@@ -32,9 +32,9 @@ export class UpdateFotoGrupal {
       id_foto || '',
     );
 
-    if (!id_foto) {
+    if (!oldlink_foto) {
       // no tiene foto y llega foto => guardar nueva foto
-      if (!oldlink_foto && foto) {
+      if (foto) {
         archivoResponse = await this.archivosService.saveImagen(foto);
         new_link = archivoResponse.data?.link || null;
         await this.chatRepository.update(id_chat, {
@@ -44,16 +44,16 @@ export class UpdateFotoGrupal {
       // no tiene foto y no llega foto => nada
     } else {
       // tiene foto y no llega foto => eliminar foto
-      if (oldlink_foto && !foto) {
-        await this.archivosService.deleteArchivo(id_foto);
+      if (!foto) {
+        await this.archivosService.deleteArchivo(id_foto!);
         await this.chatRepository.update(id_chat, {
           id_foto: null,
         });
       }
       // tiene foto y llega foto => eliminar foto anterior y guardar la nueva
-      else if (oldlink_foto && foto) {
+      else if (foto) {
         archivoResponse = await this.archivosService.updateImagen(
-          id_foto,
+          id_foto!,
           foto,
         );
         new_link = archivoResponse.data?.link || null;
