@@ -1,19 +1,16 @@
 import { AuthUtils } from 'src/modules/auth/application/auth.utils';
 import { CrearUsuario } from 'src/modules/auth/application/use-cases/crear-usuario';
-import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 import { IUsuariosService } from 'src/modules/usuarios/application/usuarios.service.interface';
+import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 import { IRespuesta } from 'src/shared/application/response';
 
-//////////////////////////////
-/// PRUEBAS DE ÉXITO ////////
-//////////////////////////////
-
-describe('CrearUsuario - Éxito', () => {
-  let crearUsuario: CrearUsuario;
+describe('CrearUsuario', () => {
+  let crearUsuarioCU: CrearUsuario;
   let usuariosServiceMock: jest.Mocked<IUsuariosService>;
   let authUtilsMock: jest.Mocked<AuthUtils>;
 
   beforeEach(() => {
+    // Mocks
     usuariosServiceMock = {
       createUsuario: jest.fn(),
       getUsuariosPorNombreOUsername: jest.fn(),
@@ -23,15 +20,18 @@ describe('CrearUsuario - Éxito', () => {
     } as unknown as jest.Mocked<IUsuariosService>;
 
     authUtilsMock = {
-      generarJWT: jest.fn(),
+      generarJWT: jest.fn().mockReturnValue('token-mock'),
     } as unknown as jest.Mocked<AuthUtils>;
 
-    crearUsuario = new CrearUsuario(usuariosServiceMock, authUtilsMock);
+    crearUsuarioCU = new CrearUsuario(usuariosServiceMock, authUtilsMock);
   });
 
-  it('debería crear un usuario y devolver token si todo sale bien', async () => {
+  // ----------------------------
+  // TEST: ÉXITO
+  // ----------------------------
+  it('crearUsuario -> éxito', async () => {
     // Arrange
-    const mockUser: IUsuarioResponse = {
+    const usuarioMock: IUsuarioResponse = {
       id_usuario: '1234dsfsd123d',
       username: 'bell',
       nombre: 'Bellita',
@@ -39,97 +39,74 @@ describe('CrearUsuario - Éxito', () => {
       createdAt: new Date(),
     };
 
-    const mockRespuesta: IRespuesta<IUsuarioResponse> = {
+    const respuestaMock: IRespuesta<IUsuarioResponse> = {
       success: true,
-      data: mockUser,
+      data: usuarioMock,
       error: null,
     };
 
-    usuariosServiceMock.createUsuario.mockResolvedValue(mockRespuesta);
+    usuariosServiceMock.createUsuario.mockResolvedValue(respuestaMock);
     authUtilsMock.generarJWT.mockReturnValue('fake-token');
 
     // Act
-    const result = await crearUsuario.execute('Bell', 'bell', '1234');
+    const resultado = await crearUsuarioCU.execute('Bell', 'bell', '1234');
 
     // Assert
     expect(usuariosServiceMock.createUsuario).toHaveBeenCalledWith(
       'Bell',
       'bell',
       '1234',
-      undefined
+      undefined,
     );
     expect(authUtilsMock.generarJWT).toHaveBeenCalledWith(
       '1234dsfsd123d',
       'bell',
     );
 
-    // Validaciones
-    expect(result.success).toBe(true);
-    expect(result.data?.usuario).toEqual(mockUser);
-    expect(result.data?.token).toBe('fake-token');
-  });
-});
-
-//////////////////////////////
-/// PRUEBAS DE ERROR /////////
-//////////////////////////////
-
-describe('CrearUsuario - Errores', () => {
-  let crearUsuario: CrearUsuario;
-  let usuariosServiceMock: jest.Mocked<IUsuariosService>;
-  let authUtilsMock: jest.Mocked<AuthUtils>;
-
-  beforeEach(() => {
-    usuariosServiceMock = {
-      createUsuario: jest.fn(),
-      getUsuariosPorNombreOUsername: jest.fn(),
-      existeUsuarioPorUsername: jest.fn(),
-      disableUsuario: jest.fn(),
-      updateUsuario: jest.fn(),
-    } as unknown as jest.Mocked<IUsuariosService>;
-
-    authUtilsMock = {
-      generarJWT: jest.fn(),
-    } as unknown as jest.Mocked<AuthUtils>;
-
-    crearUsuario = new CrearUsuario(usuariosServiceMock, authUtilsMock);
+    expect(resultado.success).toBe(true);
+    expect(resultado.data?.usuario).toEqual(usuarioMock);
+    expect(resultado.data?.token).toBe('fake-token');
   });
 
-  it('debería devolver error si el servicio falla', async () => {
+  // ----------------------------
+  // TEST: ERROR
+  // ----------------------------
+
+  it('crearUsuario -> fallo (error servicio)', async () => {
     // Arrange
-    const mockRespuesta: IRespuesta<IUsuarioResponse> = {
+    const respuestaMock: IRespuesta<IUsuarioResponse> = {
       success: false,
-      data: null as any, // tipado explícito para evitar conflicto
+      data: null as any,
       error: 'Error al crear usuario',
     };
 
-    usuariosServiceMock.createUsuario.mockResolvedValue(mockRespuesta);
+    usuariosServiceMock.createUsuario.mockResolvedValue(respuestaMock);
 
     // Act
-    const result = await crearUsuario.execute('Bell', 'bell', '1234');
+    const resultado = await crearUsuarioCU.execute('Bell', 'bell', '1234');
 
     // Assert
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('Error al crear usuario');
+    expect(resultado.success).toBe(false);
+    expect(resultado.error).toBe('Error al crear usuario');
     expect(authUtilsMock.generarJWT).not.toHaveBeenCalled();
   });
 
-  it('debería devolver error si el usuario devuelto es nulo', async () => {
+  it('crearUsuario -> fallo (datos nulos)', async () => {
     // Arrange
-    const mockRespuesta: IRespuesta<IUsuarioResponse> = {
+    const respuestaMock: IRespuesta<IUsuarioResponse> = {
       success: true,
       data: null,
       error: null,
     };
 
-    usuariosServiceMock.createUsuario.mockResolvedValue(mockRespuesta);
+    usuariosServiceMock.createUsuario.mockResolvedValue(respuestaMock);
 
     // Act
-    const result = await crearUsuario.execute('Bell', 'bell', '1234');
+    const resultado = await crearUsuarioCU.execute('Bell', 'bell', '1234');
 
     // Assert
-    expect(result.success).toBe(false);
-    expect(result.error).toBeDefined();
+    expect(resultado.success).toBe(false);
+    expect(resultado.error).toBeDefined();
     expect(authUtilsMock.generarJWT).not.toHaveBeenCalled();
   });
 });
