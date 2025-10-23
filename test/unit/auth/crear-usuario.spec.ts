@@ -1,77 +1,94 @@
-import { IAuthService } from '../../../src/modules/auth/application/auth.service.interface';
-import { AuthService } from '../../../src/modules/auth/application/auth.service';
-import { CrearUsuario } from '../../../src/modules/auth/application/use-cases/crear-usuario';
-import { IniciarSesion } from '../../../src/modules/auth/application/use-cases/iniciar-sesion';
-import { GetUsuarioByJWT } from '../../../src/modules/auth/application/use-cases/get-usuario-by-jwt';
+/* eslint-disable @typescript-eslint/unbound-method */
+import { CrearUsuario } from 'src/modules/auth/application/use-cases/crear-usuario';
+import { AuthUtils } from 'src/modules/auth/application/auth.utils';
+import type { IUsuariosService } from 'src/modules/usuarios/application/usuarios.service.interface';
+import type { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 
-describe('AuthService', () => {
-  let authService: IAuthService;
-  // casos de uso
-  let crearUsuarioCU: jest.Mocked<CrearUsuario>;
-  let iniciarSesionCU: jest.Mocked<IniciarSesion>;
-  let getUsuarioByJWTCU: jest.Mocked<GetUsuarioByJWT>;
+describe('CrearUsuario', () => {
+  let crearUsuario: CrearUsuario;
+  let usuariosService: jest.Mocked<IUsuariosService>;
+  let authUtils: jest.Mocked<AuthUtils>;
 
   beforeEach(() => {
-    // Mock de casos de uso
-    crearUsuarioCU = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<CrearUsuario>;
+    usuariosService = {
+      createUsuario: jest.fn(),
+    } as unknown as jest.Mocked<IUsuariosService>;
 
-    iniciarSesionCU = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<IniciarSesion>;
+    authUtils = {
+      generarJWT: jest.fn(),
+    } as unknown as jest.Mocked<AuthUtils>;
 
-    getUsuarioByJWTCU = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<GetUsuarioByJWT>;
-
-    // Servicio real usando los casos de uso mockeados
-    authService = new AuthService(
-      iniciarSesionCU,
-      crearUsuarioCU,
-      getUsuarioByJWTCU,
-    );
+    crearUsuario = new CrearUsuario(usuariosService, authUtils);
   });
 
-  // ----------------------------
-  // TEST: CREAR USUARIO
-  // ----------------------------
-  it('crearUsuario -> éxito', async () => {
-    // Arrange
-    const usuarioResponseMock = {
-      id_usuario: 'id123',
-      username: 'bell',
-      nombre: 'Bellita',
+  // ----------------------------------------------------------------
+  // TEST 1: Crear usuario exitosamente
+  // ----------------------------------------------------------------
+  it('debe crear un usuario y retornar token', async () => {
+    const mockUsuario: IUsuarioResponse = {
+      id_usuario: 'u123',
+      username: 'frank',
+      nombre: 'Frank',
       link_foto: 'foto.png',
       createdAt: new Date(),
     };
-    crearUsuarioCU.execute.mockResolvedValue({
+
+    usuariosService.createUsuario.mockResolvedValue({
       success: true,
-      data: { usuario: usuarioResponseMock, token: 'token-fake' },
+      data: mockUsuario,
     });
 
-    // Act
-    const resultado = await authService.crearUsuario('Bellita', 'bell', '1234');
+    authUtils.generarJWT.mockReturnValue('jwt-token-mock');
 
-    // Assert
-    expect(resultado.success).toBe(true);
-    expect(resultado.data?.usuario).toEqual(usuarioResponseMock);
-    expect(resultado.data?.token).toBe('token-fake');
+    const result = await crearUsuario.execute(
+      'Frank',
+      'frank',
+      '123456',
+      'foto.png',
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data?.usuario).toEqual(mockUsuario);
+    expect(result.data?.token).toBe('jwt-token-mock');
+    expect(usuariosService.createUsuario).toHaveBeenCalledWith(
+      'Frank',
+      'frank',
+      '123456',
+      'foto.png',
+    );
+    expect(authUtils.generarJWT).toHaveBeenCalledWith('u123', 'frank');
   });
 
-  it('crearUsuario -> fallo', async () => {
-    // Arrange
-    crearUsuarioCU.execute.mockResolvedValue({
+  // ----------------------------------------------------------------
+  // TEST 2: Fallo al crear usuario (respuesta sin éxito)
+  // ----------------------------------------------------------------
+  it('debe retornar error si createUsuario falla', async () => {
+    usuariosService.createUsuario.mockResolvedValue({
       success: false,
       data: null,
-      error: 'Error al crear usuario',
+      error: 'Username ya existe',
     });
 
-    // Act
-    const resultado = await authService.crearUsuario('Bellita', 'bell', '1234');
+    const result = await crearUsuario.execute(
+      'Frank',
+      'frank',
+      '123456',
+      'foto.png',
+    );
 
-    // Assert
-    expect(resultado.success).toBe(false);
-    expect(resultado.error).toBe('Error al crear usuario');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Username ya existe');
+    expect(authUtils.generarJWT).not.toHaveBeenCalled();
+  });
+
+  // ----------------------------------------------------------------
+  // TEST 3: Fallo inesperado (por ejemplo, excepción en createUsuario)
+  // ----------------------------------------------------------------
+  it('debe propagar errores inesperados', async () => {
+    usuariosService.createUsuario.mockRejectedValue(new Error('DB error'));
+
+    await expect(
+      crearUsuario.execute('Frank', 'frank', '123456'),
+    ).rejects.toThrow('DB error');
   });
 });

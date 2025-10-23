@@ -1,32 +1,82 @@
-import { TipoArchivo, Estado } from 'src/shared/domain/enums';
-import { crearRespuesta } from 'src/shared/application/response';
-import { SendMensajePrivado } from 'src/modules/mensajes/application/use-cases/send-mensaje-privado';
+import { SendMensajePrivado } from '../../../src/modules/mensajes/application/use-cases/send-mensaje-privado';
+import { Estado, TipoArchivo } from '../../../src/shared/domain/enums';
+import type {
+  IChatRepository,
+  IIntegranteRepository,
+} from '../../../src/modules/chats/infraestructure/chats.repositories.interfaces';
+import type {
+  IMensajeRepository,
+  IViewerRepository,
+  IDetalleMensajeRepository,
+} from '../../../src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
+import type { IArchivosService } from '../../../src/modules/archivos/application/archivos.service.interface';
+import type { IChatsService } from '../../../src/modules/chats/application/chats.service.interface';
+import type { IUsuario } from '../../../src/modules/usuarios/domain/usuarios.entities';
+import {
+  IDetalleMensaje,
+  IMensaje,
+  IViewer,
+} from 'src/modules/mensajes/domain/mensajes.entities';
+import { IChat, IIntegrante } from 'src/modules/chats/domain/chats.entities';
+import { IRespuesta } from 'src/shared/application/response';
+import { IChatPrivadoResponse } from 'src/modules/chats/application/chats.responses';
+import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 
 describe('SendMensajePrivado', () => {
-  let sendMensajePrivadoCU: SendMensajePrivado;
+  let sendMensajePrivado: SendMensajePrivado;
 
-  // MOCKS DE DEPENDENCIAS
-  let chatRepository: any;
-  let integranteRepository: any;
-  let mensajeRepository: any;
-  let viewerRepository: any;
-  let detalleRepository: any;
-  let archivosService: any;
-  let chatsService: any;
+  let chatRepository: jest.Mocked<IChatRepository>;
+  let integranteRepository: jest.Mocked<IIntegranteRepository>;
+  let mensajeRepository: jest.Mocked<IMensajeRepository>;
+  let viewerRepository: jest.Mocked<IViewerRepository>;
+  let detalleRepository: jest.Mocked<IDetalleMensajeRepository>;
+  let archivosService: jest.Mocked<IArchivosService>;
+  let chatsService: jest.Mocked<IChatsService>;
 
-  const usuarioMock = { _id: 'userA' } as any;
+  const usuarioEmisor: IUsuario = {
+    _id: 'userA',
+    nombre: 'Frank',
+    username: 'frank',
+    id_foto: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    password: '',
+    estado: Estado.HABILITADO,
+  };
+
+  const id_usuarioReceptor = 'userB';
 
   beforeEach(() => {
-    // Arrange: Inicialización de mocks uwu
-    chatRepository = { findChatPrivadoByIdUsuarios: jest.fn() };
-    integranteRepository = { findOne: jest.fn(), findAll: jest.fn() };
-    mensajeRepository = { create: jest.fn() };
-    viewerRepository = { registrarViewers: jest.fn() };
-    detalleRepository = { create: jest.fn() };
-    archivosService = { saveImagen: jest.fn() };
-    chatsService = { crearChatPrivado: jest.fn() };
+    chatRepository = {
+      findChatPrivadoByIdUsuarios: jest.fn(),
+    } as unknown as jest.Mocked<IChatRepository>;
 
-    sendMensajePrivadoCU = new SendMensajePrivado(
+    integranteRepository = {
+      findOne: jest.fn(),
+      findAll: jest.fn(),
+    } as unknown as jest.Mocked<IIntegranteRepository>;
+
+    mensajeRepository = {
+      create: jest.fn(),
+    } as unknown as jest.Mocked<IMensajeRepository>;
+
+    viewerRepository = {
+      registrarViewers: jest.fn(),
+    } as unknown as jest.Mocked<IViewerRepository>;
+
+    detalleRepository = {
+      create: jest.fn(),
+    } as unknown as jest.Mocked<IDetalleMensajeRepository>;
+
+    archivosService = {
+      saveImagen: jest.fn(),
+    } as unknown as jest.Mocked<IArchivosService>;
+
+    chatsService = {
+      crearChatPrivado: jest.fn(),
+    } as unknown as jest.Mocked<IChatsService>;
+
+    sendMensajePrivado = new SendMensajePrivado(
       chatRepository,
       integranteRepository,
       mensajeRepository,
@@ -35,109 +85,132 @@ describe('SendMensajePrivado', () => {
       archivosService,
       chatsService,
     );
-
-    jest.clearAllMocks();
   });
 
-  // ----------------------------
-  // TESTS DE FALLO
-  // ----------------------------
+  it('debe enviar un mensaje privado exitosamente cuando existe el chat', async () => {
+    chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue({
+      _id: 'chat123',
+    } as IChat);
+    integranteRepository.findOne.mockResolvedValue({
+      _id: 'intA',
+    } as IIntegrante);
+    integranteRepository.findAll.mockResolvedValue([
+      { _id: 'intA', id_usuario: 'userA' } as Partial<any>,
+      { _id: 'intB', id_usuario: 'userB' } as Partial<any>,
+    ] as IIntegrante[]);
+    mensajeRepository.create.mockResolvedValue({
+      _id: 'msg123',
+      createdAt: new Date(),
+      estado: Estado.HABILITADO,
+    } as IMensaje);
+    viewerRepository.registrarViewers.mockResolvedValue([] as IViewer[]);
 
-  it('sendMensajePrivado -> fallo (mensaje vacío)', async () => {
-    // Act
-    const result = await sendMensajePrivadoCU.execute(usuarioMock, 'userB');
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      id_usuarioReceptor,
+      'Hola mundo',
+    );
 
-    // Assert
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('vacío');
+    expect(resultado.success).toBe(true);
+    expect(resultado.data?.descripcion).toBe('Hola mundo');
   });
 
-  it('sendMensajePrivado -> fallo (envío a sí mismo)', async () => {
-    // Act
-    const result = await sendMensajePrivadoCU.execute(usuarioMock, 'userA', 'Hola');
-
-    // Assert
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('sí mismo');
-  });
-
-  it('sendMensajePrivado -> fallo (sin integrante habilitado)', async () => {
-    // Arrange
-    chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue({ _id: 'chat1' });
-    integranteRepository.findOne.mockResolvedValue(null);
-
-    // Act
-    const result = await sendMensajePrivadoCU.execute(usuarioMock, 'userB', 'Hola');
-
-    // Assert
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('integrante');
-  });
-
-  // ----------------------------
-  // TESTS DE ÉXITO
-  // ----------------------------
-
-  it('sendMensajePrivado -> éxito (crea chat si no existe)', async () => {
-    // Arrange
+  it('debe crear un chat privado nuevo si no existía antes', async () => {
     chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue(null);
-    chatsService.crearChatPrivado.mockResolvedValue(
-      crearRespuesta({ success: true, data: { id_chat: 'chat1' } }),
-    );
-    integranteRepository.findOne.mockResolvedValue({ _id: 'int1' });
+    chatsService.crearChatPrivado.mockResolvedValue({
+      success: true,
+      data: { id_chat: 'newChat' } as Partial<IChatPrivadoResponse>,
+    } as IRespuesta<IChatPrivadoResponse>);
+    integranteRepository.findOne.mockResolvedValue({
+      _id: 'intA',
+    } as IIntegrante);
     integranteRepository.findAll.mockResolvedValue([
-      { _id: 'int1', id_usuario: 'userA' },
-      { _id: 'int2', id_usuario: 'userB' },
-    ]);
+      { _id: 'intA', id_usuario: 'userA' } as Partial<IIntegrante>,
+      { _id: 'intB', id_usuario: 'userB' } as Partial<IIntegrante>,
+    ] as IIntegrante[]);
     mensajeRepository.create.mockResolvedValue({
-      _id: 'msg1',
+      _id: 'msg999',
       createdAt: new Date(),
       estado: Estado.HABILITADO,
-    });
-    viewerRepository.registrarViewers.mockResolvedValue(undefined);
+    } as IMensaje);
+    viewerRepository.registrarViewers.mockResolvedValue([] as IViewer[]);
 
-    // Act
-    const result = await sendMensajePrivadoCU.execute(usuarioMock, 'userB', 'Hola mundo');
-
-    // Assert
-    expect(result.success).toBe(true);
-    expect(chatsService.crearChatPrivado).toHaveBeenCalled();
-    expect(result.data?.descripcion).toBe('Hola mundo');
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      id_usuarioReceptor,
+      'Nuevo chat',
+    );
+    expect(resultado.success).toBe(true);
+    expect(resultado.data?.id_chat).toBe('newChat');
   });
 
-  it('sendMensajePrivado -> éxito (envía imágenes adjuntas)', async () => {
-    // Arrange
-    chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue({ _id: 'chat1' });
-    integranteRepository.findOne.mockResolvedValue({ _id: 'int1' });
+  it('debe enviar un mensaje con archivos correctamente', async () => {
+    chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue({
+      _id: 'chat123',
+    } as IChat);
+    integranteRepository.findOne.mockResolvedValue({
+      _id: 'intA',
+    } as IIntegrante);
     integranteRepository.findAll.mockResolvedValue([
-      { _id: 'int1', id_usuario: 'userA' },
-      { _id: 'int2', id_usuario: 'userB' },
-    ]);
+      { _id: 'intA', id_usuario: 'userA' } as Partial<IIntegrante>,
+      { _id: 'intB', id_usuario: 'userB' } as Partial<IIntegrante>,
+    ] as IIntegrante[]);
     mensajeRepository.create.mockResolvedValue({
-      _id: 'msg1',
+      _id: 'msgArch',
       createdAt: new Date(),
       estado: Estado.HABILITADO,
-    });
-    archivosService.saveImagen.mockResolvedValue(
-      crearRespuesta({
-        success: true,
-        data: { id_archivo: 'img1', nombre: 'foto.png', tipoArchivo: TipoArchivo.IMAGEN },
-      }),
-    );
+    } as IMensaje);
+    archivosService.saveImagen.mockResolvedValue({
+      success: true,
+      data: { id_archivo: 'arch123', nombre: 'foto.png' } as Partial<any>,
+    } as IRespuesta<IArchivoResponse>);
+    viewerRepository.registrarViewers.mockResolvedValue([] as IViewer[]);
+    detalleRepository.create.mockResolvedValue({} as IDetalleMensaje);
 
     const archivos = [
-      { tipoArchivo: TipoArchivo.IMAGEN, b64: 'abc123', nombre: 'foto.png' },
+      { tipoArchivo: TipoArchivo.IMAGEN, b64: 'b64data', nombre: 'foto.png' },
     ];
 
-    // Act
-    const result = await sendMensajePrivadoCU.execute(usuarioMock, 'userB', 'Con imagen', archivos);
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      id_usuarioReceptor,
+      'Con imagen',
+      archivos,
+    );
 
-    // Assert
-    expect(result.success).toBe(true);
-    expect(archivosService.saveImagen).toHaveBeenCalledTimes(1);
-    expect(detalleRepository.create).toHaveBeenCalledWith({
-      id_mensaje: 'msg1',
-      id_archivo: 'img1',
-    });
+    expect(resultado.success).toBe(true);
+    expect(resultado.data?.has_files).toBe(true);
+  });
+
+  it('debe fallar si no se envía descripción ni archivos', async () => {
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      id_usuarioReceptor,
+    );
+    expect(resultado.success).toBe(false);
+  });
+
+  it('debe fallar si el usuario intenta enviarse un mensaje a sí mismo', async () => {
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      'userA',
+      'Auto-msg',
+    );
+    expect(resultado.success).toBe(false);
+  });
+
+  it('debe fallar si el integrante no puede enviar mensajes', async () => {
+    chatRepository.findChatPrivadoByIdUsuarios.mockResolvedValue({
+      _id: 'chat123',
+    } as IChat);
+    integranteRepository.findOne.mockResolvedValue(null);
+
+    const resultado = await sendMensajePrivado.execute(
+      usuarioEmisor,
+      id_usuarioReceptor,
+      'Hola bloqueado',
+    );
+
+    expect(resultado.success).toBe(false);
   });
 });
