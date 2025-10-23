@@ -1,0 +1,83 @@
+import { IAuthService } from '../../../src/modules/auth/application/auth.service.interface';
+import { AuthService } from '../../../src/modules/auth/application/auth.service';
+import { CrearUsuario } from '../../../src/modules/auth/application/use-cases/crear-usuario';
+import { IniciarSesion } from '../../../src/modules/auth/application/use-cases/iniciar-sesion';
+import { GetUsuarioByJWT } from '../../../src/modules/auth/application/use-cases/get-usuario-by-jwt';
+import { AuthUtils } from '../../../src/modules/auth/application/auth.utils';
+
+describe('AuthService', () => {
+  let authService: IAuthService;
+  let crearUsuarioCU: jest.Mocked<CrearUsuario>;
+  let iniciarSesionCU: jest.Mocked<IniciarSesion>;
+  let getUsuarioByJWTCU: jest.Mocked<GetUsuarioByJWT>;
+  let authUtils: jest.Mocked<AuthUtils>;
+
+  beforeEach(() => {
+    // Mock de utilidades
+    authUtils = {
+      generarJWT: jest.fn().mockReturnValue('token-mock'),
+    } as unknown as jest.Mocked<AuthUtils>;
+
+    // Mock de casos de uso
+    crearUsuarioCU = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<CrearUsuario>;
+
+    iniciarSesionCU = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<IniciarSesion>;
+
+    getUsuarioByJWTCU = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<GetUsuarioByJWT>;
+
+    // Servicio real usando los casos de uso mockeados
+    authService = new AuthService(
+      iniciarSesionCU,
+      crearUsuarioCU,
+      getUsuarioByJWTCU,
+    );
+  });
+
+  // ----------------------------
+  // TEST: INICIAR SESION
+  // ----------------------------
+  it('iniciarSesion -> éxito', async () => {
+    // Arrange
+    const usuarioResponseMock = {
+      id_usuario: 'id123',
+      username: 'frank',
+      nombre: 'Frank',
+      link_foto: 'foto.png',
+      createdAt: new Date(),
+    };
+    iniciarSesionCU.execute.mockResolvedValue({
+      success: true,
+      data: { usuario: usuarioResponseMock, token: 'token-mock' },
+    });
+
+    // Act
+    const resultado = await authService.iniciarSesion('frank', '123456');
+
+    // Assert
+    expect(resultado.success).toBe(true);
+    expect(resultado.data?.usuario).toEqual(usuarioResponseMock);
+    expect(resultado.data?.token).toBe('token-mock');
+  });
+
+  it('iniciarSesion -> fallo', async () => {
+    // Arrange
+    iniciarSesionCU.execute.mockResolvedValue({
+      success: false,
+      data: null,
+      error: 'Credenciales incorrectas',
+    });
+
+    // Act
+    const resultado = await authService.iniciarSesion('frank', 'wrongpass');
+
+    // Assert
+    expect(resultado.success).toBe(false);
+    expect(resultado.error).toBe('Credenciales incorrectas');
+  });
+});
