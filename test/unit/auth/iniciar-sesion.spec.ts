@@ -3,21 +3,15 @@ import { AuthService } from '../../../src/modules/auth/application/auth.service'
 import { CrearUsuario } from '../../../src/modules/auth/application/use-cases/crear-usuario';
 import { IniciarSesion } from '../../../src/modules/auth/application/use-cases/iniciar-sesion';
 import { GetUsuarioByJWT } from '../../../src/modules/auth/application/use-cases/get-usuario-by-jwt';
-import { AuthUtils } from '../../../src/modules/auth/application/auth.utils';
 
 describe('AuthService', () => {
   let authService: IAuthService;
+  // casos de uso
   let crearUsuarioCU: jest.Mocked<CrearUsuario>;
   let iniciarSesionCU: jest.Mocked<IniciarSesion>;
   let getUsuarioByJWTCU: jest.Mocked<GetUsuarioByJWT>;
-  let authUtils: jest.Mocked<AuthUtils>;
 
   beforeEach(() => {
-    // Mock de utilidades
-    authUtils = {
-      generarJWT: jest.fn().mockReturnValue('token-mock'),
-    } as unknown as jest.Mocked<AuthUtils>;
-
     // Mock de casos de uso
     crearUsuarioCU = {
       execute: jest.fn(),
