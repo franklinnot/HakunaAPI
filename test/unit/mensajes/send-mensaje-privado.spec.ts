@@ -21,6 +21,7 @@ import { IChat, IIntegrante } from 'src/modules/chats/domain/chats.entities';
 import { IRespuesta } from 'src/shared/application/response';
 import { IChatPrivadoResponse } from 'src/modules/chats/application/chats.responses';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SendMensajePrivado', () => {
   let sendMensajePrivado: SendMensajePrivado;
@@ -32,6 +33,7 @@ describe('SendMensajePrivado', () => {
   let detalleRepository: jest.Mocked<IDetalleMensajeRepository>;
   let archivosService: jest.Mocked<IArchivosService>;
   let chatsService: jest.Mocked<IChatsService>;
+  let eventEmitter: jest.Mocked<EventEmitter2>;
 
   const usuarioEmisor: IUsuario = {
     _id: 'userA',
@@ -76,6 +78,10 @@ describe('SendMensajePrivado', () => {
       crearChatPrivado: jest.fn(),
     } as unknown as jest.Mocked<IChatsService>;
 
+    eventEmitter = {
+      emit: jest.fn(),
+    } as unknown as jest.Mocked<EventEmitter2>;
+
     sendMensajePrivado = new SendMensajePrivado(
       chatRepository,
       integranteRepository,
@@ -84,6 +90,7 @@ describe('SendMensajePrivado', () => {
       detalleRepository,
       archivosService,
       chatsService,
+      eventEmitter,
     );
   });
 
