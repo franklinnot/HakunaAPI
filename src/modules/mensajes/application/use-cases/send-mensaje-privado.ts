@@ -13,6 +13,7 @@ import type { IArchivosService } from 'src/modules/archivos/application/archivos
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 export interface ICrearArchivo {
   nombre?: string;
@@ -37,6 +38,8 @@ export class SendMensajePrivado {
     private readonly archivosService: IArchivosService,
     @Inject('IChatsService')
     private readonly chatsService: IChatsService,
+    @Inject()
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(
@@ -134,19 +137,27 @@ export class SendMensajePrivado {
       }
     }
 
+    const mensajeResponse: IMensajeResponse = {
+      id_mensaje: nuevo_mensaje._id,
+      id_usuario: id_usuarioA,
+      id_chat: id_chat,
+      es_grupal: false,
+      descripcion: descripcion || null,
+      has_files: has_files,
+      createdAt: nuevo_mensaje.createdAt,
+      archivos: detalles,
+      estado: nuevo_mensaje.estado,
+    };
+
+    // emitir el eventop para que lo reciba el geateway
+    this.eventEmitter.emit('send-mensaje-privado', {
+      idUsuarioB: id_usuarioB,
+      mensaje: mensajeResponse,
+    });
+
     return crearRespuesta({
       success: true,
-      data: {
-        id_mensaje: nuevo_mensaje._id,
-        id_usuario: id_usuarioA,
-        id_chat: id_chat,
-        es_grupal: false,
-        descripcion: descripcion || null,
-        has_files: has_files,
-        createdAt: nuevo_mensaje.createdAt,
-        archivos: detalles,
-        estado: nuevo_mensaje.estado,
-      },
+      data: mensajeResponse,
     });
   }
 }

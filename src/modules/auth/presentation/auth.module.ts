@@ -10,6 +10,7 @@ import { AuthUtils } from '../application/auth.utils';
 import { GetUsuarioByJWT } from '../application/use-cases/get-usuario-by-jwt';
 import { IniciarSesion } from '../application/use-cases/iniciar-sesion';
 import { CrearUsuario } from '../application/use-cases/crear-usuario';
+import { AuthSocketService } from '../application/auth.socket.service';
 
 @Module({
   imports: [
@@ -37,8 +38,9 @@ import { CrearUsuario } from '../application/use-cases/crear-usuario';
       provide: 'IAuthService',
       useClass: AuthService,
     },
+    AuthSocketService,
   ],
-  exports: [JwtStrategy, 'IAuthService'],
+  exports: [JwtStrategy, 'IAuthService', AuthSocketService],
   controllers: [AuthController],
 })
 export class AuthModule {}

@@ -51,7 +51,12 @@ async function bootstrap() {
   app.useGlobalFilters(new FiltroExcepcion());
 
   // cors
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // run run
   await app.listen(PORT);

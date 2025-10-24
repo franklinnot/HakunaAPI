@@ -23,10 +23,13 @@ import { MensajesUtils } from '../application/mensajes.utils';
 import { SendMensajePrivado } from '../application/use-cases/send-mensaje-privado';
 import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-privados';
 import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupales';
+import { MensajesGateway } from './mensajes.gateway';
+import { AuthModule } from 'src/modules/auth/presentation/auth.module';
 
 @Module({
   imports: [
     ArchivosModule,
+    AuthModule,
     forwardRef(() => ChatsModule),
     // modelos y schemas
     MongooseModule.forFeature([
@@ -55,6 +58,8 @@ import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupa
     SendMensajePrivado,
     GetMensajesPrivados,
     GetMensajesGrupales,
+    // socket
+    MensajesGateway,
     // servicio
     {
       provide: 'IMensajesService',
@@ -67,6 +72,7 @@ import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupa
     'IDetalleMensajeRepository',
     'IMensajesService',
     MensajesUtils,
+    MensajesGateway,
   ],
   controllers: [MensajesController],
 })

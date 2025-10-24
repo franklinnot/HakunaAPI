@@ -6,12 +6,17 @@ import { UsuariosModule } from './modules/usuarios/presentation/usuarios.module'
 import { AuthModule } from './modules/auth/presentation/auth.module';
 import { ChatsModule } from './modules/chats/presentation/chats.module';
 import { MensajesModule } from './modules/mensajes/presentation/mensajes.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 @Module({
   imports: [
     // Cargar variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    // emisod de eventos
+    EventEmitterModule.forRoot(),
 
     // Modulos
     DbConfigModule,

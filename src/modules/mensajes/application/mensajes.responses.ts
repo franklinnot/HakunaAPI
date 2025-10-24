@@ -9,6 +9,6 @@ export interface IMensajeResponse {
   descripcion: string | null;
   has_files: boolean;
   createdAt: Date;
-  archivos: IArchivoResponse[] | null;
+  archivos: IArchivoResponse[];
   estado: Estado;
 }
