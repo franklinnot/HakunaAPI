@@ -1,3 +1,6 @@
+# Personalizado
+**/coverage
+
 # Nestjs specific
 /dist
 /node_modules
