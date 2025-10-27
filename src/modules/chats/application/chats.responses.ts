@@ -2,12 +2,18 @@ import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.resp
 import { Estado } from 'src/shared/domain/enums';
 import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
 
-export interface IChatPrivadoResponse {
+export interface IChatResponse {
   id_chat: string;
   historial_mensajes: IMensajeResponse[];
   createdAt: Date;
-  usuarioB: IUsuarioResponse;
   ultimo_mensaje: IMensajeResponse | null;
+  is_group: boolean;
+}
+
+//
+
+export interface IChatPrivadoResponse extends IChatResponse {
+  usuarioB: IUsuarioResponse;
 }
 
 //
@@ -18,11 +24,7 @@ export type IIntegranteGrupalResponse = {
   estado: Estado;
 } & IUsuarioResponse;
 
-export interface IChatGrupalResponse {
-  id_chat: string;
-  historial_mensajes: IMensajeResponse[];
-  ultimo_mensaje: IMensajeResponse | null;
-  createdAt: Date;
+export interface IChatGrupalResponse extends IChatResponse {
   link_foto: string | null;
   nombre: string;
   descripcion: string | null;

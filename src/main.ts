@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { JwtAuthGuard } from './modules/auth/presentation/jwt/jwt.guard';
+import { JwtAuthGuard } from './modules/auth/application/jwt/jwt.guard';
 import { FiltroExcepcion } from './exception.filter';
 import { json } from 'body-parser';
 

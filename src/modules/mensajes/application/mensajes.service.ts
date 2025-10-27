@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajesService } from './mensajes.service.interface';
-import { IMensajeResponse } from './mensajes.responses';
+import {
+  IMensajePrivadoResponse,
+  IMensajeResponse,
+} from './mensajes.responses';
 import {
   SendMensajePrivado,
   ICrearArchivo,
@@ -26,7 +29,7 @@ export class MensajesService implements IMensajesService {
     id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
-  ): Promise<IRespuesta<IMensajeResponse>> {
+  ): Promise<IRespuesta<IMensajePrivadoResponse>> {
     return await this.sendMensajePrivadoCU.execute(
       usuario,
       id_usuarioB,

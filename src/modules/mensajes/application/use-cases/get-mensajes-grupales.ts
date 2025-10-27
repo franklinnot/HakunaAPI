@@ -62,7 +62,7 @@ export class GetMensajesGrupales {
         id_mensaje: mensaje._id,
         id_usuario: integranteEmisor!.id_usuario,
         id_chat: id_chat,
-        es_grupal: true,
+        is_group: true,
         descripcion: mensaje.descripcion,
         has_files: mensaje.has_files,
         createdAt: mensaje.createdAt,

@@ -24,6 +24,7 @@ export class ChatsMapper {
       descripcion: chat.descripcion,
       integrantes: integrantes,
       cantidad_integrantes: chat.cantidad_integrantes,
+      is_group: true,
     };
   }
 

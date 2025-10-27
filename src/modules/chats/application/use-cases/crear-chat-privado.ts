@@ -87,6 +87,7 @@ export class CrearChatPrivado {
         createdAt: chat.createdAt,
         usuarioB: usuarioBResponse,
         ultimo_mensaje: null,
+        is_group: false,
       },
     });
   }

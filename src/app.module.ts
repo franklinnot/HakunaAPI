@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/presentation/auth.module';
 import { ChatsModule } from './modules/chats/presentation/chats.module';
 import { MensajesModule } from './modules/mensajes/presentation/mensajes.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     AuthModule,
     ChatsModule,
     MensajesModule,
+    SocketModule,
   ],
 })
 export class AppModule {}

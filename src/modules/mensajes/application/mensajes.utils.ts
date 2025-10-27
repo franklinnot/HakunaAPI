@@ -65,7 +65,7 @@ export class MensajesUtils {
       id_mensaje: ultimo_mensaje._id,
       id_usuario: integranteEmisor!.id_usuario,
       id_chat: id_chat,
-      es_grupal: false,
+      is_group: false,
       descripcion: ultimo_mensaje.descripcion,
       has_files: ultimo_mensaje.has_files,
       createdAt: ultimo_mensaje.createdAt,

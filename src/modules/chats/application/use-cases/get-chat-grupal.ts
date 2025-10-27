@@ -65,6 +65,7 @@ export class GetChatGrupal {
         descripcion: chat.descripcion,
         integrantes: integrantesResponse,
         cantidad_integrantes: chat.cantidad_integrantes,
+        is_group: true,
       },
     });
   }

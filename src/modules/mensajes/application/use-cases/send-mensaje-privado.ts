@@ -2,18 +2,18 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import type { IChatRepository } from 'src/modules/chats/infraestructure/chats.repositories.interfaces';
 import type { IIntegranteRepository } from 'src/modules/chats/infraestructure/chats.repositories.interfaces';
-import { Estado, TipoArchivo } from 'src/shared/domain/enums';
+import { Estado, TipoArchivo, TipoEvento } from 'src/shared/domain/enums';
 import type {
   IDetalleMensajeRepository,
   IMensajeRepository,
   IViewerRepository,
 } from 'src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
-import { IMensajeResponse } from '../mensajes.responses';
+import { IMensajePrivadoResponse } from '../mensajes.responses';
 import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
 import { IArchivoResponse } from 'src/modules/archivos/application/archivos.responses';
 import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EmisorEventos } from 'src/socket/emisor-eventos';
 
 export interface ICrearArchivo {
   nombre?: string;
@@ -39,7 +39,7 @@ export class SendMensajePrivado {
     @Inject('IChatsService')
     private readonly chatsService: IChatsService,
     @Inject()
-    private readonly eventEmitter: EventEmitter2,
+    private readonly emisorEventos: EmisorEventos,
   ) {}
 
   async execute(
@@ -47,7 +47,7 @@ export class SendMensajePrivado {
     id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
-  ): Promise<IRespuesta<IMensajeResponse>> {
+  ): Promise<IRespuesta<IMensajePrivadoResponse>> {
     const id_usuarioA = usuario._id;
     if (!descripcion && !archivos) {
       return crearRespuesta({
@@ -137,11 +137,12 @@ export class SendMensajePrivado {
       }
     }
 
-    const mensajeResponse: IMensajeResponse = {
+    const mensajeResponse: IMensajePrivadoResponse = {
       id_mensaje: nuevo_mensaje._id,
       id_usuario: id_usuarioA,
+      id_usuarioB: id_usuarioB,
       id_chat: id_chat,
-      es_grupal: false,
+      is_group: false,
       descripcion: descripcion || null,
       has_files: has_files,
       createdAt: nuevo_mensaje.createdAt,
@@ -150,7 +151,8 @@ export class SendMensajePrivado {
     };
 
     // emitir el eventop para que lo reciba el geateway
-    this.eventEmitter.emit('send-mensaje-privado', {
+    this.emisorEventos.emit(TipoEvento.NUEVO_MENSAJE_PRIVADO, {
+      idUsuarioA: id_usuarioA,
       idUsuarioB: id_usuarioB,
       mensaje: mensajeResponse,
     });

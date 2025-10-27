@@ -59,7 +59,7 @@ export class GetMensajesPrivados {
         id_mensaje: mensaje._id,
         id_usuario: integranteEmisor!.id_usuario,
         id_chat: id_chat,
-        es_grupal: false,
+        is_group: false,
         descripcion: mensaje.descripcion,
         has_files: mensaje.has_files,
         createdAt: mensaje.createdAt,

@@ -5,10 +5,14 @@ export interface IMensajeResponse {
   id_mensaje: string;
   id_usuario: string; // quien lo envio
   id_chat: string; // a que chat
-  es_grupal: boolean; // si es para un chat grupal
+  is_group: boolean; // si es para un chat grupal
   descripcion: string | null;
   has_files: boolean;
   createdAt: Date;
   archivos: IArchivoResponse[];
   estado: Estado;
+}
+
+export interface IMensajePrivadoResponse extends IMensajeResponse {
+  id_usuarioB: string; // quien lo recibe
 }

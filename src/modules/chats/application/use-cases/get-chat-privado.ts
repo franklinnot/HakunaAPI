@@ -59,6 +59,7 @@ export class GetChatPrivado {
         createdAt: chat.createdAt,
         usuarioB: usuarioB,
         ultimo_mensaje: null,
+        is_group: false,
       },
     });
   }

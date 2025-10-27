@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Estado } from 'src/shared/domain/enums';
-import { JWTPayload } from '../auth.types';
+import { JWTPayload } from '../../presentation/auth.types';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import type { IUsuarioRepository } from 'src/modules/usuarios/infraestructure/usuarios.repositories.interfaces';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
