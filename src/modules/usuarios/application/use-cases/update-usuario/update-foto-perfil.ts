@@ -57,6 +57,9 @@ export class UpdateFotoPerfil {
           id_foto!,
           foto,
         );
+        await this.usuarioRepository.update(id_usuario, {
+          id_foto: archivoResponse.data?.id_archivo || null,
+        });
         new_link = archivoResponse.data?.link || null;
       }
     }
