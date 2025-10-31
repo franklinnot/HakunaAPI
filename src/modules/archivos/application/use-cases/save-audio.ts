@@ -7,10 +7,9 @@ import { ArchivosUtils } from '../archivos.utils';
 import { TipoArchivo } from 'src/shared/domain/enums';
 import { randomUUID } from 'crypto';
 import { ArchivosMapper } from '../archivos.mapper';
-import sharp from 'sharp';
 
 @Injectable()
-export class SaveImagen {
+export class SaveAudio {
   constructor(
     @Inject('IArchivoRepository')
     private readonly archivoRepository: IArchivoRepository,
@@ -20,53 +19,53 @@ export class SaveImagen {
     private readonly archivosUtils: ArchivosUtils,
   ) {}
 
-  private readonly maxSize = 4;
-  private readonly extension = 'webp';
-  private readonly allowedImageFormats = [
-    'image/webp',
-    'image/png',
-    'image/jpeg',
-    'image/svg+xml',
+  private readonly maxSize = 8; // MB
+  private readonly extension = 'mp3';
+  private readonly allowedAudioFormats = [
+    'audio/mpeg',
+    'audio/wav',
+    'audio/aac',
+    'audio/webm',
+    'video/webm',
   ];
 
   async execute(
     base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
-    // convertir a .webp
-    const webpBuffer = await this.getImageBuffer(base64);
+    // obtener buffer del audio
+    const audioBuffer = await this.getAudioBuffer(base64);
 
-    if (!webpBuffer) {
+    if (!audioBuffer) {
       return crearRespuesta({
         success: false,
-        error: 'El imagen no es válida.',
+        error: 'El audio no es válido.',
       });
     }
 
-    // validar tamaño (máximo 4MB)
-    const sizeMB = this.archivosUtils.obtenerTamañoMB(webpBuffer);
+    // validar tamaño
+    const sizeMB = this.archivosUtils.obtenerTamañoMB(audioBuffer);
     if (sizeMB > this.maxSize) {
       return crearRespuesta<IArchivoResponse>({
         success: false,
-        error: `El tamaño máximo para imágenes es de ${this.maxSize}MB.`,
+        error: `El tamaño máximo para audios es de ${this.maxSize}MB.`,
       });
     }
 
     // generar fileKey
     const uuid = randomUUID();
-    const fileKey = `${TipoArchivo.IMAGEN}/${uuid}.${this.extension}`;
-
+    const fileKey = `${TipoArchivo.AUDIO}/${uuid}.${this.extension}`;
     // subir a Cloudflare
     const link = await this.storageService.uploadFile(
       fileKey,
-      webpBuffer,
-      `image/${this.extension}`,
+      audioBuffer,
+      `audio/${this.extension}`,
     );
 
     // guardar metadata
     const archivo = await this.archivoRepository.create({
       nombre: nombre,
-      tipo_archivo: TipoArchivo.IMAGEN,
+      tipo_archivo: TipoArchivo.AUDIO,
       extension: `.${this.extension}`,
       filekey: fileKey,
       link: link,
@@ -80,33 +79,14 @@ export class SaveImagen {
     });
   }
 
-  async convertirAWebp(buffer: Buffer): Promise<Buffer | null> {
-    try {
-      const result = await sharp(buffer).webp({ quality: 80 }).toBuffer();
-      return result;
-    } catch {
-      return null;
-    }
-  }
-
-  async getImageBuffer(base64: string): Promise<Buffer | null> {
-    // obtener MIME y validar
+  async getAudioBuffer(base64: string): Promise<Buffer | null> {
     const mimeType = await this.archivosUtils.getMimeType(base64);
 
-    if (!mimeType) {
-      return null;
-    }
-
-    if (!this.allowedImageFormats.includes(mimeType)) {
+    if (!mimeType || !this.allowedAudioFormats.includes(mimeType)) {
       return null;
     }
 
     const buffer = this.archivosUtils.base64ToBuffer(base64);
-
-    if (!buffer) {
-      return null;
-    }
-
-    return await this.convertirAWebp(buffer);
+    return buffer || null;
   }
 }

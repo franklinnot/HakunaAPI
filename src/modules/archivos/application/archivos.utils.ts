@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import sharp from 'sharp';
 import { fileTypeFromBuffer } from 'file-type';
 
 @Injectable()
 export class ArchivosUtils {
-  private readonly allowedFormats = ['image/webp', 'image/png', 'image/jpeg'];
+  // Limpia el base64 (remueve data:image/png;base64, etc.)
+  private limpiarBase64(base64: string): string {
+    if (!base64) return '';
+    const comaIndex = base64.indexOf(',');
+    return comaIndex !== -1 ? base64.substring(comaIndex + 1) : base64;
+  }
 
-  // base64 a Buffer
+  // Convierte base64 a Buffer
   base64ToBuffer(base64: string): Buffer | null {
     try {
-      const cleanBase64 = base64.includes(',') ? base64.split(',')[1] : base64;
-
-      // validar que sea un base64 válido
+      const cleanBase64 = this.limpiarBase64(base64);
       const buffer = Buffer.from(cleanBase64, 'base64');
+
+      // Validar que realmente sea un base64 válido
       if (buffer.toString('base64') !== cleanBase64.replace(/\s/g, '')) {
-        return null; // no es base64 válido
+        return null;
       }
       return buffer;
     } catch {
@@ -22,55 +26,21 @@ export class ArchivosUtils {
     }
   }
 
-  // extrae el tipo MIME desde el Base64
+  // Obtiene el tipo MIME desde el Base64
   async getMimeType(base64: string): Promise<string | null> {
-    const buffer = Buffer.from(base64, 'base64');
-    const fileType = await fileTypeFromBuffer(buffer);
-    return fileType?.mime || null;
-  }
-
-  // Obtiene el tamaño del buffer en MB como string
-  obtenerTamañoMB(buffer: Buffer): number {
-    const sizeMB = buffer.length / (1024 * 1024);
-    return Number(sizeMB.toFixed(2));
-  }
-
-  validarImagen(mimeType: string): boolean {
-    if (!this.allowedFormats.includes(mimeType)) {
-      return false;
-    }
-    return true;
-  }
-
-  async convertirAWebp(buffer: Buffer): Promise<Buffer | null> {
     try {
-      const result = await sharp(buffer).webp({ quality: 80 }).toBuffer();
-      return result;
+      const cleanBase64 = this.limpiarBase64(base64);
+      const buffer = Buffer.from(cleanBase64, 'base64');
+      const fileType = await fileTypeFromBuffer(buffer);
+      return fileType?.mime || null;
     } catch {
       return null;
     }
   }
 
-  async getImageBuffer(base64: string): Promise<Buffer | null> {
-    // obtener MIME y validar
-    const mimeType = await this.getMimeType(base64);
-
-    if (!mimeType) {
-      return null;
-    }
-
-    const result = this.validarImagen(mimeType);
-
-    if (!result) {
-      return null;
-    }
-
-    const buffer = this.base64ToBuffer(base64);
-
-    if (!buffer) {
-      return null;
-    }
-
-    return await this.convertirAWebp(buffer);
+  // Obtiene el tamaño del buffer en MB
+  obtenerTamañoMB(buffer: Buffer): number {
+    const sizeMB = buffer.length / (1024 * 1024);
+    return Number(sizeMB.toFixed(2));
   }
 }

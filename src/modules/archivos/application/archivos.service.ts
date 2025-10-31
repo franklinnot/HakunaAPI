@@ -5,8 +5,7 @@ import { IArchivoResponse } from './archivos.responses';
 import { SaveImagen } from './use-cases/save-imagen';
 import { UpdateImagen } from './use-cases/update-imagen';
 import { DeleteArchivo } from './use-cases/delete-archivo';
-
-// hakuna-api-files
+import { SaveAudio } from './use-cases/save-audio';
 
 @Injectable()
 export class ArchivosService implements IArchivosService {
@@ -17,6 +16,8 @@ export class ArchivosService implements IArchivosService {
     private readonly updateImagenCU: UpdateImagen,
     @Inject()
     private readonly deleteArchivoCU: DeleteArchivo,
+    @Inject()
+    private readonly saveAudioCU: SaveAudio,
   ) {}
 
   async saveImagen(
@@ -54,10 +55,10 @@ export class ArchivosService implements IArchivosService {
     throw new Error('Method not implemented.');
   }
 
-  saveAudio(
+  async saveAudio(
     base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
-    throw new Error('Method not implemented.');
+    return await this.saveAudioCU.execute(base64, nombre);
   }
 }
