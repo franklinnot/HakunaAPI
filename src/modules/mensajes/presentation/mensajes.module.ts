@@ -20,7 +20,9 @@ import { MensajesController } from './mensajes.controller';
 import { ChatsModule } from 'src/modules/chats/presentation/chats.module';
 import { ArchivosModule } from 'src/modules/archivos/presentation/archivos.module';
 import { MensajesUtils } from '../application/mensajes.utils';
+import { MensajesGrupalesUtils } from '../application/mensajes-grupales.utils';
 import { SendMensajePrivado } from '../application/use-cases/send-mensaje-privado';
+import { SendMensajeGrupal } from '../application/use-cases/send-mensaje-grupal';
 import { GetMensajesPrivados } from '../application/use-cases/get-mensajes-privados';
 import { GetMensajesGrupales } from '../application/use-cases/get-mensajes-grupales';
 import { MensajesGateway } from './mensajes.gateway';
@@ -54,8 +56,10 @@ import { SocketModule } from 'src/socket/socket.module';
     },
     // de utilidad
     MensajesUtils,
+    MensajesGrupalesUtils,
     // casos de uso
     SendMensajePrivado,
+    SendMensajeGrupal,
     GetMensajesPrivados,
     GetMensajesGrupales,
     // servicio

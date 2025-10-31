@@ -16,3 +16,8 @@ export interface IMensajeResponse {
 export interface IMensajePrivadoResponse extends IMensajeResponse {
   id_usuarioB: string; // quien lo recibe
 }
+
+export interface IMensajeGrupalResponse extends IMensajeResponse {
+  // No necesita campos adicionales ya que toda la información necesaria
+  // está en la interfaz base IMensajeResponse
+}

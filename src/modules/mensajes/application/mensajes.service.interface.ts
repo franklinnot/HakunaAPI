@@ -1,5 +1,5 @@
 import { IRespuesta } from 'src/shared/application/response';
-import { IMensajeResponse } from './mensajes.responses';
+import { IMensajeGrupalResponse, IMensajePrivadoResponse, IMensajeResponse } from './mensajes.responses';
 import { ICrearArchivo } from './use-cases/send-mensaje-privado';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
@@ -9,7 +9,13 @@ export interface IMensajesService {
     id_usuarioB: string,
     descripcion?: string,
     archivos?: ICrearArchivo[],
-  ): Promise<IRespuesta<IMensajeResponse>>;
+  ): Promise<IRespuesta<IMensajePrivadoResponse>>;
+  sendMensajeGrupal(
+    usuario: IUsuario,
+    id_chat: string,
+    descripcion?: string,
+    archivos?: ICrearArchivo[],
+  ): Promise<IRespuesta<IMensajeGrupalResponse>>;
   getMensajesPrivados(
     id_usuario: string,
     id_chat: string,

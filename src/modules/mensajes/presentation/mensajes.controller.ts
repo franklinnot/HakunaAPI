@@ -7,7 +7,7 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
-import { EnviarMensajePrivadoDto } from './mensajes.dtos';
+import { EnviarMensajePrivadoDto, EnviarMensajeGrupalDto } from './mensajes.dtos';
 import type { IMensajesService } from '../application/mensajes.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
 
@@ -49,5 +49,20 @@ export class MensajesController {
   ) {
     const usuario = req.user.data;
     return this.mensajeService.getMensajesGrupales(usuario!._id, id_chat);
+  }
+
+  @Post('grupal/:id_chat')
+  sendMensajeGrupal(
+    @Request() req: IRequestWithUser,
+    @Body() dto: EnviarMensajeGrupalDto,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return this.mensajeService.sendMensajeGrupal(
+      usuario!,
+      id_chat,
+      dto.descripcion,
+      dto.archivos,
+    );
   }
 }

@@ -11,6 +11,7 @@ import { SaveImagen } from '../application/use-cases/save-imagen';
 import { StorageService } from '../application/storage.service';
 import { UpdateImagen } from '../application/use-cases/update-imagen';
 import { DeleteArchivo } from '../application/use-cases/delete-archivo';
+import { SaveDocumento } from '../application/use-cases/save-documento';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DeleteArchivo } from '../application/use-cases/delete-archivo';
     DeleteArchivo,
     SaveImagen,
     UpdateImagen,
+    SaveDocumento,
     // servicio
     {
       provide: 'IArchivosService',
