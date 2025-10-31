@@ -12,6 +12,7 @@ import { StorageService } from '../application/storage.service';
 import { UpdateImagen } from '../application/use-cases/update-imagen';
 import { DeleteArchivo } from '../application/use-cases/delete-archivo';
 import { SaveAudio } from '../application/use-cases/save-audio';
+import { SaveDocumento } from '../application/use-cases/save-documento';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SaveAudio } from '../application/use-cases/save-audio';
     SaveImagen,
     SaveAudio,
     UpdateImagen,
+    SaveDocumento,
     // servicio
     {
       provide: 'IArchivosService',

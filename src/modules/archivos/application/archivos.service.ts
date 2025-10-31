@@ -6,6 +6,7 @@ import { SaveImagen } from './use-cases/save-imagen';
 import { UpdateImagen } from './use-cases/update-imagen';
 import { DeleteArchivo } from './use-cases/delete-archivo';
 import { SaveAudio } from './use-cases/save-audio';
+import { SaveDocumento } from './use-cases/save-documento';
 
 @Injectable()
 export class ArchivosService implements IArchivosService {
@@ -18,6 +19,8 @@ export class ArchivosService implements IArchivosService {
     private readonly deleteArchivoCU: DeleteArchivo,
     @Inject()
     private readonly saveAudioCU: SaveAudio,
+    @Inject()
+    private readonly saveDocumentoCU: SaveDocumento,
   ) {}
 
   async saveImagen(
@@ -49,10 +52,10 @@ export class ArchivosService implements IArchivosService {
   }
 
   saveDocumento(
-    extension: string,
+    base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
-    throw new Error('Method not implemented.');
+    return this.saveDocumentoCU.execute(base64, nombre);
   }
 
   async saveAudio(

@@ -18,9 +18,9 @@ export interface IArchivosService {
     base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
-  // excel, word, powerpoint, zip, pdf, zip, etc
+  // excel, word, powerpoint, zip, pdf, etc
   saveDocumento(
-    extension: string,
+    base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>>;
   // siempre mp3

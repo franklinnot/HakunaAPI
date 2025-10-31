@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta } from 'src/shared/application/response';
 import { IMensajesService } from './mensajes.service.interface';
 import {
+  IMensajeGrupalResponse,
   IMensajePrivadoResponse,
   IMensajeResponse,
 } from './mensajes.responses';
@@ -9,6 +10,7 @@ import {
   SendMensajePrivado,
   ICrearArchivo,
 } from './use-cases/send-mensaje-privado';
+import { SendMensajeGrupal } from './use-cases/send-mensaje-grupal';
 import { GetMensajesPrivados } from './use-cases/get-mensajes-privados';
 import { GetMensajesGrupales } from './use-cases/get-mensajes-grupales';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
@@ -18,6 +20,8 @@ export class MensajesService implements IMensajesService {
   constructor(
     @Inject()
     private readonly sendMensajePrivadoCU: SendMensajePrivado,
+    @Inject()
+    private readonly sendMensajeGrupalCU: SendMensajeGrupal,
     @Inject()
     private readonly getMensajesPrivadosCU: GetMensajesPrivados,
     @Inject()
@@ -43,6 +47,20 @@ export class MensajesService implements IMensajesService {
     id_chat: string,
   ): Promise<IRespuesta<IMensajeResponse[]>> {
     return await this.getMensajesPrivadosCU.execute(id_usuario, id_chat);
+  }
+
+  async sendMensajeGrupal(
+    usuario: IUsuario,
+    id_chat: string,
+    descripcion?: string,
+    archivos?: ICrearArchivo[],
+  ): Promise<IRespuesta<IMensajeGrupalResponse>> {
+    return await this.sendMensajeGrupalCU.execute(
+      usuario,
+      id_chat,
+      descripcion,
+      archivos,
+    );
   }
 
   async getMensajesGrupales(

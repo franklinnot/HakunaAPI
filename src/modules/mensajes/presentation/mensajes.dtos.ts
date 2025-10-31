@@ -23,3 +23,12 @@ export class EnviarMensajePrivadoDto {
   @IsOptional()
   archivos?: ArchivoDto[];
 }
+
+export class EnviarMensajeGrupalDto {
+  @IsString()
+  @IsOptional()
+  descripcion: string;
+
+  @IsOptional()
+  archivos?: ArchivoDto[];
+}

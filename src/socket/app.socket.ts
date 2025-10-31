@@ -96,6 +96,11 @@ export class AppSocket implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit(event, data);
   }
 
+  /** Emitir a todos los sockets en una sala específica */
+  emitToRoom(roomId: string, event: string, data: any) {
+    this.server.to(roomId).emit(event, data);
+  }
+
   getServer() {
     return this.server;
   }
