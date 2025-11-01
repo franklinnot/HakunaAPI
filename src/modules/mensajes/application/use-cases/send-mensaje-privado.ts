@@ -37,7 +37,7 @@ export class SendMensajePrivado {
     @Inject('IArchivosService')
     private readonly archivosService: IArchivosService,
     @Inject('IChatsService')
-    private readonly chatsService: IChaxtsService,
+    private readonly chatsService: IChatsService,
     @Inject()
     private readonly emisorEventos: EmisorEventos,
   ) {}
