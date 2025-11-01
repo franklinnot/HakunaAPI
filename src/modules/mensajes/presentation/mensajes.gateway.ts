@@ -50,4 +50,28 @@ export class MensajesGateway {
       `Mensaje grupal enviado a ${usuariosIds.length} usuarios del chat ${idChat}`,
     );
   }
+
+  @OnEvent(TipoEvento.NUEVO_INTEGRANTE)
+  async handleNuevoIntegrante(payload: {
+    id_chat: string;
+    nuevo_miembro: any;
+    chat_actualizado: any;
+  }) {
+    const { id_chat, nuevo_miembro, chat_actualizado } = payload;
+    this.logger.log(`Nuevo integrante agregado al chat: ${id_chat}`);
+    
+    // Obtener todos los usuarios del chat usando el servicio de utilidad
+    const usuariosIds = await this.mensajesGrupalesUtils.obtenerUsuariosDelChat(id_chat);
+
+    // Emitir el evento a todos los usuarios del grupo
+    this.appGateway.emitToUsers(usuariosIds, TipoEvento.NUEVO_INTEGRANTE, {
+      id_chat,
+      nuevo_miembro,
+      chat_actualizado
+    });
+    
+    this.logger.log(
+      `Evento NUEVO_INTEGRANTE enviado a ${usuariosIds.length} usuarios del chat ${id_chat}`,
+    );
+  }
 }
