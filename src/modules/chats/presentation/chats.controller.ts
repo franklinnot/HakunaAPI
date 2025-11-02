@@ -73,9 +73,11 @@ export class ChatsController {
   // obtener un chat grupal
   @Get('grupal/:id_chat')
   async getChatGrupal(
+    @Request() req: IRequestWithUser,
     @Param('id_chat') id_chat: string,
   ) {
-    return await this.chatsService.getChatGrupal(id_chat);
+    const usuario = req.user.data;
+    return await this.chatsService.getChatGrupal(id_chat, usuario!._id);
   }
 
   // actualizar chat grupal
@@ -123,5 +125,15 @@ export class ChatsController {
       id_chat,
       id_usuario,
     );
+  }
+
+  // eliminar grupo
+  @Delete('grupal/:id_chat')
+  async deleteGroup(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.deleteGroup(usuario!._id, id_chat);
   }
 }

@@ -11,6 +11,7 @@ import { UpdateChatGrupal } from './use-cases/update-chat-grupal/update-chat-gru
 import { AddMemberToGroup } from './use-cases/add-member-to-group';
 import { RemoveMemberFromGroup } from './use-cases/remove-member-from-group';
 import { GetChatGrupal } from './use-cases/get-chat-grupal';
+import { DeleteGroup } from './use-cases/delete-group';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 @Injectable()
@@ -34,6 +35,8 @@ export class ChatsService implements IChatsService {
     private readonly removeMemberFromGroupCU: RemoveMemberFromGroup,
     @Inject()
     private readonly getChatGrupalCU: GetChatGrupal,
+    @Inject()
+    private readonly deleteGroupCU: DeleteGroup,
   ) {}
 
   async crearChatPrivado(
@@ -80,8 +83,9 @@ export class ChatsService implements IChatsService {
 
   async getChatGrupal(
     id_chat: string,
+    id_usuario: string,
   ): Promise<IRespuesta<IChatGrupalResponse>> {
-    return await this.getChatGrupalCU.execute(id_chat);
+    return await this.getChatGrupalCU.execute(id_chat, id_usuario);
   }
 
   async updateChatGrupal(
@@ -122,5 +126,12 @@ export class ChatsService implements IChatsService {
       id_chat,
       id_miembro_a_eliminar,
     );
+  }
+
+  async deleteGroup(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<any>> {
+    return await this.deleteGroupCU.execute(id_chat, id_usuario);
   }
 }

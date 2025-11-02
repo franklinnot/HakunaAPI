@@ -23,6 +23,8 @@ export class GetMensajesGrupales {
     id_usuario: string,
     id_chat: string,
   ): Promise<IRespuesta<IMensajeResponse[]>> {
+    // Verificar que el usuario sea miembro activo del grupo
+    // Solo usuarios HABILITADOS pueden acceder a los mensajes
     const integrante = await this.integranteRepository.findOne({
       id_chat: id_chat,
       id_usuario: id_usuario,

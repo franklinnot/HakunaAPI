@@ -108,6 +108,7 @@ export class UpdateChatGrupal {
       [], // historial_mensajes
       null, // ultimo_mensaje
       new_link, // link_foto
+      integrante.estado, // estado_miembro
     );
 
     return crearRespuesta({

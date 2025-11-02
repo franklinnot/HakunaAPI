@@ -36,9 +36,11 @@ export class MensajeRepository
   }
 
   async findAllByChatId(id_chat: string): Promise<IMensaje[]> {
+    // Obtener todos los integrantes del chat (habilitados y deshabilitados)
+    // para mantener el historial completo de mensajes
     const integrantes = await this.integranteRepository.findAll({
       id_chat,
-      estado: Estado.HABILITADO,
+      estado: { $in: [Estado.HABILITADO, Estado.DESHABILITADO] },
     });
 
     const integranteIds = integrantes.map((i) => i._id);
@@ -56,10 +58,11 @@ export class MensajeRepository
   }
 
   async findUltimoMensajeByChatId(id_chat: string): Promise<IMensaje | null> {
-    // obtener los IDs de los integrantes del chat
+    // Obtener todos los integrantes del chat (habilitados y deshabilitados)
+    // para considerar mensajes de miembros eliminados en el último mensaje
     const integrantes = await this.integranteRepository.findAll({
       id_chat,
-      estado: Estado.HABILITADO,
+      estado: { $in: [Estado.HABILITADO, Estado.DESHABILITADO] },
     });
 
     const integranteIds = integrantes.map((i) => i._id);

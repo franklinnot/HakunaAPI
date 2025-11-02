@@ -94,10 +94,8 @@ export class AddMemberToGroup {
         estado: Estado.HABILITADO,
       });
 
-      // Actualizar la cantidad de integrantes en el chat
-      await this.chatRepository.update(id_chat, {
-        cantidad_integrantes: chat.cantidad_integrantes + 1,
-      });
+      // Sincronizar la cantidad de integrantes en la base de datos
+      await this.chatsUtils.sincronizarCantidadIntegrantes(id_chat);
 
       // Obtener el chat actualizado
       const chatActualizado = await this.chatRepository.findById(id_chat);
@@ -127,6 +125,7 @@ export class AddMemberToGroup {
         historialMensajes, // historial completo de mensajes
         ultimoMensaje, // último mensaje
         chatActualizado!.id_foto,
+        usuarioSolicitante.estado, // estado_miembro
       );
 
       // Emitir evento socket para notificar a todos los miembros del grupo
