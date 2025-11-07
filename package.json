@@ -37,7 +37,7 @@
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
-    "file-type": "^21.0.0",
+    "file-type": "^16.5.4",
     "mongoose": "^8.18.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -91,7 +91,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!uuid)"
+      "/node_modules/(?!(uuid)/)"
     ],
     "collectCoverageFrom": [
       "src/**/*.(t|j)s",
@@ -100,9 +100,6 @@
       "!src/**/*.module.(t|j)s"
     ],
     "coverageDirectory": "coverage",
-    "testEnvironment": "node",
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(uuid)/)"
-    ]
+    "testEnvironment": "node"
   }
 }
