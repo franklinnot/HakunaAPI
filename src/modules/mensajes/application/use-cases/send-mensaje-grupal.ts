@@ -41,7 +41,7 @@ export class SendMensajeGrupal {
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajeGrupalResponse>> {
     const id_usuario = usuario._id;
-    
+
     if (!descripcion && !archivos) {
       return crearRespuesta({
         success: false,
@@ -94,12 +94,15 @@ export class SendMensajeGrupal {
     });
 
     // Registrar viewers para todos los integrantes
-    const viewersData = integrantes.map(i => ({
+    const viewersData = integrantes.map((i) => ({
       id_integrante: i._id,
       visto: i._id === integrante._id, // Solo el emisor lo ha visto
     }));
-    
-    await this.viewerRepository.registrarViewers(nuevo_mensaje._id, viewersData);
+
+    await this.viewerRepository.registrarViewers(
+      nuevo_mensaje._id,
+      viewersData,
+    );
 
     // Procesar archivos si existen
     const detalles: IArchivoResponse[] = [];

@@ -1,5 +1,9 @@
 import { IRespuesta } from 'src/shared/application/response';
-import { IMensajeGrupalResponse, IMensajePrivadoResponse, IMensajeResponse } from './mensajes.responses';
+import {
+  IMensajeGrupalResponse,
+  IMensajePrivadoResponse,
+  IMensajeResponse,
+} from './mensajes.responses';
 import { ICrearArchivo } from './use-cases/send-mensaje-privado';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 

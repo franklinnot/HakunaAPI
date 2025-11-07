@@ -91,7 +91,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-    "node_modules/(?!uuid)"
+      "node_modules/(?!uuid)"
     ],
     "collectCoverageFrom": [
       "src/**/*.(t|j)s",
@@ -102,8 +102,7 @@
     "coverageDirectory": "coverage",
     "testEnvironment": "node",
     "transformIgnorePatterns": [
-    
-    "/node_modules/(?!(uuid)/)"
-  ]
-}
+      "/node_modules/(?!(uuid)/)"
+    ]
+  }
 }

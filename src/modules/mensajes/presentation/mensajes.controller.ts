@@ -7,7 +7,10 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
-import { EnviarMensajePrivadoDto, EnviarMensajeGrupalDto } from './mensajes.dtos';
+import {
+  EnviarMensajePrivadoDto,
+  EnviarMensajeGrupalDto,
+} from './mensajes.dtos';
 import type { IMensajesService } from '../application/mensajes.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
 
