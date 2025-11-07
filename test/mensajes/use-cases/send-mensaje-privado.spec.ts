@@ -1,17 +1,17 @@
-import { SendMensajePrivado } from '../../../../src/modules/mensajes/application/use-cases/send-mensaje-privado';
-import { Estado, TipoArchivo } from '../../../../src/shared/domain/enums';
+import { SendMensajePrivado } from 'src/modules/mensajes/application/use-cases/send-mensaje-privado';
+import { Estado, TipoArchivo } from 'src/shared/domain/enums';
 import type {
   IChatRepository,
   IIntegranteRepository,
-} from '../../../../src/modules/chats/infraestructure/chats.repositories.interfaces';
+} from 'src/modules/chats/infraestructure/chats.repositories.interfaces';
 import type {
   IMensajeRepository,
   IViewerRepository,
   IDetalleMensajeRepository,
-} from '../../../../src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
-import type { IArchivosService } from '../../../../src/modules/archivos/application/archivos.service.interface';
-import type { IChatsService } from '../../../../src/modules/chats/application/chats.service.interface';
-import type { IUsuario } from '../../../../src/modules/usuarios/domain/usuarios.entities';
+} from 'src/modules/mensajes/infraestructure/mensajes.repositories.interfaces';
+import type { IArchivosService } from 'src/modules/archivos/application/archivos.service.interface';
+import type { IChatsService } from 'src/modules/chats/application/chats.service.interface';
+import type { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 import {
   IDetalleMensaje,
   IMensaje,

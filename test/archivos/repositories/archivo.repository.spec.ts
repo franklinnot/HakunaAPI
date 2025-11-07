@@ -10,7 +10,7 @@ import { IArchivo } from '../../../src/modules/archivos/domain/archivos.entities
 const mockArchivoModel = () => ({
   findOne: jest.fn(), // Usado por BaseRepository.findOne
   // Si BaseRepository.findOne usa find:
-  find: jest.fn().mockReturnThis(), 
+  find: jest.fn().mockReturnThis(),
   lean: jest.fn().mockReturnThis(),
   exec: jest.fn(),
 });
@@ -46,18 +46,18 @@ describe('ArchivoRepository', () => {
 
     repository = module.get<ArchivoRepository>(ArchivoRepository);
     archivoModel = module.get<Model<Archivo>>(getModelToken(Archivo.name));
-    
   });
 
   it('1. debe devolver el link del archivo cuando se encuentra por ID', async () => {
     const archivoId = 'valid-archivo-id';
-    
+
     // Simulamos que BaseRepository.findOne encuentra y mapea la entidad IArchivo
     ((archivoModel as any).exec as jest.Mock).mockResolvedValue([mockIArchivo]); // find().exec() devuelve un array
-    
+
     // Espiamos el método findOne, que se llama internamente en findLinkById
-    const findOneSpy = jest.spyOn(repository, 'findOne' as any)
-        .mockResolvedValue(mockIArchivo);
+    const findOneSpy = jest
+      .spyOn(repository, 'findOne' as any)
+      .mockResolvedValue(mockIArchivo);
 
     const result = await repository.findLinkById(archivoId);
 
@@ -66,15 +66,16 @@ describe('ArchivoRepository', () => {
 
     // 2. Verificar el resultado (debe ser el link)
     expect(result).toBe(mockIArchivo.link);
-    
+
     findOneSpy.mockRestore(); // Restaurar el mock
   });
   it('2. debe devolver null si el archivo no se encuentra', async () => {
     const archivoId = 'invalid-archivo-id';
 
     // Simulamos que BaseRepository.findOne devuelve null
-    const findOneSpy = jest.spyOn(repository, 'findOne' as any)
-        .mockResolvedValue(null); 
+    const findOneSpy = jest
+      .spyOn(repository, 'findOne' as any)
+      .mockResolvedValue(null);
 
     const result = await repository.findLinkById(archivoId);
 
@@ -83,10 +84,10 @@ describe('ArchivoRepository', () => {
 
     // 2. Verificar el resultado
     expect(result).toBeNull();
-    
+
     findOneSpy.mockRestore();
   });
-it('3. debe mapear correctamente un documento de Mongoose a la entidad de dominio IArchivo', () => {
+  it('3. debe mapear correctamente un documento de Mongoose a la entidad de dominio IArchivo', () => {
     const now = new Date();
     // Simular el documento que retorna Mongoose
     const mockDoc: Archivo = {
@@ -100,7 +101,7 @@ it('3. debe mapear correctamente un documento de Mongoose a la entidad de domini
       extension: 'jpg',
       size: '500kb',
       filekey: 's3-key-456',
-    } as unknown as Archivo; 
+    } as unknown as Archivo;
 
     // Acceso al método protegido para la prueba
     const result: IArchivo = (repository as any).toDomain(mockDoc);
@@ -115,7 +116,7 @@ it('3. debe mapear correctamente un documento de Mongoose a la entidad de domini
     expect(result.size).toBe('500kb');
     expect(result.filekey).toBe('s3-key-456');
   });
-  
+
   it('4. debe usar valores por defecto en toDomain cuando las propiedades son nulas o indefinidas', () => {
     // Simular un documento con mínimos valores, donde la mayoría son nulos/undefined
     const mockDocMinimal: Archivo = {
@@ -128,20 +129,17 @@ it('3. debe mapear correctamente un documento de Mongoose a la entidad de domini
       extension: null, // Prueba el operador ?? null
       size: undefined,
       filekey: null,
-    } as unknown as Archivo; 
+    } as unknown as Archivo;
 
     // Acceso al método protegido para la prueba
     const result: IArchivo = (repository as any).toDomain(mockDocMinimal);
 
     // Verificar valores por defecto (||) o ?? null
     expect(result.nombre).toBeNull(); // Usa || null
-    expect(result.link).toBeNull();   // Usa || null
+    expect(result.link).toBeNull(); // Usa || null
     expect(result.tipo_archivo).toBe(TipoArchivo.DOCUMENTO); // Usa || default
     expect(result.extension).toBeNull(); // Usa ?? null
-    expect(result.size).toBe('');     // Usa || ''
+    expect(result.size).toBe(''); // Usa || ''
     expect(result.filekey).toBeNull(); // Usa || null
   });
 });
-
-
-
