@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { fileTypeFromBuffer } from 'file-type';
+import * as FileType from 'file-type';  
 
 @Injectable()
 export class ArchivosUtils {
@@ -31,7 +31,7 @@ export class ArchivosUtils {
     try {
       const cleanBase64 = this.limpiarBase64(base64);
       const buffer = Buffer.from(cleanBase64, 'base64');
-      const fileType = await fileTypeFromBuffer(buffer);
+      const fileType = await FileType.fromBuffer(buffer);
       return fileType?.mime || null;
     } catch {
       return null;
