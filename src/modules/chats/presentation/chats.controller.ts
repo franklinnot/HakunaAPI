@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -10,7 +11,7 @@ import {
 } from '@nestjs/common';
 import type { IChatsService } from '../application/chats.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
-import { CreateChatGrupalDto, UpdateChatGrupalDto } from './chats.dtos';
+import { CreateChatGrupalDto, UpdateChatGrupalDto, AddMemberDto } from './chats.dtos';
 
 @Controller('chats')
 export class ChatsController {
@@ -69,6 +70,16 @@ export class ChatsController {
     return await this.chatsService.getChatPrivado(usuario!._id, id_chat);
   }
 
+  // obtener un chat grupal
+  @Get('grupal/:id_chat')
+  async getChatGrupal(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.getChatGrupal(id_chat, usuario!._id);
+  }
+
   // actualizar chat grupal
   @Put('grupal/:id_chat')
   async updateChatGrupal(
@@ -84,5 +95,45 @@ export class ChatsController {
       dto.descripcion,
       dto.foto,
     );
+  }
+
+  // agregar miembro a grupo
+  @Post('grupal/:id_chat/miembros')
+  async addMemberToGroup(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+    @Body() dto: AddMemberDto,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.addMemberToGroup(
+      usuario!._id,
+      id_chat,
+      dto.id_usuario,
+    );
+  }
+
+  // eliminar miembro de grupo
+  @Delete('grupal/:id_chat/miembros/:id_usuario')
+  async removeMemberFromGroup(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+    @Param('id_usuario') id_usuario: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.removeMemberFromGroup(
+      usuario!._id,
+      id_chat,
+      id_usuario,
+    );
+  }
+
+  // eliminar grupo
+  @Delete('grupal/:id_chat')
+  async deleteGroup(
+    @Request() req: IRequestWithUser,
+    @Param('id_chat') id_chat: string,
+  ) {
+    const usuario = req.user.data;
+    return await this.chatsService.deleteGroup(usuario!._id, id_chat);
   }
 }

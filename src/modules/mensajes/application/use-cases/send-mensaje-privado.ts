@@ -49,16 +49,14 @@ export class SendMensajePrivado {
     archivos?: ICrearArchivo[],
   ): Promise<IRespuesta<IMensajePrivadoResponse>> {
     const id_usuarioA = usuario._id;
-
-    // no hay descripción ni archivos
-    if (!descripcion && (!archivos || archivos.length === 0)) {
+    if (!descripcion && !archivos) {
       return crearRespuesta({
         success: false,
         error: 'No se puede enviar un mensaje vacío.',
       });
     }
 
-    if (id_usuarioA === id_usuarioB) {
+    if (id_usuarioA == id_usuarioB) {
       return crearRespuesta({
         success: false,
         error: 'No se puede enviar un mensaje a sí mismo.',
@@ -70,25 +68,27 @@ export class SendMensajePrivado {
       id_usuarioB,
     );
 
-    let id_chat: string;
+    let id_chat: string = '';
     if (!old_chat) {
       const result = await this.chatsService.crearChatPrivado(
         usuario,
         id_usuarioB,
       );
+
       if (!result.success || !result.data) {
         return crearRespuesta({
           success: false,
           error: result.error,
         });
       }
+
       id_chat = result.data.id_chat;
     } else {
       id_chat = old_chat._id;
     }
 
     const integranteA = await this.integranteRepository.findOne({
-      id_chat,
+      id_chat: id_chat,
       id_usuario: id_usuarioA,
       estado: Estado.HABILITADO,
     });
@@ -100,82 +100,57 @@ export class SendMensajePrivado {
       });
     }
 
-    const has_files = !!archivos?.length;
+    const has_files = archivos ? true : false;
     const nuevo_mensaje = await this.mensajeRepository.create({
       id_integrante: integranteA._id,
-      descripcion,
-      has_files,
+      descripcion: descripcion,
+      has_files: has_files,
     });
 
     const integrantes = await this.integranteRepository.findAll({
-      id_chat,
+      id_chat: id_chat,
       estado: Estado.HABILITADO,
     });
-    const integranteB = integrantes.find((i) => i.id_usuario !== usuario._id);
-
+    const integranteB = integrantes.find((i) => i.id_usuario != usuario._id);
     await this.viewerRepository.registrarViewers(nuevo_mensaje._id, [
       { id_integrante: integranteA._id, visto: true },
       { id_integrante: integranteB!._id, visto: false },
     ]);
 
     const detalles: IArchivoResponse[] = [];
-
     if (has_files) {
-      for (const archivo of archivos) {
-        let rpta: IRespuesta<IArchivoResponse>;
-        if (archivo.tipoArchivo === TipoArchivo.IMAGEN) {
-          rpta = await this.archivosService.saveImagen(
+      for (const archivo of archivos!) {
+        if (archivo.tipoArchivo == TipoArchivo.IMAGEN) {
+          const rpta = await this.archivosService.saveImagen(
             archivo.b64,
             archivo.nombre,
           );
-        } else if (archivo.tipoArchivo === TipoArchivo.AUDIO) {
-          rpta = await this.archivosService.saveAudio(
-            archivo.b64,
-            archivo.nombre,
-          );
-        } else if (archivo.tipoArchivo === TipoArchivo.DOCUMENTO) {
-          rpta = await this.archivosService.saveDocumento(
-            archivo.b64,
-            archivo.nombre,
-          );
-        } else {
-          continue;
+          if (rpta.data) {
+            const archivo = rpta.data;
+            detalles.push(archivo);
+            await this.detalleRepository.create({
+              id_mensaje: nuevo_mensaje._id,
+              id_archivo: archivo.id_archivo,
+            });
+          }
         }
-
-        if (rpta.data) {
-          const archivoGuardado = rpta.data;
-          detalles.push(archivoGuardado);
-          await this.detalleRepository.create({
-            id_mensaje: nuevo_mensaje._id,
-            id_archivo: archivoGuardado.id_archivo,
-          });
-        }
-      }
-
-      // si no se registró ningún archivo y tampoco hay descripción
-      if (detalles.length === 0 && !descripcion) {
-        return crearRespuesta({
-          success: false,
-          error:
-            'No se pudo registrar ningún archivo ni se proporcionó descripción.',
-        });
       }
     }
 
     const mensajeResponse: IMensajePrivadoResponse = {
       id_mensaje: nuevo_mensaje._id,
       id_usuario: id_usuarioA,
-      id_usuarioB,
-      id_chat,
+      id_usuarioB: id_usuarioB,
+      id_chat: id_chat,
       is_group: false,
       descripcion: descripcion || null,
-      has_files,
+      has_files: has_files,
       createdAt: nuevo_mensaje.createdAt,
       archivos: detalles,
       estado: nuevo_mensaje.estado,
     };
 
-    // emitir evento para que lo reciba el gateway
+    // emitir el eventop para que lo reciba el geateway
     this.emisorEventos.emit(TipoEvento.NUEVO_MENSAJE_PRIVADO, {
       idUsuarioA: id_usuarioA,
       idUsuarioB: id_usuarioB,

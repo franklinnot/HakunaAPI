@@ -105,7 +105,7 @@ export class ChatRepository
     return chatsDelUsuario.map((chat) => this.toDomain(chat));
   }
 
-  // buscar chats grupales de un usuario
+  // buscar chats grupales de un usuario (incluye chats donde fue eliminado)
   async findChatsGrupalesByIdUsuario(id_usuario: string): Promise<IChat[]> {
     const chats = await this.chatModel
       .find({
@@ -116,9 +116,10 @@ export class ChatRepository
         path: 'integrantes',
         match: {
           id_usuario: id_usuario,
-          estado: Estado.HABILITADO,
+          // Incluir tanto miembros habilitados como deshabilitados
+          estado: { $in: [Estado.HABILITADO, Estado.DESHABILITADO] },
         },
-        select: '_id',
+        select: '_id estado',
       })
       .lean()
       .exec();
@@ -131,6 +132,15 @@ export class ChatRepository
     );
 
     return chatsDelUsuario.map((chat) => this.toDomain(chat));
+  }
+
+  // eliminar grupo
+  async deleteGroup(id_chat: string): Promise<void> {
+    await this.chatModel.findByIdAndUpdate(
+      id_chat,
+      { estado: Estado.DESHABILITADO },
+      { new: true }
+    ).exec();
   }
 
   // buscar coincidencias

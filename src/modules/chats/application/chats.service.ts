@@ -8,6 +8,10 @@ import { GetChatPrivado } from './use-cases/get-chat-privado';
 import { CrearChatGrupal } from './use-cases/crear-chat-grupal';
 import { GetChatsGrupales } from './use-cases/get-chats-grupales';
 import { UpdateChatGrupal } from './use-cases/update-chat-grupal/update-chat-grupal';
+import { AddMemberToGroup } from './use-cases/add-member-to-group';
+import { RemoveMemberFromGroup } from './use-cases/remove-member-from-group';
+import { GetChatGrupal } from './use-cases/get-chat-grupal';
+import { DeleteGroup } from './use-cases/delete-group';
 import { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 
 @Injectable()
@@ -25,6 +29,14 @@ export class ChatsService implements IChatsService {
     private readonly getChatsGrupalesCU: GetChatsGrupales,
     @Inject()
     private readonly updateChatGrupalCU: UpdateChatGrupal,
+    @Inject()
+    private readonly addMemberToGroupCU: AddMemberToGroup,
+    @Inject()
+    private readonly removeMemberFromGroupCU: RemoveMemberFromGroup,
+    @Inject()
+    private readonly getChatGrupalCU: GetChatGrupal,
+    @Inject()
+    private readonly deleteGroupCU: DeleteGroup,
   ) {}
 
   async crearChatPrivado(
@@ -69,6 +81,13 @@ export class ChatsService implements IChatsService {
     return await this.getChatsGrupalesCU.execute(id_usuario);
   }
 
+  async getChatGrupal(
+    id_chat: string,
+    id_usuario: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>> {
+    return await this.getChatGrupalCU.execute(id_chat, id_usuario);
+  }
+
   async updateChatGrupal(
     id_usuario: string,
     id_chat: string,
@@ -83,5 +102,36 @@ export class ChatsService implements IChatsService {
       descripcion,
       foto,
     );
+  }
+
+  async addMemberToGroup(
+    id_usuario: string,
+    id_chat: string,
+    id_nuevo_miembro: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>> {
+    return await this.addMemberToGroupCU.execute(
+      id_usuario,
+      id_chat,
+      id_nuevo_miembro,
+    );
+  }
+
+  async removeMemberFromGroup(
+    id_usuario: string,
+    id_chat: string,
+    id_miembro_a_eliminar: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>> {
+    return await this.removeMemberFromGroupCU.execute(
+      id_usuario,
+      id_chat,
+      id_miembro_a_eliminar,
+    );
+  }
+
+  async deleteGroup(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<any>> {
+    return await this.deleteGroupCU.execute(id_chat, id_usuario);
   }
 }

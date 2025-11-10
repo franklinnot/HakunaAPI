@@ -30,4 +30,5 @@ export interface IChatGrupalResponse extends IChatResponse {
   descripcion: string | null;
   integrantes: IIntegranteGrupalResponse[];
   cantidad_integrantes: number;
+  estado_miembro: Estado; // Estado del usuario actual en el grupo
 }

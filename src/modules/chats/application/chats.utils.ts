@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IChat } from '../domain/chats.entities';
 import { IIntegranteGrupalResponse } from './chats.responses';
-import type { IIntegranteRepository } from '../infraestructure/chats.repositories.interfaces';
+import type { IIntegranteRepository, IChatRepository } from '../infraestructure/chats.repositories.interfaces';
 import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 import { Estado } from 'src/shared/domain/enums';
 
@@ -10,6 +10,8 @@ export class ChatsUtils {
   constructor(
     @Inject('IIntegranteRepository')
     private readonly integranteRepository: IIntegranteRepository,
+    @Inject('IChatRepository')
+    private readonly chatRepository: IChatRepository,
     @Inject()
     private readonly usuariosUtils: UsuariosUtils,
   ) {}
@@ -40,5 +42,22 @@ export class ChatsUtils {
     }
 
     return integrantesResponse;
+  }
+
+  /**
+   * Sincroniza el campo cantidad_integrantes en la base de datos
+   * con la cantidad real de integrantes activos (HABILITADO)
+   */
+  async sincronizarCantidadIntegrantes(id_chat: string): Promise<void> {
+    // Contar integrantes activos
+    const integrantesActivos = await this.integranteRepository.findAll({
+      id_chat: id_chat,
+      estado: Estado.HABILITADO,
+    });
+
+    // Actualizar el campo en la base de datos
+    await this.chatRepository.update(id_chat, {
+      cantidad_integrantes: integrantesActivos.length,
+    });
   }
 }

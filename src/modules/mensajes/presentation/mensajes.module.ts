@@ -77,6 +77,7 @@ import { SocketModule } from 'src/socket/socket.module';
     'IMensajesService',
     MensajesUtils,
     MensajesGateway,
+    GetMensajesGrupales,
   ],
   controllers: [MensajesController],
 })

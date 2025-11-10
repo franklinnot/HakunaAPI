@@ -47,3 +47,9 @@ export class UpdateChatGrupalDto {
   @IsOptional()
   descripcion?: string;
 }
+
+export class AddMemberDto {
+  @IsString()
+  @IsNotEmpty()
+  id_usuario: string;
+}

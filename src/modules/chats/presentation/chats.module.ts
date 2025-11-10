@@ -21,9 +21,14 @@ import { GetChatsGrupales } from '../application/use-cases/get-chats-grupales';
 import { UpdateChatGrupal } from '../application/use-cases/update-chat-grupal/update-chat-grupal';
 import { UpdateFotoGrupal } from '../application/use-cases/update-chat-grupal/update-foto-grupal';
 import { GetChatGrupal } from '../application/use-cases/get-chat-grupal';
+import { AddMemberToGroup } from '../application/use-cases/add-member-to-group';
+import { RemoveMemberFromGroup } from '../application/use-cases/remove-member-from-group';
+import { DeleteGroup } from '../application/use-cases/delete-group';
+import { SocketModule } from 'src/socket/socket.module';
 
 @Module({
   imports: [
+    SocketModule,
     ArchivosModule,
     UsuariosModule,
     forwardRef(() => MensajesModule),
@@ -54,6 +59,9 @@ import { GetChatGrupal } from '../application/use-cases/get-chat-grupal';
     GetChatGrupal,
     UpdateChatGrupal,
     UpdateFotoGrupal,
+    AddMemberToGroup,
+    RemoveMemberFromGroup,
+    DeleteGroup,
     // servicios
     {
       provide: 'IChatsService',

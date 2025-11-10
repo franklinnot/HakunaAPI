@@ -5,8 +5,10 @@ import { IArchivoResponse } from './archivos.responses';
 import { SaveImagen } from './use-cases/save-imagen';
 import { UpdateImagen } from './use-cases/update-imagen';
 import { DeleteArchivo } from './use-cases/delete-archivo';
-import { SaveAudio } from './use-cases/save-audio';
 import { SaveDocumento } from './use-cases/save-documento';
+import { SaveAudio } from './use-cases/save-audio';
+
+// hakuna-api-files
 
 @Injectable()
 export class ArchivosService implements IArchivosService {
@@ -18,9 +20,9 @@ export class ArchivosService implements IArchivosService {
     @Inject()
     private readonly deleteArchivoCU: DeleteArchivo,
     @Inject()
-    private readonly saveAudioCU: SaveAudio,
-    @Inject()
     private readonly saveDocumentoCU: SaveDocumento,
+    @Inject()
+    private readonly saveAudioCU: SaveAudio,
   ) {}
 
   async saveImagen(
@@ -58,10 +60,10 @@ export class ArchivosService implements IArchivosService {
     return this.saveDocumentoCU.execute(base64, nombre);
   }
 
-  async saveAudio(
+  saveAudio(
     base64: string,
     nombre?: string,
   ): Promise<IRespuesta<IArchivoResponse>> {
-    return await this.saveAudioCU.execute(base64, nombre);
+    return this.saveAudioCU.execute(base64, nombre);
   }
 }

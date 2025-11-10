@@ -24,6 +24,10 @@ export interface IChatsService {
     id_usuario: string,
     id_chat: string,
   ): Promise<IRespuesta<IChatPrivadoResponse>>;
+  getChatGrupal(
+    id_chat: string,
+    id_usuario: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>>;
   updateChatGrupal(
     id_usuario: string,
     id_chat: string,
@@ -31,4 +35,18 @@ export interface IChatsService {
     descripcion?: string,
     foto?: string | null,
   ): Promise<IRespuesta<IChatGrupalResponse>>;
+  addMemberToGroup(
+    id_usuario: string,
+    id_chat: string,
+    id_nuevo_miembro: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>>;
+  removeMemberFromGroup(
+    id_usuario: string,
+    id_chat: string,
+    id_miembro_a_eliminar: string,
+  ): Promise<IRespuesta<IChatGrupalResponse>>;
+  deleteGroup(
+    id_usuario: string,
+    id_chat: string,
+  ): Promise<IRespuesta<any>>;
 }

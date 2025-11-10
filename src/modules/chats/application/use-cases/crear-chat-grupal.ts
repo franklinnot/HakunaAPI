@@ -100,6 +100,7 @@ export class CrearChatGrupal {
       [], // historial_mensajes
       null, // ultimo_mensaje
       link_foto, // link_foto
+      Estado.HABILITADO, // estado_miembro (el creador siempre está habilitado)
     );
 
     return crearRespuesta({

@@ -108,30 +108,48 @@ export class SendMensajeGrupal {
     const detalles: IArchivoResponse[] = [];
     if (has_files) {
       for (const archivo of archivos!) {
-        let rpta;
-        if (archivo.tipoArchivo === TipoArchivo.IMAGEN) {
-          rpta = await this.archivosService.saveImagen(
+        if (archivo.tipoArchivo == TipoArchivo.IMAGEN) {
+          const rpta = await this.archivosService.saveImagen(
             archivo.b64,
             archivo.nombre,
           );
-        } else if (archivo.tipoArchivo === TipoArchivo.DOCUMENTO) {
-          rpta = await this.archivosService.saveDocumento(
-            archivo.b64,
-            archivo.nombre,
-          );
-        } else {
-          // Por ahora no se implementa audio/video
-          rpta = undefined;
+          if (rpta.data) {
+            const archivo = rpta.data;
+            detalles.push(archivo);
+            await this.detalleRepository.create({
+              id_mensaje: nuevo_mensaje._id,
+              id_archivo: archivo.id_archivo,
+            });
+          }
+        } else if (archivo.tipoArchivo == TipoArchivo.DOCUMENTO) {
+          const rpta = await this.archivosService.saveDocumento(archivo.b64);
+          if (rpta.data) {
+            const archivo = rpta.data;
+            detalles.push(archivo);
+            await this.detalleRepository.create({
+              id_mensaje: nuevo_mensaje._id,
+              id_archivo: archivo.id_archivo,
+            });
+          }
+        } else if (archivo.tipoArchivo == TipoArchivo.AUDIO) {
+          const rpta = await this.archivosService.saveAudio(archivo.b64, archivo.nombre);
+          if (rpta.data) {
+            const archivo = rpta.data;
+            detalles.push(archivo);
+            await this.detalleRepository.create({
+              id_mensaje: nuevo_mensaje._id,
+              id_archivo: archivo.id_archivo,
+            });
+          }
         }
+      }
 
-        if (rpta && rpta.data) {
-          const archResp = rpta.data;
-          detalles.push(archResp);
-          await this.detalleRepository.create({
-            id_mensaje: nuevo_mensaje._id,
-            id_archivo: archResp.id_archivo,
-          });
-        }
+      // si no se registró ningún archivo y tampoco hay descripción
+      if (detalles.length === 0 && !descripcion) {
+        return crearRespuesta({
+          success: false,
+          error: 'No se pudo registrar ningún archivo ni se proporcionó descripción.',
+        });
       }
     }
 
