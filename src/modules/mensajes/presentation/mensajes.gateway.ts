@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { AppSocket } from 'src/socket/app.socket';
-import { IMensajeGrupalResponse, IMensajePrivadoResponse } from '../application/mensajes.responses';
+import {
+  IMensajeGrupalResponse,
+  IMensajePrivadoResponse,
+} from '../application/mensajes.responses';
 import { TipoEvento } from 'src/shared/domain/enums';
 import { MensajesGrupalesUtils } from '../application/mensajes-grupales.utils';
 
@@ -39,13 +42,18 @@ export class MensajesGateway {
   }) {
     const { idChat, mensaje } = payload;
     this.logger.log(`Emitiendo mensaje grupal: ${mensaje.id_mensaje}`);
-    
+
     // Obtener todos los usuarios del chat usando el servicio de utilidad
-    const usuariosIds = await this.mensajesGrupalesUtils.obtenerUsuariosDelChat(idChat);
+    const usuariosIds =
+      await this.mensajesGrupalesUtils.obtenerUsuariosDelChat(idChat);
 
     // Emitir el mensaje a todos los usuarios del grupo
-    this.appGateway.emitToUsers(usuariosIds, TipoEvento.NUEVO_MENSAJE_GRUPAL, mensaje);
-    
+    this.appGateway.emitToUsers(
+      usuariosIds,
+      TipoEvento.NUEVO_MENSAJE_GRUPAL,
+      mensaje,
+    );
+
     this.logger.log(
       `Mensaje grupal enviado a ${usuariosIds.length} usuarios del chat ${idChat}`,
     );
