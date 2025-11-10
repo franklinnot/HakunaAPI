@@ -1,15 +1,20 @@
+jest.mock('file-type', () => ({
+  fromBuffer: jest.fn(async (buffer) => {
+    if (buffer.includes('PDF')) return { ext: 'pdf', mime: 'application/pdf' };
+    if (buffer.includes('DOCX')) return { ext: 'docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+    if (buffer.includes('XLSX')) return { ext: 'xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+    return { ext: 'txt', mime: 'text/plain' };
+  }),
+}));
+import * as FileType from 'file-type';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { SaveDocumento } from '../../../src/modules/archivos/application/use-cases/save-documento';
 import { StorageService } from '../../../src/modules/archivos/application/storage.service';
 import { ArchivosUtils } from '../../../src/modules/archivos/application/archivos.utils';
 import { TipoArchivo } from '../../../src/shared/domain/enums';
 
-// Mock de file-type
-jest.mock('file-type', () => ({
-  fileTypeFromBuffer: jest.fn(),
-}));
 
-import { fileTypeFromBuffer } from 'file-type';
 
 describe('SaveDocumento', () => {
   let service: SaveDocumento;
@@ -68,7 +73,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 2;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/pdf',
         ext: 'pdf',
       });
@@ -102,7 +107,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 1.5;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ext: 'docx',
       });
@@ -129,7 +134,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 3;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ext: 'xlsx',
       });
@@ -156,7 +161,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 1;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/octet-stream',
         ext: 'bin',
       });
@@ -183,7 +188,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 1;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue(null);
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue(null);
       mockArchivosUtils.obtenerTamañoMB.mockReturnValue(sizeMB);
       mockStorageService.uploadFile.mockResolvedValue(mockLink);
       mockArchivoRepository.create.mockResolvedValue({
@@ -224,7 +229,7 @@ describe('SaveDocumento', () => {
       const mockBuffer = Buffer.from('data');
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'video/mp4',
         ext: 'mp4',
       });
@@ -241,7 +246,7 @@ describe('SaveDocumento', () => {
       const mockBuffer = Buffer.from('data');
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'image/png',
         ext: 'png',
       });
@@ -261,7 +266,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 2;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/msword',
         ext: 'doc',
       });
@@ -288,7 +293,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 2;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/vnd.ms-excel',
         ext: 'xls',
       });
@@ -315,7 +320,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 2;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/vnd.ms-powerpoint',
         ext: 'ppt',
       });
@@ -342,7 +347,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 2;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         ext: 'pptx',
       });
@@ -369,7 +374,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 0.5;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'text/plain',
         ext: 'txt',
       });
@@ -396,7 +401,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 5;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/zip',
         ext: 'zip',
       });
@@ -423,7 +428,7 @@ describe('SaveDocumento', () => {
       const sizeMB = 5;
 
       mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      (fileTypeFromBuffer as jest.Mock).mockResolvedValue({
+      (FileType.fromBuffer as jest.Mock).mockResolvedValue({
         mime: 'application/x-rar-compressed',
         ext: 'rar',
       });

@@ -7,7 +7,7 @@ import { ArchivosUtils } from '../archivos.utils';
 import { TipoArchivo } from 'src/shared/domain/enums';
 import { randomUUID } from 'crypto';
 import { ArchivosMapper } from '../archivos.mapper';
-import { fileTypeFromBuffer } from 'file-type';
+const FileType = require('file-type'); 
 
 @Injectable()
 export class SaveDocumento {
@@ -34,7 +34,7 @@ export class SaveDocumento {
     }
 
     // Detectar tipo y extensión
-    const tipo = await fileTypeFromBuffer(buffer);
+    const tipo = await FileType.fromBuffer(buffer);
     const mimeType = tipo?.mime || 'application/octet-stream';
     const extension = tipo?.ext ? `.${tipo.ext}` : '';
 
