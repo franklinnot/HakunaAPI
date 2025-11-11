@@ -154,7 +154,7 @@ describe('UpdateFotoPerfil', () => {
     });
     expect(archivosService.saveImagen).not.toHaveBeenCalled();
   });
-  
+
   // ----------------------------------------------------------------
   // TEST 4: Usuario con foto, llega foto nueva (debe actualizar)
   // ----------------------------------------------------------------

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat } from '../schemas/chat.schema';
@@ -136,11 +137,13 @@ export class ChatRepository
 
   // eliminar grupo
   async deleteGroup(id_chat: string): Promise<void> {
-    await this.chatModel.findByIdAndUpdate(
-      id_chat,
-      { estado: Estado.DESHABILITADO },
-      { new: true }
-    ).exec();
+    await this.chatModel
+      .findByIdAndUpdate(
+        id_chat,
+        { estado: Estado.DESHABILITADO },
+        { new: true },
+      )
+      .exec();
   }
 
   // buscar coincidencias

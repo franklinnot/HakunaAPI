@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { IChatRepository, IIntegranteRepository } from '../../infraestructure/chats.repositories.interfaces';
+import type {
+  IChatRepository,
+  IIntegranteRepository,
+} from '../../infraestructure/chats.repositories.interfaces';
 import type {
   IMensajeRepository,
   IViewerRepository,
@@ -8,7 +11,6 @@ import type {
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { Estado, TipoEvento } from 'src/shared/domain/enums';
 import { EmisorEventos } from 'src/socket/emisor-eventos';
-import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 
 @Injectable()
 export class DeleteGroup {
@@ -25,8 +27,6 @@ export class DeleteGroup {
     private readonly detalleMensajeRepository: IDetalleMensajeRepository,
     @Inject()
     private readonly emisorEventos: EmisorEventos,
-    @Inject()
-    private readonly usuariosUtils: UsuariosUtils,
   ) {}
 
   async execute(id_chat: string, id_usuario: string): Promise<IRespuesta<any>> {
@@ -81,7 +81,9 @@ export class DeleteGroup {
         }
 
         // Eliminar todos los detalles de mensajes (archivos adjuntos)
-        const detalles = await this.detalleMensajeRepository.findByMensaje(mensaje._id);
+        const detalles = await this.detalleMensajeRepository.findByMensaje(
+          mensaje._id,
+        );
         for (const detalle of detalles) {
           await this.detalleMensajeRepository.delete(detalle._id);
         }
@@ -107,8 +109,10 @@ export class DeleteGroup {
       await this.chatRepository.deleteGroup(id_chat);
 
       // Obtener información de todos los usuarios para notificarles
-      const usuariosIds = todosLosIntegrantes.map(integrante => integrante.id_usuario);
-      
+      const usuariosIds = todosLosIntegrantes.map(
+        (integrante) => integrante.id_usuario,
+      );
+
       // Emitir evento de socket para notificar que el grupo fue eliminado
       this.emisorEventos.emit(TipoEvento.GRUPO_ELIMINADO, {
         id_chat: id_chat,
@@ -118,7 +122,9 @@ export class DeleteGroup {
 
       return crearRespuesta({
         success: true,
-        data: { message: 'Grupo y su historial de mensajes eliminados exitosamente' },
+        data: {
+          message: 'Grupo y su historial de mensajes eliminados exitosamente',
+        },
       });
     } catch (error) {
       console.error('Error en DeleteGroup:', error);

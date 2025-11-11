@@ -45,8 +45,5 @@ export interface IChatsService {
     id_chat: string,
     id_miembro_a_eliminar: string,
   ): Promise<IRespuesta<IChatGrupalResponse>>;
-  deleteGroup(
-    id_usuario: string,
-    id_chat: string,
-  ): Promise<IRespuesta<any>>;
+  deleteGroup(id_usuario: string, id_chat: string): Promise<IRespuesta<any>>;
 }

@@ -127,7 +127,9 @@ describe('BaseRepository (Full Coverage)', () => {
       save: jest.fn().mockRejectedValue(new Error('Save failed')),
     }));
     (repository as any).model = Object.assign(createMock, model);
-    await expect(repository.create({ name: 'Bad' } as any)).rejects.toThrow('Save failed');
+    await expect(repository.create({ name: 'Bad' } as any)).rejects.toThrow(
+      'Save failed',
+    );
   });
 
   // ---------- update ----------
@@ -141,20 +143,26 @@ describe('BaseRepository (Full Coverage)', () => {
   });
 
   it('should return null when update finds nothing', async () => {
-    model.findByIdAndUpdate.mockReturnValueOnce({ exec: () => Promise.resolve(null) });
+    model.findByIdAndUpdate.mockReturnValueOnce({
+      exec: () => Promise.resolve(null),
+    });
     const result = await repository.update('x', { name: 'Updated' });
     expect(result).toBeNull();
   });
 
   // ---------- delete ----------
   it('should return true when delete succeeds', async () => {
-    model.findByIdAndDelete.mockReturnValueOnce({ exec: () => Promise.resolve(true) });
+    model.findByIdAndDelete.mockReturnValueOnce({
+      exec: () => Promise.resolve(true),
+    });
     const result = await repository.delete('1');
     expect(result).toBe(true);
   });
 
   it('should return false when delete finds nothing', async () => {
-    model.findByIdAndDelete.mockReturnValueOnce({ exec: () => Promise.resolve(null) });
+    model.findByIdAndDelete.mockReturnValueOnce({
+      exec: () => Promise.resolve(null),
+    });
     const result = await repository.delete('missing');
     expect(result).toBe(false);
   });

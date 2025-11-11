@@ -1,239 +1,168 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SaveAudio } from '../../../src/modules/archivos/application/use-cases/save-audio';
-import { StorageService } from '../../../src/modules/archivos/application/storage.service';
 import { ArchivosUtils } from '../../../src/modules/archivos/application/archivos.utils';
+import { CreateArchivo } from '../../../src/modules/archivos/application/use-cases/create-archivo';
 import { TipoArchivo } from '../../../src/shared/domain/enums';
+import { crearRespuesta } from '../../../src/shared/application/response';
 
 describe('SaveAudio', () => {
   let service: SaveAudio;
-  let archivoRepository: any;
-  let storageService: StorageService;
-  let archivosUtils: ArchivosUtils;
-
-  const mockArchivoRepository = {
-    create: jest.fn(),
-  };
-
-  const mockStorageService = {
-    uploadFile: jest.fn(),
-  };
-
-  const mockArchivosUtils = {
-    getMimeType: jest.fn(),
-    base64ToBuffer: jest.fn(),
-    obtenerTamañoMB: jest.fn(),
-  };
+  let archivosUtils: jest.Mocked<ArchivosUtils>;
+  let createArchivoCU: jest.Mocked<CreateArchivo>;
 
   beforeEach(async () => {
+    const mockArchivosUtils = {
+      getBuffer: jest.fn(),
+    };
+
+    const mockCreateArchivo = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SaveAudio,
-        {
-          provide: 'IArchivoRepository',
-          useValue: mockArchivoRepository,
-        },
-        {
-          provide: StorageService,
-          useValue: mockStorageService,
-        },
-        {
-          provide: ArchivosUtils,
-          useValue: mockArchivosUtils,
-        },
+        { provide: ArchivosUtils, useValue: mockArchivosUtils },
+        { provide: CreateArchivo, useValue: mockCreateArchivo },
       ],
     }).compile();
 
     service = module.get<SaveAudio>(SaveAudio);
-    archivoRepository = mockArchivoRepository;
-    storageService = module.get<StorageService>(StorageService);
-    archivosUtils = module.get<ArchivosUtils>(ArchivosUtils);
+    archivosUtils = module.get(ArchivosUtils);
+    createArchivoCU = module.get(CreateArchivo);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
 
-  describe('execute - Happy Path', () => {
-    it('debe guardar un audio válido correctamente', async () => {
-      const base64 = 'validBase64Audio';
-      const nombre = 'audio-test';
-      const mockBuffer = Buffer.from('audio data');
-      const mockLink = 'https://storage.com/audio.mp3';
-      const sizeMB = 2;
+  // ------------------------------------------------------------
+  // Caso de ÉXITO
+  // ------------------------------------------------------------
+  it('debe guardar un audio correctamente', async () => {
+    const base64 = 'data:audio/mpeg;base64,AAAA';
+    const nombre = 'audio-test';
+    const mockBuffer = Buffer.from('1234');
 
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/mpeg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      mockArchivosUtils.obtenerTamañoMB.mockReturnValue(sizeMB);
-      mockStorageService.uploadFile.mockResolvedValue(mockLink);
-      mockArchivoRepository.create.mockResolvedValue({
-        _id: 'archivo123',
-        nombre: nombre,
+    archivosUtils.getBuffer.mockResolvedValue(mockBuffer);
+
+    const mockResponse = crearRespuesta({
+      success: true,
+      data: {
+        nombre: `${nombre}.mp3`,
         tipo_archivo: TipoArchivo.AUDIO,
-        extension: '.mp3',
-        link: mockLink,
-        size: `${sizeMB}MB`,
-      });
-
-      const result = await service.execute(base64, nombre);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toBeDefined();
-      expect(mockStorageService.uploadFile).toHaveBeenCalled();
-      expect(mockArchivoRepository.create).toHaveBeenCalled();
+        extension: 'mp3',
+        link: 'https://storage.com/audio.mp3',
+      },
     });
 
-    it('debe guardar audio sin nombre', async () => {
-      const base64 = 'validBase64Audio';
-      const mockBuffer = Buffer.from('audio data');
-      const mockLink = 'https://storage.com/audio.mp3';
-      const sizeMB = 1.5;
+    createArchivoCU.execute.mockResolvedValue(mockResponse);
 
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/wav');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      mockArchivosUtils.obtenerTamañoMB.mockReturnValue(sizeMB);
-      mockStorageService.uploadFile.mockResolvedValue(mockLink);
-      mockArchivoRepository.create.mockResolvedValue({
-        _id: 'archivo123',
-        nombre: undefined,
-        tipo_archivo: TipoArchivo.AUDIO,
-        extension: '.mp3',
-        link: mockLink,
-        size: `${sizeMB}MB`,
-      });
+    const result = await service.execute(base64, nombre);
 
-      const result = await service.execute(base64);
-
-      expect(result.success).toBe(true);
-      expect(mockArchivoRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          nombre: undefined,
-        }),
-      );
-    });
+    expect(result.success).toBe(true);
+    expect(result.data?.tipo_archivo).toBe(TipoArchivo.AUDIO);
+    expect(archivosUtils.getBuffer).toHaveBeenCalledWith(
+      base64,
+      expect.arrayContaining(['audio/mpeg']),
+    );
+    expect(createArchivoCU.execute).toHaveBeenCalledWith(
+      mockBuffer,
+      'audio/mpeg',
+      TipoArchivo.AUDIO,
+      'mp3',
+      8,
+      nombre,
+    );
   });
 
-  describe('execute - Sad Paths', () => {
-    it('debe fallar si el audio no es válido', async () => {
-      const base64 = 'invalidBase64';
+  // ------------------------------------------------------------
+  // Casos de ERROR
+  // ------------------------------------------------------------
+  it('debe retornar error si el base64 no es válido o su formato no está permitido', async () => {
+    archivosUtils.getBuffer.mockResolvedValue(null);
 
-      mockArchivosUtils.getMimeType.mockResolvedValue(null);
+    const result = await service.execute(
+      'data:image/png;base64,XXXX',
+      'audioX',
+    );
 
-      const result = await service.execute(base64);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El audio no es válido.');
-      expect(mockStorageService.uploadFile).not.toHaveBeenCalled();
-    });
-
-    it('debe fallar si el formato de audio no está permitido', async () => {
-      const base64 = 'validBase64';
-      const mockBuffer = Buffer.from('audio data');
-
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/ogg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-
-      const result = await service.execute(base64);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El audio no es válido.');
-    });
-
-    it('debe fallar si el tamaño excede el máximo permitido', async () => {
-      const base64 = 'validBase64Audio';
-      const mockBuffer = Buffer.from('audio data');
-      const sizeMB = 10; // Excede el máximo de 8MB
-
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/mpeg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
-      mockArchivosUtils.obtenerTamañoMB.mockReturnValue(sizeMB);
-
-      const result = await service.execute(base64);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El tamaño máximo para audios es de 8MB.');
-      expect(mockStorageService.uploadFile).not.toHaveBeenCalled();
-    });
-
-    it('debe fallar si base64ToBuffer retorna null', async () => {
-      const base64 = 'invalidBase64';
-
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/mpeg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(null);
-
-      const result = await service.execute(base64);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El audio no es válido.');
-    });
+    expect(result.success).toBe(false);
+    expect(result.error).toBe(
+      'El audio no es válido o su formato no está permitido.',
+    );
+    expect(createArchivoCU.execute).not.toHaveBeenCalled();
   });
 
-  describe('getAudioBuffer', () => {
-    it('debe retornar buffer para audio/mpeg', async () => {
-      const base64 = 'validBase64';
-      const mockBuffer = Buffer.from('audio data');
+  it('debe retornar error si getBuffer lanza una excepción', async () => {
+    archivosUtils.getBuffer.mockRejectedValue(new Error('Falla interna'));
 
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/mpeg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
+    const result = await service.execute('data:audio/mpeg;base64,XXX');
 
-      const result = await service.getAudioBuffer(base64);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Error al procesar el audio');
+  });
 
-      expect(result).toEqual(mockBuffer);
-    });
+  it('debe propagar error si createArchivoCU falla internamente', async () => {
+    const base64 = 'data:audio/mpeg;base64,AAAA';
+    const mockBuffer = Buffer.from('bytes');
 
-    it('debe retornar buffer para audio/webm', async () => {
-      const base64 = 'validBase64';
-      const mockBuffer = Buffer.from('audio data');
+    archivosUtils.getBuffer.mockResolvedValue(mockBuffer);
+    createArchivoCU.execute.mockResolvedValue(
+      crearRespuesta({
+        success: false,
+        error: 'Error al guardar archivo.',
+      }),
+    );
 
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/webm');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
+    const result = await service.execute(base64);
 
-      const result = await service.getAudioBuffer(base64);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Error al guardar archivo.');
+  });
 
-      expect(result).toEqual(mockBuffer);
-    });
+  // ------------------------------------------------------------
+  // ⚙️ Casos adicionales
+  // ------------------------------------------------------------
+  it('debe aceptar ejecución sin nombre', async () => {
+    const base64 = 'data:audio/mpeg;base64,AAAA';
+    const mockBuffer = Buffer.from('AAA');
 
-    it('debe retornar buffer para video/webm', async () => {
-      const base64 = 'validBase64';
-      const mockBuffer = Buffer.from('audio data');
+    archivosUtils.getBuffer.mockResolvedValue(mockBuffer);
 
-      mockArchivosUtils.getMimeType.mockResolvedValue('video/webm');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(mockBuffer);
+    createArchivoCU.execute.mockResolvedValue(
+      crearRespuesta({
+        success: true,
+        data: { nombre: 'default.mp3' },
+      }),
+    );
 
-      const result = await service.getAudioBuffer(base64);
+    const result = await service.execute(base64);
 
-      expect(result).toEqual(mockBuffer);
-    });
+    expect(result.success).toBe(true);
+    expect(createArchivoCU.execute).toHaveBeenCalledWith(
+      mockBuffer,
+      'audio/mpeg',
+      TipoArchivo.AUDIO,
+      'mp3',
+      8,
+      undefined,
+    );
+  });
 
-    it('debe retornar null si mimeType es null', async () => {
-      const base64 = 'invalidBase64';
+  it('debe pasar correctamente los formatos permitidos a getBuffer', async () => {
+    const base64 = 'data:audio/webm;base64,AAAA';
+    const mockBuffer = Buffer.from('bytes');
 
-      mockArchivosUtils.getMimeType.mockResolvedValue(null);
+    archivosUtils.getBuffer.mockResolvedValue(mockBuffer);
+    createArchivoCU.execute.mockResolvedValue(
+      crearRespuesta({ success: true }),
+    );
 
-      const result = await service.getAudioBuffer(base64);
+    await service.execute(base64);
 
-      expect(result).toBeNull();
-    });
-
-    it('debe retornar null si el formato no está permitido', async () => {
-      const base64 = 'validBase64';
-
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/flac');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(Buffer.from('data'));
-
-      const result = await service.getAudioBuffer(base64);
-
-      expect(result).toBeNull();
-    });
-
-    it('debe retornar null si base64ToBuffer retorna null', async () => {
-      const base64 = 'invalidBase64';
-
-      mockArchivosUtils.getMimeType.mockResolvedValue('audio/mpeg');
-      mockArchivosUtils.base64ToBuffer.mockReturnValue(null);
-
-      const result = await service.getAudioBuffer(base64);
-
-      expect(result).toBeNull();
-    });
+    const allowedFormats = service['allowedFormats'];
+    expect(archivosUtils.getBuffer).toHaveBeenCalledWith(
+      base64,
+      allowedFormats,
+    );
   });
 });

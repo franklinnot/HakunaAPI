@@ -33,10 +33,11 @@ describe('ChatRepository', () => {
     chatModel = module.get<Model<Chat>>(getModelToken(Chat.name));
   });
 
-it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () => {
+  it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () => {
     const usuarioA = 'userA-id';
     const usuarioB = 'userB-id';
-    const mockChatDoc = { // Documento que Mongoose (aggregate) devolvería
+    const mockChatDoc = {
+      // Documento que Mongoose (aggregate) devolvería
       _id: 'chat-id-123',
       is_group: false,
       nombre: 'Chat Privado',
@@ -47,19 +48,24 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
       id_foto: null,
       cantidad_integrantes: 2,
     };
-    
+
     // Mock del método 'aggregate' para simular la cadena: aggregate().exec()
     (chatModel.aggregate as jest.Mock).mockImplementation(() => ({
       exec: jest.fn().mockResolvedValue([mockChatDoc]),
     }));
 
-    const result = await repository.findChatPrivadoByIdUsuarios(usuarioA, usuarioB);
+    const result = await repository.findChatPrivadoByIdUsuarios(
+      usuarioA,
+      usuarioB,
+    );
 
     // 1. Verificar que se llamó a aggregate con los parámetros correctos
     expect(chatModel.aggregate).toHaveBeenCalled();
     const aggregateCall = (chatModel.aggregate as jest.Mock).mock.calls[0][0];
     expect(aggregateCall).toHaveLength(4);
-    expect(aggregateCall[2].$match['integrantes.id_usuario'].$all).toEqual(expect.arrayContaining([usuarioA, usuarioB]));
+    expect(aggregateCall[2].$match['integrantes.id_usuario'].$all).toEqual(
+      expect.arrayContaining([usuarioA, usuarioB]),
+    );
 
     // 2. Verificar el resultado y que se aplicó la transformación a dominio
     expect(result).not.toBeNull();
@@ -76,7 +82,10 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
       exec: jest.fn().mockResolvedValue([]), // Array vacío = No encontrado
     }));
 
-    const result = await repository.findChatPrivadoByIdUsuarios(usuarioA, usuarioB);
+    const result = await repository.findChatPrivadoByIdUsuarios(
+      usuarioA,
+      usuarioB,
+    );
 
     // 1. Verificar que se llamó a aggregate
     expect(chatModel.aggregate).toHaveBeenCalled();
@@ -88,7 +97,8 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
   it('debe devolver chats privados de un usuario que coincidan con el filtro de integrantes', async () => {
     const idUsuario = 'user-id-456';
     const mockChatsEncontrados = [
-      { // Chat Válido: tiene el integrante buscado
+      {
+        // Chat Válido: tiene el integrante buscado
         _id: 'chat-1-valido',
         is_group: false,
         estado: Estado.HABILITADO,
@@ -96,7 +106,8 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
         integrantes: [{ _id: 'integ-1' }], // El populate agrega esto
         nombre: 'Chat con UserX',
       },
-      { // Chat Inválido (Aunque cumpla el find, el populate falló o el integrante no está)
+      {
+        // Chat Inválido (Aunque cumpla el find, el populate falló o el integrante no está)
         _id: 'chat-2-invalido',
         is_group: false,
         estado: Estado.HABILITADO,
@@ -109,7 +120,7 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
     // Mock del método 'find' para simular la cadena: find().populate().lean().exec()
     (chatModel.find as jest.Mock).mockImplementation(() => ({
       populate: jest.fn().mockReturnThis(), // Simular populate
-      lean: jest.fn().mockReturnThis(),     // Simular lean
+      lean: jest.fn().mockReturnThis(), // Simular lean
       exec: jest.fn().mockResolvedValue(mockChatsEncontrados),
     }));
 
@@ -156,13 +167,15 @@ it('debe devolver un chat privado al encontrarlo entre dos usuarios', async () =
     });
 
     // 2. Verificar el llamado a 'populate' con el match de usuario
-    expect((chatModel.find as jest.Mock).mock.results[0].value.populate).toHaveBeenCalledWith({
+    expect(
+      (chatModel.find as jest.Mock).mock.results[0].value.populate,
+    ).toHaveBeenCalledWith({
       path: 'integrantes',
       match: {
-        id_usuario: idUsuario, // Usuario es el criterio
-        estado: Estado.HABILITADO,
+        id_usuario: idUsuario,
+        estado: { $in: [Estado.HABILITADO, Estado.DESHABILITADO] },
       },
-      select: '_id',
+      select: '_id estado',
     });
 
     // 3. Verificar el resultado (debe devolver el grupo encontrado)

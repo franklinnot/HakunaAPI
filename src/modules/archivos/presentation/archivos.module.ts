@@ -13,6 +13,7 @@ import { UpdateImagen } from '../application/use-cases/update-imagen';
 import { DeleteArchivo } from '../application/use-cases/delete-archivo';
 import { SaveDocumento } from '../application/use-cases/save-documento';
 import { SaveAudio } from '../application/use-cases/save-audio';
+import { CreateArchivo } from '../application/use-cases/create-archivo';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SaveAudio } from '../application/use-cases/save-audio';
     StorageService,
     ArchivosUtils,
     DeleteArchivo,
+    CreateArchivo,
     SaveImagen,
     UpdateImagen,
     SaveDocumento,

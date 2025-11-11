@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRespuesta, crearRespuesta } from 'src/shared/application/response';
 import { IChatGrupalResponse } from '../chats.responses';
-import type { IChatRepository, IIntegranteRepository } from '../../infraestructure/chats.repositories.interfaces';
+import type {
+  IChatRepository,
+  IIntegranteRepository,
+} from '../../infraestructure/chats.repositories.interfaces';
 import { Estado } from 'src/shared/domain/enums';
 import { MensajesUtils } from 'src/modules/mensajes/application/mensajes.utils';
 import { IChat } from '../../domain/chats.entities';
@@ -46,11 +49,12 @@ export class GetChatGrupal {
     }
 
     // Obtener integrantes del chat con información completa
-    const integrantesResponse = await this.chatsUtils.getIntegrantesResponseByChat(chat);
-    
+    const integrantesResponse =
+      await this.chatsUtils.getIntegrantesResponseByChat(chat);
+
     // Obtener todos los integrantes del chat para validar permisos
     const todosLosIntegrantes = await this.integranteRepository.findAll({
-      id_chat: id_chat
+      id_chat: id_chat,
     });
 
     // obtener ultimo mensaje
@@ -62,12 +66,13 @@ export class GetChatGrupal {
 
     // Verificar que el usuario es miembro del chat y obtener su estado
     let estado_miembro = Estado.HABILITADO; // Por defecto para casos sin autenticación
-    let integrante;
-    
+
     if (id_usuario) {
       // Buscar al usuario en la lista de integrantes
-      integrante = todosLosIntegrantes.find(i => i.id_usuario.toString() === id_usuario);
-      
+      const integrante = todosLosIntegrantes.find(
+        (i) => i.id_usuario.toString() === id_usuario,
+      );
+
       // Si el usuario no es miembro del chat, no puede acceder
       if (!integrante) {
         return crearRespuesta({
@@ -75,9 +80,9 @@ export class GetChatGrupal {
           error: 'No tienes permisos para acceder a este chat',
         });
       }
-      
+
       estado_miembro = integrante.estado;
-      
+
       // Si el estado del integrante no está habilitado, no puede acceder
       if (estado_miembro !== Estado.HABILITADO) {
         return crearRespuesta({

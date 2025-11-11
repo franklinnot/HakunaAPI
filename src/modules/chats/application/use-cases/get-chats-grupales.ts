@@ -22,7 +22,11 @@ export class GetChatsGrupales {
     const chatsResponse: IChatGrupalResponse[] = [];
 
     for (const c of chats) {
-      const chatResult = await this.getChatGrupalCU.execute(c._id, id_usuario, c);
+      const chatResult = await this.getChatGrupalCU.execute(
+        c._id,
+        id_usuario,
+        c,
+      );
 
       if (chatResult.success && chatResult.data) {
         chatsResponse.push(chatResult.data);

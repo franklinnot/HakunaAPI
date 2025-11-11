@@ -1,8 +1,14 @@
 import { ChatsController } from 'src/modules/chats/presentation/chats.controller';
-import { CreateChatGrupalDto, UpdateChatGrupalDto } from 'src/modules/chats/presentation/chats.dtos';
+import {
+  CreateChatGrupalDto,
+  UpdateChatGrupalDto,
+} from 'src/modules/chats/presentation/chats.dtos';
 import { IChatsService } from 'src/modules/chats/application/chats.service.interface';
 import { IRespuesta } from 'src/shared/application/response';
-import { IChatGrupalResponse, IChatPrivadoResponse } from 'src/modules/chats/application/chats.responses';
+import {
+  IChatGrupalResponse,
+  IChatPrivadoResponse,
+} from 'src/modules/chats/application/chats.responses';
 
 describe('ChatsController', () => {
   let controller: ChatsController;
@@ -24,17 +30,17 @@ describe('ChatsController', () => {
     controller = new ChatsController(chatsService);
   });
 
- it('POST /chats/grupal → debe llamar a crearChatGrupal con los parámetros correctos', async () => {
-  const dto: CreateChatGrupalDto = {
-    integrantes: [{ id_usuario: 'u2' }] as any,
-    nombre: 'Equipo QA',
-    descripcion: 'Grupo de pruebas',
-    foto: 'fotoBase64',
-  };
+  it('POST /chats/grupal → debe llamar a crearChatGrupal con los parámetros correctos', async () => {
+    const dto: CreateChatGrupalDto = {
+      integrantes: [{ id_usuario: 'u2' }] as any,
+      nombre: 'Equipo QA',
+      descripcion: 'Grupo de pruebas',
+      foto: 'fotoBase64',
+    };
 
-  const expectedResponse: IRespuesta<IChatGrupalResponse> = {
-    success: true,
-    data: {
+    const expectedResponse: IRespuesta<IChatGrupalResponse> = {
+      success: true,
+      data: {
         nombre: 'Equipo QA',
         descripcion: 'Grupo de pruebas',
         link_foto: 'fotoBase64',
@@ -44,24 +50,23 @@ describe('ChatsController', () => {
         historial_mensajes: [],
         ultimo_mensaje: null,
         is_group: false,
-        createdAt: new Date()
-    },
-  };
+        createdAt: new Date(),
+      },
+    };
 
-  chatsService.crearChatGrupal.mockResolvedValue(expectedResponse);
+    chatsService.crearChatGrupal.mockResolvedValue(expectedResponse);
 
-  const result = await controller.crearChatGrupal(mockRequest as any, dto);
+    const result = await controller.crearChatGrupal(mockRequest as any, dto);
 
-  expect(chatsService.crearChatGrupal).toHaveBeenCalledWith(
-    mockUser,
-    dto.integrantes,
-    dto.nombre,
-    dto.descripcion,
-    dto.foto,
-  );
-  expect(result).toBe(expectedResponse);
-});
-
+    expect(chatsService.crearChatGrupal).toHaveBeenCalledWith(
+      mockUser,
+      dto.integrantes,
+      dto.nombre,
+      dto.descripcion,
+      dto.foto,
+    );
+    expect(result).toBe(expectedResponse);
+  });
 
   // -------------------------------------------------------------------
   it('GET /chats/privados → debe obtener los chats privados del usuario', async () => {
@@ -85,7 +90,7 @@ describe('ChatsController', () => {
     expect(result).toBe(expected);
   });
 
-   // -------------------------------------------------------------------
+  // -------------------------------------------------------------------
   it('GET /chats/privado/:id_chat → debe obtener un chat privado por id', async () => {
     const expected: IRespuesta<IChatPrivadoResponse> = {
       success: true,
@@ -96,11 +101,11 @@ describe('ChatsController', () => {
         ultimo_mensaje: null,
         is_group: false,
         usuarioB: {
-            id_usuario: 'u456',
-            nombre: 'María',
-            link_foto: null,
-            username: '',
-            createdAt: new Date(),
+          id_usuario: 'u456',
+          nombre: 'María',
+          link_foto: null,
+          username: '',
+          createdAt: new Date(),
         },
       },
     };

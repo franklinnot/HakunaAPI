@@ -43,35 +43,39 @@ describe('MensajesController', () => {
   it('debe enviar un mensaje privado correctamente', async () => {
     const dto: EnviarMensajePrivadoDto = {
       descripcion: 'Hola!',
-      archivos: [{
-            nombre: 'file1.png',
-            tipoArchivo: TipoArchivo.IMAGEN,
-            b64: 'iVBORw0KGgoAAAANSUhEUgAAAAUA',
-          },],
+      archivos: [
+        {
+          nombre: 'file1.png',
+          tipoArchivo: TipoArchivo.IMAGEN,
+          b64: 'iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        },
+      ],
     };
     const id_usuarioB = 'u999';
 
     const expectedResponse: IRespuesta<IMensajePrivadoResponse> = {
       success: true,
       data: {
-          id_mensaje: 'm001',
-          id_usuario: mockUser._id,
-          id_usuarioB,
-          id_chat: 'chat_privado',
-          is_group: false,
-          descripcion: dto.descripcion,
-          has_files: true,
-          createdAt: new Date(),
-          estado: Estado.HABILITADO,
-          archivos: [
-            {id_archivo: 'a002',
+        id_mensaje: 'm001',
+        id_usuario: mockUser._id,
+        id_usuarioB,
+        id_chat: 'chat_privado',
+        is_group: false,
+        descripcion: dto.descripcion,
+        has_files: true,
+        createdAt: new Date(),
+        estado: Estado.HABILITADO,
+        archivos: [
+          {
+            id_archivo: 'a002',
             nombre: 'file2.jpg',
-        link: 'https://cdn/files/file2.jpg',
+            link: 'https://cdn/files/file2.jpg',
             tipo_archivo: TipoArchivo.IMAGEN,
             extension: 'jpg',
             size: '2MB',
-            estado: Estado.HABILITADO,},
-          ]
+            estado: Estado.HABILITADO,
+          },
+        ],
       },
     };
 
@@ -139,12 +143,13 @@ describe('MensajesController', () => {
     const id_chat = 'g001';
     const dto: EnviarMensajeGrupalDto = {
       descripcion: 'Saludos grupo!',
-      archivos: [{
-            nombre: 'file2.png',
-            tipoArchivo: TipoArchivo.IMAGEN,
-            b64: 'iVBORw0KGgoAAAANSUhEUgAAAAUA',
-          },
-        ],
+      archivos: [
+        {
+          nombre: 'file2.png',
+          tipoArchivo: TipoArchivo.IMAGEN,
+          b64: 'iVBORw0KGgoAAAANSUhEUgAAAAUA',
+        },
+      ],
     };
 
     const expectedResponse: IRespuesta<IMensajeGrupalResponse> = {
@@ -174,7 +179,11 @@ describe('MensajesController', () => {
 
     mensajesService.sendMensajeGrupal.mockResolvedValue(expectedResponse);
 
-    const result = await controller.sendMensajeGrupal(mockRequest, dto, id_chat);
+    const result = await controller.sendMensajeGrupal(
+      mockRequest,
+      dto,
+      id_chat,
+    );
 
     expect(result).toBe(expectedResponse);
     expect(mensajesService.sendMensajeGrupal).toHaveBeenCalledWith(

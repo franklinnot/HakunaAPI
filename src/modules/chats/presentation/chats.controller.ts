@@ -11,7 +11,11 @@ import {
 } from '@nestjs/common';
 import type { IChatsService } from '../application/chats.service.interface';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
-import { CreateChatGrupalDto, UpdateChatGrupalDto, AddMemberDto } from './chats.dtos';
+import {
+  CreateChatGrupalDto,
+  UpdateChatGrupalDto,
+  AddMemberDto,
+} from './chats.dtos';
 
 @Controller('chats')
 export class ChatsController {
@@ -19,16 +23,6 @@ export class ChatsController {
     @Inject('IChatsService')
     private readonly chatsService: IChatsService,
   ) {}
-
-  // // Crear chat privado
-  // @Post('privado/:id_usuarioB')
-  // async crearChatPrivado(
-  //   @Request() req: IRequestWithUser,
-  //   @Param('id_usuarioB') id_usuarioB: string,
-  // ) {
-  //   const usuario = req.user.data;
-  //   return await this.chatsService.crearChatPrivado(usuario!, id_usuarioB);
-  // }
 
   // Crear chat grupal
   @Post('grupal')

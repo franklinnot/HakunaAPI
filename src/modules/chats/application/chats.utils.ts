@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IChat } from '../domain/chats.entities';
 import { IIntegranteGrupalResponse } from './chats.responses';
-import type { IIntegranteRepository, IChatRepository } from '../infraestructure/chats.repositories.interfaces';
+import type {
+  IIntegranteRepository,
+  IChatRepository,
+} from '../infraestructure/chats.repositories.interfaces';
 import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 import { Estado } from 'src/shared/domain/enums';
 

@@ -86,11 +86,10 @@ export class RemoveMemberFromGroup {
 
       // Obtener el chat actualizado
       const chatActualizado = await this.chatRepository.findById(id_chat);
-      
+
       // Obtener los integrantes actualizados
-      const integrantesResponse = await this.chatsUtils.getIntegrantesResponseByChat(
-        chatActualizado!,
-      );
+      const integrantesResponse =
+        await this.chatsUtils.getIntegrantesResponseByChat(chatActualizado!);
 
       // Crear la respuesta del chat grupal
       const chatResponse = ChatsMapper.toChatGrupalResponse(
@@ -119,7 +118,7 @@ export class RemoveMemberFromGroup {
         success: true,
         data: chatResponse,
       });
-    } catch (error) {
+    } catch {
       return crearRespuesta({
         success: false,
         error: 'Error interno del servidor',
