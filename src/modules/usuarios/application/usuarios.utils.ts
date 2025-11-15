@@ -16,7 +16,7 @@ export class UsuariosUtils {
 
   async getUsuarioResponse(usuario: IUsuario): Promise<IUsuarioResponse> {
     const link_foto = await this.archivoRepository.findLinkById(
-      usuario.id_foto || '',
+      usuario?.id_foto || '',
     );
 
     return UsuariosMapper.toUsuarioResponse(usuario, link_foto);

@@ -100,7 +100,7 @@ export class SendMensajePrivado {
       });
     }
 
-    const has_files = archivos ? true : false;
+    const has_files = archivos && archivos.length >= 1 ? true : false;
     const nuevo_mensaje = await this.mensajeRepository.create({
       id_integrante: integranteA._id,
       descripcion: descripcion,
@@ -120,19 +120,34 @@ export class SendMensajePrivado {
     const detalles: IArchivoResponse[] = [];
     if (has_files) {
       for (const archivo of archivos!) {
+        let rpta: IRespuesta<IArchivoResponse>;
+
         if (archivo.tipoArchivo == TipoArchivo.IMAGEN) {
-          const rpta = await this.archivosService.saveImagen(
+          rpta = await this.archivosService.saveImagen(
             archivo.b64,
             archivo.nombre,
           );
-          if (rpta.data) {
-            const archivo = rpta.data;
-            detalles.push(archivo);
-            await this.detalleRepository.create({
-              id_mensaje: nuevo_mensaje._id,
-              id_archivo: archivo.id_archivo,
-            });
-          }
+        } else if (archivo.tipoArchivo === TipoArchivo.AUDIO) {
+          rpta = await this.archivosService.saveAudio(
+            archivo.b64,
+            archivo.nombre,
+          );
+        } else if (archivo.tipoArchivo === TipoArchivo.DOCUMENTO) {
+          rpta = await this.archivosService.saveDocumento(
+            archivo.b64,
+            archivo.nombre,
+          );
+        } else {
+          continue;
+        }
+
+        if (rpta.data) {
+          const archivo = rpta.data;
+          detalles.push(archivo);
+          await this.detalleRepository.create({
+            id_mensaje: nuevo_mensaje._id,
+            id_archivo: archivo.id_archivo,
+          });
         }
       }
     }
