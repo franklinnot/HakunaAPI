@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { fileTypeFromBuffer } from 'file-type';
+import { fileTypeFromBuffer, FileTypeResult } from 'file-type';
 
 @Injectable()
 export class ArchivosUtils {
@@ -26,13 +26,13 @@ export class ArchivosUtils {
     }
   }
 
-  // Obtiene el tipo MIME desde el Base64
-  async getMimeType(base64: string): Promise<string | null> {
+  // Obtener el file type
+  async getFileType(base64: string): Promise<FileTypeResult | null> {
     try {
       const cleanBase64 = this.limpiarBase64(base64);
       const buffer = Buffer.from(cleanBase64, 'base64');
       const fileType = await fileTypeFromBuffer(buffer);
-      return fileType?.mime || null;
+      return fileType || null;
     } catch {
       return null;
     }
@@ -42,5 +42,20 @@ export class ArchivosUtils {
   obtenerTamañoMB(buffer: Buffer): number {
     const sizeMB = buffer.length / (1024 * 1024);
     return Number(sizeMB.toFixed(2));
+  }
+
+  async getBuffer(
+    base64: string,
+    allowedFormats?: string[],
+  ): Promise<Buffer | null> {
+    if (allowedFormats) {
+      const fileType = await this.getFileType(base64);
+      if (!fileType || !allowedFormats.includes(fileType.mime)) {
+        return null;
+      }
+    }
+
+    const buffer = this.base64ToBuffer(base64);
+    return buffer || null;
   }
 }

@@ -132,8 +132,12 @@ export class SendMensajeGrupal {
             });
           }
         } else if (archivo.tipoArchivo == TipoArchivo.AUDIO) {
-          const rpta = await this.archivosService.saveAudio(archivo.b64, archivo.nombre);
-          if (rpta.data) {
+          const rpta = await this.archivosService.saveAudio(
+            archivo.b64,
+            archivo.nombre,
+          );
+
+          if (rpta?.data) {
             const archivo = rpta.data;
             detalles.push(archivo);
             await this.detalleRepository.create({
@@ -148,7 +152,8 @@ export class SendMensajeGrupal {
       if (detalles.length === 0 && !descripcion) {
         return crearRespuesta({
           success: false,
-          error: 'No se pudo registrar ningún archivo ni se proporcionó descripción.',
+          error:
+            'No se pudo registrar ningún archivo ni se proporcionó descripción.',
         });
       }
     }

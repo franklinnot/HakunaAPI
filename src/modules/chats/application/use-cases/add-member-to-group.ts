@@ -62,9 +62,8 @@ export class AddMemberToGroup {
       }
 
       // Verificar que el usuario a agregar existe
-      const nuevoMiembro = await this.usuariosUtils.getUsuarioResponseById(
-        id_nuevo_miembro,
-      );
+      const nuevoMiembro =
+        await this.usuariosUtils.getUsuarioResponseById(id_nuevo_miembro);
       if (!nuevoMiembro) {
         return crearRespuesta({
           success: false,
@@ -94,28 +93,26 @@ export class AddMemberToGroup {
         estado: Estado.HABILITADO,
       });
 
-      // Actualizar la cantidad de integrantes en el chat
-      await this.chatRepository.update(id_chat, {
-        cantidad_integrantes: chat.cantidad_integrantes + 1,
-      });
+      // Sincronizar la cantidad de integrantes en la base de datos
+      await this.chatsUtils.sincronizarCantidadIntegrantes(id_chat);
 
       // Obtener el chat actualizado
       const chatActualizado = await this.chatRepository.findById(id_chat);
-      
+
       // Obtener los integrantes actualizados
-      const integrantesResponse = await this.chatsUtils.getIntegrantesResponseByChat(
-        chatActualizado!,
-      );
+      const integrantesResponse =
+        await this.chatsUtils.getIntegrantesResponseByChat(chatActualizado!);
 
       // Obtener el historial completo de mensajes para el nuevo miembro
       const mensajesResponse = await this.getMensajesGrupalesCU.execute(
         id_nuevo_miembro,
         id_chat,
       );
-      
-      const historialMensajes = mensajesResponse.success && mensajesResponse.data 
-        ? mensajesResponse.data 
-        : [];
+
+      const historialMensajes =
+        mensajesResponse.success && mensajesResponse.data
+          ? mensajesResponse.data
+          : [];
 
       // Obtener el último mensaje
       const ultimoMensaje = await this.mensajesUtils.getUltimoMensaje(id_chat);
@@ -127,6 +124,7 @@ export class AddMemberToGroup {
         historialMensajes, // historial completo de mensajes
         ultimoMensaje, // último mensaje
         chatActualizado!.id_foto,
+        usuarioSolicitante.estado, // estado_miembro
       );
 
       // Emitir evento socket para notificar a todos los miembros del grupo
@@ -140,7 +138,7 @@ export class AddMemberToGroup {
         success: true,
         data: chatResponse,
       });
-    } catch (error) {
+    } catch {
       return crearRespuesta({
         success: false,
         error: 'Error interno del servidor',

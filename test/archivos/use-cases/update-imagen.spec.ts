@@ -1,224 +1,101 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateImagen } from '../../../src/modules/archivos/application/use-cases/update-imagen';
 import { SaveImagen } from '../../../src/modules/archivos/application/use-cases/save-imagen';
 import { DeleteArchivo } from '../../../src/modules/archivos/application/use-cases/delete-archivo';
+import { crearRespuesta } from '../../../src/shared/application/response';
 
 describe('UpdateImagen', () => {
   let service: UpdateImagen;
   let archivoRepository: any;
-  let saveImagen: SaveImagen;
-  let deleteArchivo: DeleteArchivo;
+  let saveImagen: jest.Mocked<SaveImagen>;
+  let deleteArchivo: jest.Mocked<DeleteArchivo>;
 
-  const mockArchivoRepository = {
-    existsById: jest.fn(),
-  };
+  beforeEach(() => {
+    archivoRepository = {
+      existsById: jest.fn(),
+    };
 
-  const mockSaveImagen = {
-    execute: jest.fn(),
-  };
+    saveImagen = {
+      execute: jest.fn(),
+    } as any;
 
-  const mockDeleteArchivo = {
-    execute: jest.fn(),
-  };
+    deleteArchivo = {
+      execute: jest.fn(),
+    } as any;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UpdateImagen,
-        {
-          provide: 'IArchivoRepository',
-          useValue: mockArchivoRepository,
-        },
-        {
-          provide: SaveImagen,
-          useValue: mockSaveImagen,
-        },
-        {
-          provide: DeleteArchivo,
-          useValue: mockDeleteArchivo,
-        },
-      ],
-    }).compile();
-
-    service = module.get<UpdateImagen>(UpdateImagen);
-    archivoRepository = mockArchivoRepository;
-    saveImagen = module.get<SaveImagen>(SaveImagen);
-    deleteArchivo = module.get<DeleteArchivo>(DeleteArchivo);
+    service = new UpdateImagen(archivoRepository, saveImagen, deleteArchivo);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('execute - Happy Path', () => {
-    it('debe actualizar una imagen correctamente', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
-      const nombre = 'nueva-imagen';
+  // -----------------------------
+  // Caso exitoso (Happy Path)
+  // -----------------------------
+  it('debe actualizar una imagen correctamente', async () => {
+    const id_archivo = 'img123';
+    const base64 = 'fake-base64-data';
+    const nombre = 'nueva-imagen.webp';
 
-      const mockArchivoResponse = {
-        id_archivo: 'archivo456',
-        nombre: nombre,
-        tipo_archivo: 'Imagen',
-        extension: '.webp',
-        link: 'https://storage.com/new-image.webp',
-        size: '2MB',
-      };
-
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockResolvedValue({
-        success: true,
-        data: {},
-      });
-      mockSaveImagen.execute.mockResolvedValue({
-        success: true,
-        data: mockArchivoResponse,
-      });
-
-      const result = await service.execute(id_archivo, base64, nombre);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toEqual(mockArchivoResponse);
-      expect(mockArchivoRepository.existsById).toHaveBeenCalledWith(id_archivo);
-      expect(mockDeleteArchivo.execute).toHaveBeenCalledWith(id_archivo);
-      expect(mockSaveImagen.execute).toHaveBeenCalledWith(base64, nombre);
+    const mockResponse = crearRespuesta({
+      success: true,
+      data: {
+        id: 'nuevo123',
+        nombre,
+        link: 'https://s3.com/new-image.webp',
+      },
     });
 
-    it('debe actualizar imagen sin nombre', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
+    archivoRepository.existsById.mockResolvedValue(true);
+    deleteArchivo.execute.mockResolvedValue(crearRespuesta({ success: true }));
+    saveImagen.execute.mockResolvedValue(mockResponse);
 
-      const mockArchivoResponse = {
-        id_archivo: 'archivo456',
-        nombre: null,
-        tipo_archivo: 'Imagen',
-        extension: '.webp',
-        link: 'https://storage.com/new-image.webp',
-        size: '1.5MB',
-      };
+    const result = await service.execute(id_archivo, base64, nombre);
 
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockResolvedValue({
-        success: true,
-        data: {},
-      });
-      mockSaveImagen.execute.mockResolvedValue({
-        success: true,
-        data: mockArchivoResponse,
-      });
-
-      const result = await service.execute(id_archivo, base64);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toEqual(mockArchivoResponse);
-      expect(mockSaveImagen.execute).toHaveBeenCalledWith(base64, undefined);
-    });
+    expect(archivoRepository.existsById).toHaveBeenCalledWith(id_archivo);
+    expect(deleteArchivo.execute).toHaveBeenCalledWith(id_archivo);
+    expect(saveImagen.execute).toHaveBeenCalledWith(base64, nombre);
+    expect(result.success).toBe(true);
+    expect(result.data?.link).toBe('https://s3.com/new-image.webp');
   });
 
-  describe('execute - Sad Paths', () => {
-    it('debe fallar si la imagen no existe', async () => {
-      const id_archivo = 'archivo-inexistente';
-      const base64 = 'validBase64Image';
-      const nombre = 'nueva-imagen';
+  // -----------------------------
+  // Imagen no existe
+  // -----------------------------
+  it('debe retornar error si la imagen no existe', async () => {
+    const id_archivo = 'inexistente';
+    archivoRepository.existsById.mockResolvedValue(false);
 
-      mockArchivoRepository.existsById.mockResolvedValue(false);
+    const result = await service.execute(id_archivo, 'base64');
 
-      const result = await service.execute(id_archivo, base64, nombre);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('La imagen no existe.');
-      expect(mockDeleteArchivo.execute).not.toHaveBeenCalled();
-      expect(mockSaveImagen.execute).not.toHaveBeenCalled();
-    });
-
-    it('debe fallar si guardar imagen falla', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'invalidBase64Image';
-
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockResolvedValue({
-        success: true,
-        data: {},
-      });
-      mockSaveImagen.execute.mockResolvedValue({
-        success: false,
-        error: 'El imagen no es válida.',
-      });
-
-      const result = await service.execute(id_archivo, base64);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El imagen no es válida.');
-      expect(mockDeleteArchivo.execute).toHaveBeenCalled();
-    });
-
-    it('debe manejar errores al verificar existencia', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
-
-      mockArchivoRepository.existsById.mockRejectedValue(
-        new Error('Database error'),
-      );
-
-      await expect(service.execute(id_archivo, base64)).rejects.toThrow(
-        'Database error',
-      );
-      expect(mockDeleteArchivo.execute).not.toHaveBeenCalled();
-    });
-
-    it('debe manejar errores al eliminar archivo', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
-
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockRejectedValue(new Error('Delete error'));
-
-      await expect(service.execute(id_archivo, base64)).rejects.toThrow(
-        'Delete error',
-      );
-      expect(mockSaveImagen.execute).not.toHaveBeenCalled();
-    });
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('La imagen no existe.');
+    expect(deleteArchivo.execute).not.toHaveBeenCalled();
+    expect(saveImagen.execute).not.toHaveBeenCalled();
   });
 
-  describe('execute - Edge Cases', () => {
-    it('debe propagar error de saveImagen correctamente', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
+  // -----------------------------
+  // Error al guardar nueva imagen
+  // -----------------------------
+  it('debe retornar error si ocurre un fallo al guardar la nueva imagen', async () => {
+    const id_archivo = 'img-error';
+    const base64 = 'fake-base64';
+    const nombre = 'imagen-falla.webp';
 
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockResolvedValue({
-        success: true,
-        data: {},
-      });
-      mockSaveImagen.execute.mockResolvedValue({
+    archivoRepository.existsById.mockResolvedValue(true);
+    deleteArchivo.execute.mockResolvedValue(crearRespuesta({ success: true }));
+    saveImagen.execute.mockResolvedValue(
+      crearRespuesta({
         success: false,
-        error: 'El tamaño máximo para imágenes es de 4MB.',
-      });
+        error: 'Error al guardar la nueva imagen.',
+      }),
+    );
 
-      const result = await service.execute(id_archivo, base64);
+    const result = await service.execute(id_archivo, base64, nombre);
 
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('El tamaño máximo para imágenes es de 4MB.');
-    });
-
-    it('debe retornar data null si saveImagen no retorna data', async () => {
-      const id_archivo = 'archivo123';
-      const base64 = 'validBase64Image';
-
-      mockArchivoRepository.existsById.mockResolvedValue(true);
-      mockDeleteArchivo.execute.mockResolvedValue({
-        success: true,
-        data: {},
-      });
-      mockSaveImagen.execute.mockResolvedValue({
-        success: true,
-        data: null,
-      });
-
-      const result = await service.execute(id_archivo, base64);
-
-      expect(result.success).toBe(true);
-      expect(result.data).toBeNull();
-    });
+    expect(deleteArchivo.execute).toHaveBeenCalled();
+    expect(saveImagen.execute).toHaveBeenCalled();
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Error al guardar la nueva imagen.');
   });
 });

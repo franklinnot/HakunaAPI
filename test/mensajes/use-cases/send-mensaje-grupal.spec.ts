@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { SendMensajeGrupal } from '../../../src/modules/mensajes/application/use-cases/send-mensaje-grupal';
 import {
@@ -47,6 +48,7 @@ describe('SendMensajeGrupal', () => {
   const mockArchivosService = {
     saveImagen: jest.fn(),
     saveDocumento: jest.fn(),
+    saveAudio: jest.fn(),
   };
 
   const mockEmisorEventos = {
@@ -368,6 +370,7 @@ describe('SendMensajeGrupal', () => {
         _id: 'mensaje123',
         id_integrante: mockIntegrante._id,
         has_files: true,
+        descripcion: 'Probando',
         estado: Estado.HABILITADO,
         createdAt: new Date(),
       };
@@ -385,7 +388,7 @@ describe('SendMensajeGrupal', () => {
       const result = await service.execute(
         mockUsuario as any,
         id_chat,
-        undefined,
+        'Probando',
         archivos,
       );
 
@@ -468,6 +471,7 @@ describe('SendMensajeGrupal', () => {
         _id: 'mensaje123',
         id_integrante: mockIntegrante._id,
         has_files: true,
+        descripcion: 'Probando',
         estado: Estado.HABILITADO,
         createdAt: new Date(),
       };
@@ -477,11 +481,12 @@ describe('SendMensajeGrupal', () => {
       mockMensajeRepository.create.mockResolvedValue(mockMensaje);
       mockIntegranteRepository.findAll.mockResolvedValue([mockIntegrante]);
       mockViewerRepository.registrarViewers.mockResolvedValue([]);
+      mockArchivosService.saveAudio.mockResolvedValue(undefined);
 
       const result = await service.execute(
         mockUsuario as any,
         id_chat,
-        undefined,
+        'Probando',
         archivos,
       );
 

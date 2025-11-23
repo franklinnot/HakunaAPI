@@ -5,6 +5,7 @@ import {
 } from './chats.responses';
 import { IUsuarioResponse } from 'src/modules/usuarios/application/usuarios.responses';
 import { IMensajeResponse } from 'src/modules/mensajes/application/mensajes.responses';
+import { Estado } from 'src/shared/domain/enums';
 
 export class ChatsMapper {
   static toChatGrupalResponse(
@@ -13,6 +14,7 @@ export class ChatsMapper {
     historial_mensajes: IMensajeResponse[],
     ultimo_mensaje: IMensajeResponse | null,
     link_foto: string | null,
+    estado_miembro: Estado,
   ): IChatGrupalResponse {
     return {
       id_chat: chat._id,
@@ -23,8 +25,9 @@ export class ChatsMapper {
       nombre: chat.nombre,
       descripcion: chat.descripcion,
       integrantes: integrantes,
-      cantidad_integrantes: chat.cantidad_integrantes,
+      cantidad_integrantes: integrantes.length, // Usar la cantidad real de integrantes activos
       is_group: true,
+      estado_miembro: estado_miembro,
     };
   }
 

@@ -20,7 +20,11 @@ describe('UpdateFotoGrupal Use Case', () => {
       findLinkById: jest.fn(),
     };
 
-    useCase = new UpdateFotoGrupal(chatRepository, archivosService, archivoRepository);
+    useCase = new UpdateFotoGrupal(
+      chatRepository,
+      archivosService,
+      archivoRepository,
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -37,7 +41,9 @@ describe('UpdateFotoGrupal Use Case', () => {
     const result = await useCase.execute('chat1', 'fotoBase64');
 
     expect(archivosService.saveImagen).toHaveBeenCalledWith('fotoBase64');
-    expect(chatRepository.update).toHaveBeenCalledWith('chat1', { id_foto: 'new123' });
+    expect(chatRepository.update).toHaveBeenCalledWith('chat1', {
+      id_foto: 'new123',
+    });
     expect(result).toBe('https://foto-nueva.jpg');
   });
 
@@ -49,7 +55,9 @@ describe('UpdateFotoGrupal Use Case', () => {
     const result = await useCase.execute('chat1', null);
 
     expect(archivosService.deleteArchivo).toHaveBeenCalledWith('old123');
-    expect(chatRepository.update).toHaveBeenCalledWith('chat1', { id_foto: null });
+    expect(chatRepository.update).toHaveBeenCalledWith('chat1', {
+      id_foto: null,
+    });
     expect(result).toBeNull();
   });
 
@@ -66,7 +74,10 @@ describe('UpdateFotoGrupal Use Case', () => {
 
     const result = await useCase.execute('chat1', 'nuevaBase64');
 
-    expect(archivosService.updateImagen).toHaveBeenCalledWith('old123', 'nuevaBase64');
+    expect(archivosService.updateImagen).toHaveBeenCalledWith(
+      'old123',
+      'nuevaBase64',
+    );
     expect(result).toBe('https://foto-nueva.jpg');
   });
 

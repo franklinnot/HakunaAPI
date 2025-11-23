@@ -2,7 +2,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from 'src/modules/auth/presentation/auth.controller';
 import type { IAuthService } from 'src/modules/auth/application/auth.service.interface';
-import { RegisterUsuarioDto, LoginDto } from 'src/modules/auth/presentation/auth.dtos';
+import {
+  RegisterUsuarioDto,
+  LoginDto,
+} from 'src/modules/auth/presentation/auth.dtos';
 import type { IRequestWithUser } from 'src/modules/auth/presentation/auth.types';
 import type { IUsuario } from 'src/modules/usuarios/domain/usuarios.entities';
 import { Estado } from 'src/shared/domain/enums';

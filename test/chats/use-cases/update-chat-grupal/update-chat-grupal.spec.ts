@@ -39,7 +39,7 @@ describe('ChatsService - updateChatGrupal', () => {
       historial_mensajes: [],
       createdAt: new Date(),
       ultimo_mensaje: null,
-      is_group: true
+      is_group: true,
     };
 
     const mockResponse: IRespuesta<IChatGrupalResponse> = {

@@ -6,7 +6,9 @@ import type { IChatRepository } from '../../infraestructure/chats.repositories.i
 import type { IIntegranteRepository } from '../../infraestructure/chats.repositories.interfaces';
 import { ChatsUtils } from '../chats.utils';
 import { ChatsMapper } from '../chats.mapper';
-import { Estado } from 'src/shared/domain/enums';
+import { Estado, TipoEvento } from 'src/shared/domain/enums';
+import { EmisorEventos } from 'src/socket/emisor-eventos';
+import { UsuariosUtils } from 'src/modules/usuarios/application/usuarios.utils';
 
 @Injectable()
 export class RemoveMemberFromGroup {
@@ -17,6 +19,10 @@ export class RemoveMemberFromGroup {
     private readonly integranteRepository: IIntegranteRepository,
     @Inject()
     private readonly chatsUtils: ChatsUtils,
+    @Inject()
+    private readonly usuariosUtils: UsuariosUtils,
+    @Inject()
+    private readonly emisorEventos: EmisorEventos,
   ) {}
 
   async execute(
@@ -70,23 +76,20 @@ export class RemoveMemberFromGroup {
         });
       }
 
-      // Eliminar el miembro (cambiar estado a deshabilitado)
+      // Deshabilitar al miembro (no eliminar para mantener historial)
       await this.integranteRepository.update(miembroAEliminar._id, {
         estado: Estado.DESHABILITADO,
       });
 
-      // Actualizar la cantidad de integrantes en el chat
-      await this.chatRepository.update(id_chat, {
-        cantidad_integrantes: chat.cantidad_integrantes - 1,
-      });
+      // Sincronizar la cantidad de integrantes en la base de datos
+      await this.chatsUtils.sincronizarCantidadIntegrantes(id_chat);
 
       // Obtener el chat actualizado
       const chatActualizado = await this.chatRepository.findById(id_chat);
-      
+
       // Obtener los integrantes actualizados
-      const integrantesResponse = await this.chatsUtils.getIntegrantesResponseByChat(
-        chatActualizado!,
-      );
+      const integrantesResponse =
+        await this.chatsUtils.getIntegrantesResponseByChat(chatActualizado!);
 
       // Crear la respuesta del chat grupal
       const chatResponse = ChatsMapper.toChatGrupalResponse(
@@ -95,13 +98,27 @@ export class RemoveMemberFromGroup {
         [], // historial_mensajes - se puede obtener si es necesario
         null, // ultimo_mensaje - se puede obtener si es necesario
         chatActualizado!.id_foto,
+        usuarioSolicitante.estado, // estado_miembro
       );
+
+      // Obtener información del miembro eliminado
+      const miembroEliminado = await this.usuariosUtils.getUsuarioResponseById(
+        id_miembro_a_eliminar,
+      );
+
+      // Emitir evento socket para notificar la eliminación del miembro
+      this.emisorEventos.emit(TipoEvento.INTEGRANTE_ELIMINADO, {
+        id_chat: id_chat,
+        miembro_eliminado: miembroEliminado,
+        id_miembro_eliminado: id_miembro_a_eliminar,
+        chat_actualizado: chatResponse,
+      });
 
       return crearRespuesta({
         success: true,
         data: chatResponse,
       });
-    } catch (error) {
+    } catch {
       return crearRespuesta({
         success: false,
         error: 'Error interno del servidor',

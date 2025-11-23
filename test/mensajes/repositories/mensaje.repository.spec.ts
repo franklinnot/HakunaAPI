@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { MensajeRepository } from '../../../src/modules/mensajes/infraestructure/repositories/mensaje.repository'; // Ajusta la ruta
 import { Mensaje } from '../../../src/modules/mensajes/infraestructure/schemas/mensaje.schema'; // Ajusta la ruta
 import { Estado } from 'src/shared/domain/enums'; // Ajusta la ruta
@@ -47,41 +46,77 @@ describe('MensajeRepository', () => {
     }).compile();
 
     repository = module.get<MensajeRepository>(MensajeRepository);
-    mensajeModel = module.get(getModelToken(Mensaje.name)) as ReturnType<typeof mockMensajeModel>;
-    integranteRepository = module.get<IIntegranteRepository>('IIntegranteRepository');
+    mensajeModel = module.get(getModelToken(Mensaje.name)) as ReturnType<
+      typeof mockMensajeModel
+    >;
+    integranteRepository = module.get<IIntegranteRepository>(
+      'IIntegranteRepository',
+    );
   });
 
   it('1. debe devolver todos los mensajes de un chat, en orden descendente', async () => {
     const chatId = 'chat-group-1';
-    
+
     // Mocks de la dependencia
     const mockIntegrantes: IIntegrante[] = [
-      { _id: 'integ-1', id_chat: chatId, id_usuario: 'user-a', is_admin: false, estado: Estado.HABILITADO, createdAt: new Date(), updatedAt: new Date() },
-      { _id: 'integ-2', id_chat: chatId, id_usuario: 'user-b', is_admin: false, estado: Estado.HABILITADO, createdAt: new Date(), updatedAt: new Date() },
+      {
+        _id: 'integ-1',
+        id_chat: chatId,
+        id_usuario: 'user-a',
+        is_admin: false,
+        estado: Estado.HABILITADO,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        _id: 'integ-2',
+        id_chat: chatId,
+        id_usuario: 'user-b',
+        is_admin: false,
+        estado: Estado.HABILITADO,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
-    (integranteRepository.findAll as jest.Mock).mockResolvedValue(mockIntegrantes);
+    (integranteRepository.findAll as jest.Mock).mockResolvedValue(
+      mockIntegrantes,
+    );
 
     // Mocks de los resultados de MensajeModel.find().sort().exec()
     const mockMensajes: Mensaje[] = [
-      { _id: 'msg-reciente', id_integrante: 'integ-1', descripcion: 'Hola', has_files: false, estado: Estado.HABILITADO, createdAt: new Date('2025-01-02') },
-      { _id: 'msg-antiguo', id_integrante: 'integ-2', descripcion: 'Chau', has_files: false, estado: Estado.HABILITADO, createdAt: new Date('2025-01-01') },
+      {
+        _id: 'msg-reciente',
+        id_integrante: 'integ-1',
+        descripcion: 'Hola',
+        has_files: false,
+        estado: Estado.HABILITADO,
+        createdAt: new Date('2025-01-02'),
+      },
+      {
+        _id: 'msg-antiguo',
+        id_integrante: 'integ-2',
+        descripcion: 'Chau',
+        has_files: false,
+        estado: Estado.HABILITADO,
+        createdAt: new Date('2025-01-01'),
+      },
     ] as unknown as Mensaje[];
     (mensajeModel.exec as jest.Mock).mockResolvedValue(mockMensajes);
-    
+
     const result = await repository.findAllByChatId(chatId);
 
     // 1. Verificar la llamada al IntegranteRepository
     expect(integranteRepository.findAll).toHaveBeenCalledWith({
       id_chat: chatId,
-      estado: Estado.HABILITADO,
+      estado: { $in: [Estado.HABILITADO, Estado.DESHABILITADO] },
     });
-    
+
     // 2. Verificar la llamada a MensajeModel.find
     expect(mensajeModel.find).toHaveBeenCalledWith({
       id_integrante: { $in: ['integ-1', 'integ-2'] },
       estado: Estado.HABILITADO,
     });
-    
+
     // 3. Verificar que se aplicó el ordenamiento
     expect(mensajeModel.sort).toHaveBeenCalledWith({ createdAt: -1 });
 
@@ -92,24 +127,34 @@ describe('MensajeRepository', () => {
 
   it('3. debe devolver el mensaje más reciente del chat, mapeado a dominio', async () => {
     const chatId = 'chat-private-2';
-    
+
     // Mocks de la dependencia (Integrantes)
     const mockIntegrantes: IIntegrante[] = [
-      { _id: 'integ-3', id_chat: chatId, id_usuario: 'user-c', is_admin: false, estado: Estado.HABILITADO, createdAt: new Date(), updatedAt: new Date() },
+      {
+        _id: 'integ-3',
+        id_chat: chatId,
+        id_usuario: 'user-c',
+        is_admin: false,
+        estado: Estado.HABILITADO,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ] as unknown as IIntegrante[];
-    (integranteRepository.findAll as jest.Mock).mockResolvedValue(mockIntegrantes);
+    (integranteRepository.findAll as jest.Mock).mockResolvedValue(
+      mockIntegrantes,
+    );
 
     // Mocks de los resultados de MensajeModel.findOne().sort().lean().exec()
-    const mockUltimoMensaje: Mensaje = { 
-        _id: 'msg-ultimo', 
-        id_integrante: 'integ-3', 
-        descripcion: 'Último mensaje', 
-        has_files: true, 
-        estado: Estado.HABILITADO, 
-        createdAt: new Date() 
+    const mockUltimoMensaje: Mensaje = {
+      _id: 'msg-ultimo',
+      id_integrante: 'integ-3',
+      descripcion: 'Último mensaje',
+      has_files: true,
+      estado: Estado.HABILITADO,
+      createdAt: new Date(),
     } as unknown as Mensaje;
     (mensajeModel.exec as jest.Mock).mockResolvedValue(mockUltimoMensaje); // findOne.exec() devuelve un objeto
-    
+
     const result = await repository.findUltimoMensajeByChatId(chatId);
 
     // 1. Verificar la llamada a MensajeModel.findOne
@@ -117,7 +162,7 @@ describe('MensajeRepository', () => {
       id_integrante: { $in: ['integ-3'] },
       estado: Estado.HABILITADO,
     });
-    
+
     // 2. Verificar que se aplicó el ordenamiento y lean
     expect(mensajeModel.sort).toHaveBeenCalledWith({ createdAt: -1 });
     expect(mensajeModel.lean).toHaveBeenCalled();
@@ -139,7 +184,7 @@ describe('MensajeRepository', () => {
       id_integrante: 'integ-parent-1',
       descripcion: 'Mensaje de prueba',
       has_files: true,
-    } as unknown as Mensaje; 
+    } as unknown as Mensaje;
 
     // Acceso al método protegido para la prueba
     const result: IMensaje = (repository as any).toDomain(mockDoc);
@@ -151,7 +196,7 @@ describe('MensajeRepository', () => {
     expect(result.descripcion).toBe('Mensaje de prueba');
     expect(result.has_files).toBe(true);
   });
-  
+
   it('5. debe devolver null en la descripción si el campo no existe o es nulo', () => {
     // Simular un mensaje que solo contiene archivos (sin texto)
     const mockDocSinDescripcion: Mensaje = {
@@ -162,15 +207,15 @@ describe('MensajeRepository', () => {
       id_integrante: 'integ-parent-2',
       descripcion: null, // o undefined
       has_files: true,
-    } as unknown as Mensaje; 
+    } as unknown as Mensaje;
 
     // Acceso al método protegido para la prueba
-    const result: IMensaje = (repository as any).toDomain(mockDocSinDescripcion);
+    const result: IMensaje = (repository as any).toDomain(
+      mockDocSinDescripcion,
+    );
 
     // Verificar que la descripción es null (como se espera en el mapeo doc.descripcion || null)
     expect(result.descripcion).toBeNull();
     expect(result.has_files).toBe(true);
   });
 });
-
-  

@@ -67,7 +67,7 @@ describe('ChatsService - getChatsGrupales', () => {
 
     getChatsGrupalesCU.execute.mockResolvedValue({
       success: false,
-      data:null,
+      data: null,
       error: 'Usuario no tiene chats grupales',
     });
 
@@ -92,4 +92,3 @@ describe('ChatsService - getChatsGrupales', () => {
     );
   });
 });
-    

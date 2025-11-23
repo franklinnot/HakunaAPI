@@ -8,6 +8,7 @@ export interface IChatRepository extends IBaseRepository<IChat> {
   ): Promise<IChat | null>;
   findChatsPrivadosByIdUsuario(id_usuario: string): Promise<IChat[]>;
   findChatsGrupalesByIdUsuario(id_usuario: string): Promise<IChat[]>;
+  deleteGroup(id_chat: string): Promise<void>;
 }
 
 export interface IIntegranteRepository extends IBaseRepository<IIntegrante> {
